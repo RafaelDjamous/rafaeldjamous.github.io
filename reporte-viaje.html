@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Reporte de Viaje - Vendedor / Comprador</title>
+  <style>
+    :root {
+      --primary: #1a3a5c;
+      --accent:  #2e86c1;
+      --success: #1e8449;
+      --danger:  #c0392b;
+      --warn:    #d68910;
+      --light:   #f4f6f9;
+      --border:  #d5d8dc;
+      --text:    #212529;
+      --white:   #ffffff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: var(--light);
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    /* ── Header ── */
+    .page-header {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      color: var(--white);
+      padding: 28px 40px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .page-header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: .5px; }
+    .page-header p  { font-size: .85rem; opacity: .85; margin-top: 4px; }
+    .badge-status {
+      background: rgba(255,255,255,.2);
+      border: 1px solid rgba(255,255,255,.4);
+      border-radius: 20px;
+      padding: 6px 16px;
+      font-size: .8rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    /* ── Layout ── */
+    .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
+
+    section { margin-bottom: 32px; }
+
+    .card {
+      background: var(--white);
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.07);
+      overflow: hidden;
+    }
+    .card-header {
+      background: var(--primary);
+      color: var(--white);
+      padding: 12px 20px;
+      font-weight: 600;
+      font-size: .95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .card-header .icon { font-size: 1.1rem; }
+    .card-body { padding: 20px; }
+
+    /* ── Grid helpers ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
+    @media(max-width:720px){
+      .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; }
+    }
+
+    /* ── Form fields ── */
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field label { font-size: .78rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: .4px; }
+    .field input,
+    .field select,
+    .field textarea {
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: .9rem;
+      color: var(--text);
+      transition: border .2s;
+      background: #fff;
+    }
+    .field input:focus,
+    .field select:focus,
+    .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,134,193,.12); }
+    .field textarea { resize: vertical; min-height: 60px; }
+
+    /* ── Summary cards ── */
+    .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 8px; }
+    @media(max-width:720px){ .summary-grid { grid-template-columns:1fr 1fr; } }
+    .stat-card {
+      border-radius: 10px;
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .stat-card .stat-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
+    .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; }
+    .stat-card .stat-sub   { font-size: .78rem; opacity: .8; }
+    .stat-blue   { background: #eaf2fb; color: var(--primary); }
+    .stat-green  { background: #eafaf1; color: var(--success); }
+    .stat-red    { background: #fdedec; color: var(--danger); }
+    .stat-orange { background: #fef9e7; color: var(--warn); }
+
+    /* ── Tables ── */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    thead tr { background: #eef2f7; }
+    th { padding: 10px 12px; text-align: left; font-weight: 600; color: #555; white-space: nowrap; border-bottom: 2px solid var(--border); }
+    td { padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    tr:hover td { background: #f8fafc; }
+    td input, td select {
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      padding: 5px 8px;
+      font-size: .82rem;
+      width: 100%;
+      background: #fff;
+    }
+    td input:focus, td select:focus { outline: none; border-color: var(--accent); }
+    .td-total { font-weight: 700; color: var(--primary); }
+    .td-usd   { font-size: .78rem; color: #888; }
+
+    /* ── Buttons ── */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: .85rem;
+      font-weight: 600;
+      transition: opacity .15s, transform .1s;
+    }
+    .btn:hover { opacity: .88; transform: translateY(-1px); }
+    .btn:active { transform: translateY(0); }
+    .btn-primary  { background: var(--accent);   color: #fff; }
+    .btn-success  { background: var(--success);  color: #fff; }
+    .btn-danger   { background: var(--danger);   color: #fff; padding: 4px 10px; font-size: .78rem; }
+    .btn-outline  { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
+    .btn-warn     { background: var(--warn); color: #fff; }
+    .btn-row      { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+
+    /* ── Alert balance ── */
+    .balance-box {
+      border-radius: 8px;
+      padding: 14px 18px;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .balance-positive { background: #eafaf1; color: var(--success); border-left: 4px solid var(--success); }
+    .balance-negative { background: #fdedec; color: var(--danger);  border-left: 4px solid var(--danger); }
+    .balance-zero     { background: #eef2f7; color: var(--primary); border-left: 4px solid var(--accent); }
+
+    /* ── Progress bar ── */
+    .progress-wrap { background: #e9ecef; border-radius: 20px; height: 10px; overflow: hidden; margin-top: 6px; }
+    .progress-bar  { height: 100%; border-radius: 20px; transition: width .4s; }
+
+    /* ── Tag chips ── */
+    .chip {
+      display: inline-block;
+      padding: 2px 10px;
+      border-radius: 12px;
+      font-size: .72rem;
+      font-weight: 600;
+    }
+    .chip-blue   { background: #d6eaf8; color: #1a5276; }
+    .chip-green  { background: #d5f5e3; color: #1e8449; }
+    .chip-orange { background: #fdebd0; color: #7d6608; }
+    .chip-red    { background: #fadbd8; color: #922b21; }
+    .chip-gray   { background: #eaecee; color: #555; }
+
+    /* ── Print ── */
+    @media print {
+      body { background: #fff; }
+      .page-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .card { box-shadow: none; border: 1px solid #ccc; }
+      .no-print { display: none !important; }
+      .btn-row { display: none; }
+      thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+
+    /* ── Divider ── */
+    hr.section-sep { border: none; border-top: 2px dashed var(--border); margin: 8px 0 18px; }
+
+    /* ── Totals row ── */
+    .totals-row td { background: #eef2f7 !important; font-weight: 700; color: var(--primary); border-top: 2px solid var(--border); }
+
+    /* ── Notes ── */
+    .note { font-size: .78rem; color: #888; margin-top: 6px; }
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════ HEADER ══════════════════════ -->
+<div class="page-header">
+  <div>
+    <h1>&#9992;&#65039; Reporte de Viaje</h1>
+    <p>Gestión de gastos, clientes y cambio de moneda &mdash; Para Gerencia</p>
+  </div>
+  <div class="badge-status" id="statusBadge">EN CURSO</div>
+</div>
+
+<!-- ══════════════════════ MAIN ══════════════════════ -->
+<div class="container">
+
+  <!-- ─── RESUMEN FINANCIERO (dinámico) ─── -->
+  <section id="secSummary">
+    <div class="summary-grid">
+      <div class="stat-card stat-blue">
+        <span class="stat-label">&#128200; Total Gastado</span>
+        <span class="stat-value" id="sumTotalGastado">$0.00</span>
+        <span class="stat-sub" id="sumTotalGastadoLocal">— moneda local</span>
+      </div>
+      <div class="stat-card stat-orange">
+        <span class="stat-label">&#128181; Adelanto Recibido</span>
+        <span class="stat-value" id="sumAdelanto">$0.00</span>
+        <span class="stat-sub" id="sumAdelantoLocal">— moneda local</span>
+      </div>
+      <div class="stat-card stat-green">
+        <span class="stat-label">&#9989; Saldo a Favor</span>
+        <span class="stat-value" id="sumFavor">$0.00</span>
+        <span class="stat-sub">Adelanto &minus; Gastos</span>
+      </div>
+      <div class="stat-card stat-red">
+        <span class="stat-label">&#9888;&#65039; Por Reembolsar</span>
+        <span class="stat-value" id="sumReembolso">$0.00</span>
+        <span class="stat-sub">Gastos &minus; Adelanto</span>
+      </div>
+    </div>
+    <div class="balance-box balance-zero" id="balanceAlert">
+      &#128269; Complete la información para ver el resumen.
+    </div>
+  </section>
+
+  <!-- ─── 1. INFORMACIÓN BÁSICA ─── -->
+  <section>
+    <div class="card">
+      <div class="card-header"><span class="icon">&#128203;</span> 1. Información Básica del Viaje</div>
+      <div class="card-body">
+        <div class="grid-3" style="margin-bottom:14px;">
+          <div class="field">
+            <label>Nombre del Viajero</label>
+            <input type="text" id="travelerName" placeholder="Ej. Juan Pérez" oninput="refreshAll()" />
+          </div>
+          <div class="field">
+            <label>Cargo / Rol</label>
+            <select id="travelerRole" onchange="refreshAll()">
+              <option value="">Seleccionar…</option>
+              <option>Vendedor</option>
+              <option>Comprador</option>
+              <option>Representante Comercial</option>
+              <option>Gerente de Ventas</option>
+              <option>Director Comercial</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Empresa / Departamento</label>
+            <input type="text" id="company" placeholder="Ej. Empresa S.A." />
+          </div>
+        </div>
+        <div class="grid-4">
+          <div class="field">
+            <label>País de Destino</label>
+            <input type="text" id="destCountry" placeholder="Ej. México" oninput="suggestCurrency()" />
+          </div>
+          <div class="field">
+            <label>Ciudad de Destino</label>
+            <input type="text" id="destCity" placeholder="Ej. Ciudad de México" />
+          </div>
+          <div class="field">
+            <label>Fecha de Salida</label>
+            <input type="date" id="dateStart" onchange="refreshAll()" />
+          </div>
+          <div class="field">
+            <label>Fecha de Regreso</label>
+            <input type="date" id="dateEnd" onchange="refreshAll()" />
+          </div>
+        </div>
+        <div style="margin-top:14px;">
+          <div class="field">
+            <label>Objetivo del Viaje</label>
+            <textarea id="tripPurpose" placeholder="Describe el propósito del viaje, metas comerciales, etc."></textarea>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 2. CONFIGURACIÓN DE MONEDA ─── -->
+  <section>
+    <div class="card">
+      <div class="card-header"><span class="icon">&#128176;</span> 2. Moneda y Adelanto de Viaje</div>
+      <div class="card-body">
+        <div class="grid-4">
+          <div class="field">
+            <label>Moneda Base (tu país)</label>
+            <select id="baseCurrency" onchange="refreshAll()">
+              <option value="USD">USD – Dólar Americano</option>
+              <option value="EUR">EUR – Euro</option>
+              <option value="MXN">MXN – Peso Mexicano</option>
+              <option value="COP">COP – Peso Colombiano</option>
+              <option value="ARS">ARS – Peso Argentino</option>
+              <option value="BRL">BRL – Real Brasileño</option>
+              <option value="CLP">CLP – Peso Chileno</option>
+              <option value="PEN">PEN – Sol Peruano</option>
+              <option value="VES">VES – Bolívar Venezolano</option>
+              <option value="GTQ">GTQ – Quetzal Guatemalteco</option>
+              <option value="HNL">HNL – Lempira Hondureño</option>
+              <option value="CRC">CRC – Colón Costarricense</option>
+              <option value="DOP">DOP – Peso Dominicano</option>
+              <option value="BOB">BOB – Boliviano</option>
+              <option value="PYG">PYG – Guaraní Paraguayo</option>
+              <option value="UYU">UYU – Peso Uruguayo</option>
+              <option value="GBP">GBP – Libra Esterlina</option>
+              <option value="CAD">CAD – Dólar Canadiense</option>
+              <option value="JPY">JPY – Yen Japonés</option>
+              <option value="CNY">CNY – Yuan Chino</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Moneda del País Visitado</label>
+            <select id="localCurrency" onchange="refreshAll()">
+              <option value="USD">USD – Dólar Americano</option>
+              <option value="EUR">EUR – Euro</option>
+              <option value="MXN">MXN – Peso Mexicano</option>
+              <option value="COP">COP – Peso Colombiano</option>
+              <option value="ARS">ARS – Peso Argentino</option>
+              <option value="BRL">BRL – Real Brasileño</option>
+              <option value="CLP">CLP – Peso Chileno</option>
+              <option value="PEN">PEN – Sol Peruano</option>
+              <option value="VES">VES – Bolívar Venezolano</option>
+              <option value="GTQ">GTQ – Quetzal Guatemalteco</option>
+              <option value="HNL">HNL – Lempira Hondureño</option>
+              <option value="CRC">CRC – Colón Costarricense</option>
+              <option value="DOP">DOP – Peso Dominicano</option>
+              <option value="BOB">BOB – Boliviano</option>
+              <option value="PYG">PYG – Guaraní Paraguayo</option>
+              <option value="UYU">UYU – Peso Uruguayo</option>
+              <option value="GBP">GBP – Libra Esterlina</option>
+              <option value="CAD">CAD – Dólar Canadiense</option>
+              <option value="JPY">JPY – Yen Japonés</option>
+              <option value="CNY">CNY – Yuan Chino</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Tasa de Cambio (1 <span id="labelBase1">USD</span> = ? <span id="labelLocal1">USD</span>)</label>
+            <input type="number" id="exchangeRate" value="1" min="0.000001" step="any" oninput="refreshAll()" />
+          </div>
+          <div class="field">
+            <label>Adelanto Recibido (en <span id="labelBase2">USD</span>)</label>
+            <input type="number" id="advance" value="0" min="0" step="any" oninput="refreshAll()" />
+          </div>
+        </div>
+        <p class="note" id="rateNote">1 USD equivale a 1.00 USD · Ingrese la tasa de cambio oficial o del mercado.</p>
+
+        <!-- Barra de uso del adelanto -->
+        <div style="margin-top:14px;">
+          <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:600;color:#555;margin-bottom:4px;">
+            <span>Uso del adelanto</span>
+            <span id="advanceUsedPct">0%</span>
+          </div>
+          <div class="progress-wrap">
+            <div class="progress-bar" id="advanceBar" style="width:0%;background:var(--success);"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 3. GASTOS DIARIOS ─── -->
+  <section>
+    <div class="card">
+      <div class="card-header"><span class="icon">&#128179;</span> 3. Gestión de Gastos Diarios</div>
+      <div class="card-body">
+        <div class="table-wrap">
+          <table id="expensesTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Fecha</th>
+                <th>Categoría</th>
+                <th>Descripción</th>
+                <th>Monto (<span class="lbl-local">Local</span>)</th>
+                <th>Equivalente (<span class="lbl-base">Base</span>)</th>
+                <th>Comprobante</th>
+                <th class="no-print">&#128465;</th>
+              </tr>
+            </thead>
+            <tbody id="expensesBody">
+              <!-- rows injected by JS -->
+            </tbody>
+            <tfoot>
+              <tr class="totals-row">
+                <td colspan="4" style="text-align:right;">TOTALES</td>
+                <td id="totalLocal">0.00</td>
+                <td id="totalBase">0.00</td>
+                <td colspan="2"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="btn-row no-print">
+          <button class="btn btn-success" onclick="addExpenseRow()">&#43; Agregar Gasto</button>
+          <button class="btn btn-outline" onclick="addExpenseRowsDate()">&#43; Día Completo</button>
+        </div>
+        <p class="note">* El monto en moneda base se calcula automáticamente usando la tasa de cambio ingresada arriba.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 4. GESTIÓN DE CLIENTES ─── -->
+  <section>
+    <div class="card">
+      <div class="card-header"><span class="icon">&#128101;</span> 4. Gestión de Clientes Visitados</div>
+      <div class="card-body">
+        <div class="table-wrap">
+          <table id="clientsTable">
+            <thead>
+              <tr>
+                <th>#</th>
+                <th>Nombre / Empresa</th>
+                <th>Ciudad</th>
+                <th>Contacto</th>
+                <th>Tipo</th>
+                <th>Monto Negociado (<span class="lbl-base2">Base</span>)</th>
+                <th>Estado</th>
+                <th>Notas</th>
+                <th class="no-print">&#128465;</th>
+              </tr>
+            </thead>
+            <tbody id="clientsBody">
+              <!-- rows injected by JS -->
+            </tbody>
+            <tfoot>
+              <tr class="totals-row">
+                <td colspan="5" style="text-align:right;">TOTAL NEGOCIADO</td>
+                <td id="totalNegotiated">0.00</td>
+                <td colspan="3"></td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        <div class="btn-row no-print">
+          <button class="btn btn-success" onclick="addClientRow()">&#43; Agregar Cliente</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 5. RESUMEN FINANCIERO DETALLADO ─── -->
+  <section>
+    <div class="card">
+      <div class="card-header"><span class="icon">&#128196;</span> 5. Resumen Financiero para Gerencia</div>
+      <div class="card-body">
+        <div class="grid-2">
+          <!-- Desglose por categoría -->
+          <div>
+            <h4 style="margin-bottom:12px;color:var(--primary);">Gastos por Categoría</h4>
+            <table id="catBreakdown">
+              <thead>
+                <tr><th>Categoría</th><th>Local</th><th>Base</th><th>%</th></tr>
+              </thead>
+              <tbody id="catBody"></tbody>
+            </table>
+          </div>
+          <!-- Flujo de caja -->
+          <div>
+            <h4 style="margin-bottom:12px;color:var(--primary);">Flujo de Caja del Viaje</h4>
+            <table>
+              <tbody>
+                <tr><td>Adelanto entregado</td><td class="td-total" id="r_adelanto" style="text-align:right;">0.00</td></tr>
+                <tr><td>Total gastos</td><td class="td-total" style="color:var(--danger);text-align:right;" id="r_gastos">0.00</td></tr>
+                <tr style="background:#eef2f7;font-weight:700;">
+                  <td>Saldo</td>
+                  <td id="r_saldo" style="text-align:right;">0.00</td>
+                </tr>
+                <tr><td colspan="2"><hr class="section-sep"/></td></tr>
+                <tr><td>Total negociado con clientes</td><td class="td-total" style="color:var(--success);text-align:right;" id="r_negociado">0.00</td></tr>
+                <tr><td>Días de viaje</td><td style="text-align:right;" id="r_dias">—</td></tr>
+                <tr><td>Gasto promedio diario</td><td class="td-total" style="text-align:right;" id="r_promedio">0.00</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Alert de saldo -->
+        <div id="balanceAlertBottom" class="balance-box balance-zero" style="margin-top:20px;">
+          &#128269; Los datos se actualizan en tiempo real.
+        </div>
+
+        <!-- Observaciones gerenciales -->
+        <div style="margin-top:20px;">
+          <div class="field">
+            <label>Observaciones / Conclusiones (para Gerencia)</label>
+            <textarea id="mgmtNotes" rows="4" placeholder="Incluye logros, dificultades, próximos pasos, etc."></textarea>
+          </div>
+        </div>
+
+        <!-- Firmas -->
+        <div class="grid-3" style="margin-top:24px;gap:32px;">
+          <div style="text-align:center;">
+            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
+              Firma del Viajero<br/><strong id="sigName">___________________</strong>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
+              Vo. Bo. Supervisor Inmediato<br/><strong>___________________</strong>
+            </div>
+          </div>
+          <div style="text-align:center;">
+            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
+              Aprobado por Gerencia<br/><strong>___________________</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="btn-row no-print" style="margin-top:20px;justify-content:flex-end;">
+          <button class="btn btn-warn" onclick="window.print()">&#128438;&#65039; Imprimir / Exportar PDF</button>
+          <button class="btn btn-primary" onclick="saveToLocalStorage()">&#128190; Guardar Borrador</button>
+          <button class="btn btn-outline" onclick="loadFromLocalStorage()">&#128196; Cargar Borrador</button>
+          <button class="btn btn-danger" onclick="clearAll()">&#128465; Limpiar Todo</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /container -->
+
+<!-- ══════════════════════ JAVASCRIPT ══════════════════════ -->
+<script>
+// ── Currency symbols map ──
+const SYMBOLS = {
+  USD:'$', EUR:'€', MXN:'$', COP:'$', ARS:'$', BRL:'R$', CLP:'$',
+  PEN:'S/', VES:'Bs.', GTQ:'Q', HNL:'L', CRC:'₡', DOP:'RD$',
+  BOB:'Bs', PYG:'₲', UYU:'$U', GBP:'£', CAD:'CA$', JPY:'¥', CNY:'¥'
+};
+
+// ── Categories ──
+const CATEGORIES = [
+  'Transporte Aéreo','Transporte Terrestre','Hospedaje','Alimentación',
+  'Gasolina / Combustible','Representación / Entretenimiento',
+  'Comunicaciones','Materiales / Papelería','Visa / Trámites',
+  'Propinas / Varios','Otro'
+];
+
+// ── Expense row counter ──
+let expRowId = 0;
+let cliRowId = 0;
+
+// ─────────────────────────────────────────
+// ADD EXPENSE ROW
+// ─────────────────────────────────────────
+function addExpenseRow(date='', cat='', desc='', amtLocal=0) {
+  const id = ++expRowId;
+  const base = document.getElementById('baseCurrency').value;
+  const local = document.getElementById('localCurrency').value;
+  const tbody = document.getElementById('expensesBody');
+  const today = date || new Date().toISOString().slice(0,10);
+
+  const catOptions = CATEGORIES.map(c =>
+    `<option value="${c}" ${c===cat?'selected':''}>${c}</option>`
+  ).join('');
+
+  const voucherOptions = [
+    ['Sin comprobante','chip-gray'],
+    ['Factura electrónica','chip-green'],
+    ['Recibo','chip-blue'],
+    ['Voucher','chip-orange'],
+  ].map(([v,c]) => `<option value="${v}">${v}</option>`).join('');
+
+  const tr = document.createElement('tr');
+  tr.id = `erow-${id}`;
+  tr.innerHTML = `
+    <td style="color:#aaa;font-size:.78rem;">${id}</td>
+    <td><input type="date" value="${today}" onchange="recalcExpenses()" /></td>
+    <td>
+      <select onchange="recalcExpenses()">
+        <option value="">—</option>${catOptions}
+      </select>
+    </td>
+    <td><input type="text" value="${desc}" placeholder="Descripción…" /></td>
+    <td>
+      <input type="number" class="amt-local" value="${amtLocal||''}" min="0" step="any"
+        placeholder="0.00" oninput="recalcExpenses()" style="max-width:110px;" />
+    </td>
+    <td class="td-total">
+      <span class="amt-base-display">—</span>
+    </td>
+    <td>
+      <select onchange="recalcExpenses()">
+        ${voucherOptions}
+      </select>
+    </td>
+    <td class="no-print">
+      <button class="btn btn-danger" onclick="removeRow('erow-${id}')">✕</button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+  recalcExpenses();
+}
+
+// Add a "full day" template (Hospedaje + Alimentación + Transporte)
+function addExpenseRowsDate() {
+  const today = new Date().toISOString().slice(0,10);
+  addExpenseRow(today, 'Hospedaje', 'Hospedaje', 0);
+  addExpenseRow(today, 'Alimentación', 'Desayuno / Almuerzo / Cena', 0);
+  addExpenseRow(today, 'Transporte Terrestre', 'Traslado', 0);
+}
+
+// ─────────────────────────────────────────
+// ADD CLIENT ROW
+// ─────────────────────────────────────────
+function addClientRow() {
+  const id = ++cliRowId;
+  const tbody = document.getElementById('clientsBody');
+  const base = document.getElementById('baseCurrency').value;
+
+  const typeOpts = ['Cliente Nuevo','Cliente Existente','Prospecto','Proveedor','Socio Estratégico']
+    .map(t => `<option value="${t}">${t}</option>`).join('');
+  const statusOpts = [
+    ['En negociación','chip-orange'],['Cerrado','chip-green'],
+    ['Perdido','chip-red'],['Seguimiento','chip-blue'],['Pendiente','chip-gray']
+  ].map(([s]) => `<option value="${s}">${s}</option>`).join('');
+
+  const tr = document.createElement('tr');
+  tr.id = `crow-${id}`;
+  tr.innerHTML = `
+    <td style="color:#aaa;font-size:.78rem;">${id}</td>
+    <td><input type="text" placeholder="Nombre o Empresa…" /></td>
+    <td><input type="text" placeholder="Ciudad" /></td>
+    <td><input type="text" placeholder="Tel / Email" /></td>
+    <td><select>${typeOpts}</select></td>
+    <td>
+      <input type="number" class="amt-negotiated" min="0" step="any"
+        placeholder="0.00" oninput="recalcClients()" style="max-width:120px;" />
+    </td>
+    <td><select class="status-sel">${statusOpts}</select></td>
+    <td><input type="text" placeholder="Notas breves…" /></td>
+    <td class="no-print">
+      <button class="btn btn-danger" onclick="removeRow('crow-${id}')">✕</button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+  recalcClients();
+}
+
+function removeRow(id) {
+  const el = document.getElementById(id);
+  if (el) { el.remove(); recalcExpenses(); recalcClients(); }
+}
+
+// ─────────────────────────────────────────
+// RECALCULATE EXPENSES
+// ─────────────────────────────────────────
+function recalcExpenses() {
+  const rate   = parseFloat(document.getElementById('exchangeRate').value) || 1;
+  const base   = document.getElementById('baseCurrency').value;
+  const local  = document.getElementById('localCurrency').value;
+  const sym_b  = SYMBOLS[base]  || base;
+  const sym_l  = SYMBOLS[local] || local;
+
+  let sumLocal = 0, sumBase = 0;
+
+  document.querySelectorAll('#expensesBody tr').forEach(tr => {
+    const inp = tr.querySelector('.amt-local');
+    const disp = tr.querySelector('.amt-base-display');
+    if (!inp || !disp) return;
+    const v = parseFloat(inp.value) || 0;
+    const inBase = v / rate;
+    sumLocal += v;
+    sumBase  += inBase;
+    disp.textContent = sym_b + fmt(inBase);
+  });
+
+  document.getElementById('totalLocal').textContent = sym_l + fmt(sumLocal);
+  document.getElementById('totalBase').textContent  = sym_b + fmt(sumBase);
+
+  // Update label spans
+  document.querySelectorAll('.lbl-local').forEach(el => el.textContent = local);
+  document.querySelectorAll('.lbl-base').forEach(el => el.textContent = base);
+
+  refreshAll();
+}
+
+// ─────────────────────────────────────────
+// RECALCULATE CLIENTS
+// ─────────────────────────────────────────
+function recalcClients() {
+  const base   = document.getElementById('baseCurrency').value;
+  const sym_b  = SYMBOLS[base] || base;
+  let total = 0;
+  document.querySelectorAll('#clientsBody tr .amt-negotiated').forEach(inp => {
+    total += parseFloat(inp.value) || 0;
+  });
+  document.getElementById('totalNegotiated').textContent = sym_b + fmt(total);
+  document.querySelectorAll('.lbl-base2').forEach(el => el.textContent = base);
+  refreshAll();
+}
+
+// ─────────────────────────────────────────
+// REFRESH ALL SUMMARY
+// ─────────────────────────────────────────
+function refreshAll() {
+  const base    = document.getElementById('baseCurrency').value;
+  const local   = document.getElementById('localCurrency').value;
+  const rate    = parseFloat(document.getElementById('exchangeRate').value) || 1;
+  const advance = parseFloat(document.getElementById('advance').value) || 0;
+  const sym_b   = SYMBOLS[base]  || base;
+  const sym_l   = SYMBOLS[local] || local;
+
+  // Rate note
+  document.getElementById('rateNote').textContent =
+    `1 ${base} equivale a ${fmt(rate)} ${local} · Ingrese la tasa de cambio oficial o del mercado.`;
+  document.getElementById('labelBase1').textContent = base;
+  document.getElementById('labelLocal1').textContent = local;
+  document.getElementById('labelBase2').textContent = base;
+
+  // Total expenses in base currency
+  let sumBase = 0, sumLocal = 0;
+  document.querySelectorAll('#expensesBody tr .amt-local').forEach(inp => {
+    const v = parseFloat(inp.value) || 0;
+    sumLocal += v;
+    sumBase  += v / rate;
+  });
+
+  // Total negotiated
+  let totalNeg = 0;
+  document.querySelectorAll('#clientsBody tr .amt-negotiated').forEach(inp => {
+    totalNeg += parseFloat(inp.value) || 0;
+  });
+
+  // Balance
+  const saldo = advance - sumBase;
+
+  // Top summary cards
+  document.getElementById('sumTotalGastado').textContent     = sym_b + fmt(sumBase);
+  document.getElementById('sumTotalGastadoLocal').textContent= sym_l + fmt(sumLocal) + ' (moneda local)';
+  document.getElementById('sumAdelanto').textContent         = sym_b + fmt(advance);
+  document.getElementById('sumAdelantoLocal').textContent    = sym_l + fmt(advance * rate) + ' equiv. local';
+  document.getElementById('sumFavor').textContent            = sym_b + fmt(Math.max(0, saldo));
+  document.getElementById('sumReembolso').textContent        = sym_b + fmt(Math.max(0, -saldo));
+
+  // Progress bar
+  const pct = advance > 0 ? Math.min(100, (sumBase / advance) * 100) : 0;
+  document.getElementById('advanceUsedPct').textContent = fmt(pct, 1) + '%';
+  const bar = document.getElementById('advanceBar');
+  bar.style.width = pct + '%';
+  bar.style.background = pct > 100 ? 'var(--danger)' : pct > 80 ? 'var(--warn)' : 'var(--success)';
+
+  // Balance alert (top)
+  setBalanceAlert('balanceAlert', saldo, sym_b, advance);
+  setBalanceAlert('balanceAlertBottom', saldo, sym_b, advance);
+
+  // Detailed summary
+  document.getElementById('r_adelanto').textContent  = sym_b + fmt(advance);
+  document.getElementById('r_gastos').textContent    = sym_b + fmt(sumBase);
+  const rsaldo = document.getElementById('r_saldo');
+  rsaldo.textContent = sym_b + fmt(Math.abs(saldo));
+  rsaldo.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
+  document.getElementById('r_negociado').textContent = sym_b + fmt(totalNeg);
+
+  // Days of travel
+  const ds = document.getElementById('dateStart').value;
+  const de = document.getElementById('dateEnd').value;
+  let dias = '—';
+  let avg = 0;
+  if (ds && de) {
+    const diff = (new Date(de) - new Date(ds)) / 86400000;
+    dias = diff >= 0 ? diff + (diff === 1 ? ' día' : ' días') : '—';
+    if (diff > 0) avg = sumBase / diff;
+  }
+  document.getElementById('r_dias').textContent    = dias;
+  document.getElementById('r_promedio').textContent = sym_b + fmt(avg);
+
+  // Category breakdown
+  buildCategoryBreakdown(sym_b, sym_l, rate, sumBase);
+
+  // Signature name
+  const n = document.getElementById('travelerName').value;
+  document.getElementById('sigName').textContent = n || '___________________';
+
+  // Status badge
+  const statusEl = document.getElementById('statusBadge');
+  if (ds && de) {
+    const now = new Date().toISOString().slice(0,10);
+    if (now < ds)       { statusEl.textContent = 'PROGRAMADO'; }
+    else if (now > de)  { statusEl.textContent = 'FINALIZADO'; }
+    else                { statusEl.textContent = 'EN CURSO'; }
+  }
+}
+
+function setBalanceAlert(id, saldo, sym, advance) {
+  const el = document.getElementById(id);
+  if (advance === 0) {
+    el.className = 'balance-box balance-zero';
+    el.innerHTML = '&#128269; Sin adelanto configurado. Ingrese el adelanto recibido para ver el saldo.';
+    return;
+  }
+  if (saldo > 0) {
+    el.className = 'balance-box balance-positive';
+    el.innerHTML = `&#9989; Saldo a favor: <strong>${sym}${fmt(saldo)}</strong> — El viajero debe devolver este monto.`;
+  } else if (saldo < 0) {
+    el.className = 'balance-box balance-negative';
+    el.innerHTML = `&#9888;&#65039; Gastos exceden el adelanto por: <strong>${sym}${fmt(-saldo)}</strong> — La empresa debe reembolsar este monto.`;
+  } else {
+    el.className = 'balance-box balance-zero';
+    el.innerHTML = '&#9889; El adelanto cubre exactamente los gastos. Saldo: $0.00';
+  }
+}
+
+function buildCategoryBreakdown(sym_b, sym_l, rate, total) {
+  const map = {};
+  document.querySelectorAll('#expensesBody tr').forEach(tr => {
+    const sel = tr.querySelector('select');
+    const inp = tr.querySelector('.amt-local');
+    if (!sel || !inp) return;
+    const cat = sel.value || 'Sin categoría';
+    const v   = parseFloat(inp.value) || 0;
+    if (!map[cat]) map[cat] = { local: 0, base: 0 };
+    map[cat].local += v;
+    map[cat].base  += v / rate;
+  });
+
+  const tbody = document.getElementById('catBody');
+  tbody.innerHTML = '';
+  const entries = Object.entries(map).sort((a,b) => b[1].base - a[1].base);
+  entries.forEach(([cat, vals]) => {
+    const pct = total > 0 ? (vals.base / total * 100).toFixed(1) : '0.0';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${cat}</td>
+      <td>${sym_l}${fmt(vals.local)}</td>
+      <td class="td-total">${sym_b}${fmt(vals.base)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="progress-wrap" style="flex:1;height:7px;">
+            <div class="progress-bar" style="width:${pct}%;background:var(--accent);"></div>
+          </div>
+          <span style="font-size:.72rem;width:36px;">${pct}%</span>
+        </div>
+      </td>
+    `;
+    tbody.appendChild(tr);
+  });
+
+  if (!entries.length) {
+    tbody.innerHTML = '<tr><td colspan="4" style="color:#aaa;text-align:center;">Sin gastos registrados.</td></tr>';
+  }
+}
+
+// ─────────────────────────────────────────
+// AUTO-SUGGEST CURRENCY
+// ─────────────────────────────────────────
+const COUNTRY_CURRENCY = {
+  'méxico':'MXN','mexico':'MXN','colombia':'COP','argentina':'ARS',
+  'brasil':'BRL','brazil':'BRL','chile':'CLP','peru':'PEN','perú':'PEN',
+  'venezuela':'VES','guatemala':'GTQ','honduras':'HNL','costa rica':'CRC',
+  'republica dominicana':'DOP','república dominicana':'DOP','bolivia':'BOB',
+  'paraguay':'PYG','uruguay':'UYU','estados unidos':'USD','usa':'USD',
+  'reino unido':'GBP','españa':'EUR','alemania':'EUR','france':'EUR',
+  'canada':'CAD','canadá':'CAD','japon':'JPY','japón':'JPY','china':'CNY',
+};
+function suggestCurrency() {
+  const c = document.getElementById('destCountry').value.toLowerCase().trim();
+  if (COUNTRY_CURRENCY[c]) {
+    document.getElementById('localCurrency').value = COUNTRY_CURRENCY[c];
+    refreshAll();
+  }
+}
+
+// ─────────────────────────────────────────
+// SAVE / LOAD / CLEAR
+// ─────────────────────────────────────────
+function saveToLocalStorage() {
+  const data = {
+    travelerName: document.getElementById('travelerName').value,
+    travelerRole: document.getElementById('travelerRole').value,
+    company:      document.getElementById('company').value,
+    destCountry:  document.getElementById('destCountry').value,
+    destCity:     document.getElementById('destCity').value,
+    dateStart:    document.getElementById('dateStart').value,
+    dateEnd:      document.getElementById('dateEnd').value,
+    tripPurpose:  document.getElementById('tripPurpose').value,
+    baseCurrency: document.getElementById('baseCurrency').value,
+    localCurrency:document.getElementById('localCurrency').value,
+    exchangeRate: document.getElementById('exchangeRate').value,
+    advance:      document.getElementById('advance').value,
+    mgmtNotes:    document.getElementById('mgmtNotes').value,
+    expenses: collectExpenses(),
+    clients:  collectClients(),
+  };
+  localStorage.setItem('travelReport_v1', JSON.stringify(data));
+  alert('✅ Borrador guardado localmente en este navegador.');
+}
+
+function collectExpenses() {
+  const rows = [];
+  document.querySelectorAll('#expensesBody tr').forEach(tr => {
+    const inputs  = tr.querySelectorAll('input');
+    const selects = tr.querySelectorAll('select');
+    if (inputs.length < 2) return;
+    rows.push({
+      date:    inputs[0].value,
+      cat:     selects[0] ? selects[0].value : '',
+      desc:    inputs[1].value,
+      amt:     inputs[2] ? inputs[2].value : '',
+      voucher: selects[1] ? selects[1].value : '',
+    });
+  });
+  return rows;
+}
+
+function collectClients() {
+  const rows = [];
+  document.querySelectorAll('#clientsBody tr').forEach(tr => {
+    const inputs  = tr.querySelectorAll('input');
+    const selects = tr.querySelectorAll('select');
+    if (!inputs.length) return;
+    rows.push({
+      name:   inputs[0].value,
+      city:   inputs[1].value,
+      contact:inputs[2].value,
+      type:   selects[0] ? selects[0].value : '',
+      amt:    inputs[3] ? inputs[3].value : '',
+      status: selects[1] ? selects[1].value : '',
+      notes:  inputs[4] ? inputs[4].value : '',
+    });
+  });
+  return rows;
+}
+
+function loadFromLocalStorage() {
+  const raw = localStorage.getItem('travelReport_v1');
+  if (!raw) { alert('No hay borrador guardado.'); return; }
+  const data = JSON.parse(raw);
+
+  document.getElementById('travelerName').value  = data.travelerName || '';
+  document.getElementById('travelerRole').value  = data.travelerRole || '';
+  document.getElementById('company').value       = data.company || '';
+  document.getElementById('destCountry').value   = data.destCountry || '';
+  document.getElementById('destCity').value      = data.destCity || '';
+  document.getElementById('dateStart').value     = data.dateStart || '';
+  document.getElementById('dateEnd').value       = data.dateEnd || '';
+  document.getElementById('tripPurpose').value   = data.tripPurpose || '';
+  document.getElementById('baseCurrency').value  = data.baseCurrency || 'USD';
+  document.getElementById('localCurrency').value = data.localCurrency || 'USD';
+  document.getElementById('exchangeRate').value  = data.exchangeRate || '1';
+  document.getElementById('advance').value       = data.advance || '0';
+  document.getElementById('mgmtNotes').value     = data.mgmtNotes || '';
+
+  document.getElementById('expensesBody').innerHTML = '';
+  expRowId = 0;
+  (data.expenses || []).forEach(e => addExpenseRow(e.date, e.cat, e.desc, e.amt));
+
+  document.getElementById('clientsBody').innerHTML = '';
+  cliRowId = 0;
+  (data.clients || []).forEach(c => {
+    addClientRow();
+    const last = document.querySelector('#clientsBody tr:last-child');
+    const inputs  = last.querySelectorAll('input');
+    const selects = last.querySelectorAll('select');
+    if (inputs[0]) inputs[0].value = c.name    || '';
+    if (inputs[1]) inputs[1].value = c.city    || '';
+    if (inputs[2]) inputs[2].value = c.contact || '';
+    if (selects[0]) selects[0].value = c.type  || '';
+    if (inputs[3]) inputs[3].value = c.amt     || '';
+    if (selects[1]) selects[1].value = c.status || '';
+    if (inputs[4]) inputs[4].value = c.notes   || '';
+  });
+
+  recalcExpenses();
+  recalcClients();
+  alert('✅ Borrador cargado correctamente.');
+}
+
+function clearAll() {
+  if (!confirm('¿Limpiar todo el reporte? Esta acción no se puede deshacer.')) return;
+  document.getElementById('expensesBody').innerHTML = '';
+  document.getElementById('clientsBody').innerHTML  = '';
+  expRowId = 0; cliRowId = 0;
+  ['travelerName','company','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
+    .forEach(id => { document.getElementById(id).value = ''; });
+  document.getElementById('advance').value = '0';
+  document.getElementById('exchangeRate').value = '1';
+  recalcExpenses();
+  recalcClients();
+}
+
+// ─────────────────────────────────────────
+// FORMAT NUMBER
+// ─────────────────────────────────────────
+function fmt(n, decimals=2) {
+  return (isNaN(n) ? 0 : n).toLocaleString('es-MX', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals
+  });
+}
+
+// ─────────────────────────────────────────
+// INIT — seed with 3 blank rows
+// ─────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', () => {
+  addExpenseRow();
+  addExpenseRow();
+  addExpenseRow();
+  addClientRow();
+  addClientRow();
+  refreshAll();
+});
+</script>
+</body>
+</html>

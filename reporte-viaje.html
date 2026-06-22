@@ -16,100 +16,51 @@
       --text:    #212529;
       --white:   #ffffff;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); font-size: 14px; }
 
-    body {
-      font-family: 'Segoe UI', Arial, sans-serif;
-      background: var(--light);
-      color: var(--text);
-      font-size: 14px;
-    }
-
-    /* ── Header ── */
     .page-header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      color: var(--white);
-      padding: 28px 40px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      flex-wrap: wrap;
-      gap: 12px;
+      color: var(--white); padding: 28px 40px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
     }
     .page-header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: .5px; }
     .page-header p  { font-size: .85rem; opacity: .85; margin-top: 4px; }
     .badge-status {
-      background: rgba(255,255,255,.2);
-      border: 1px solid rgba(255,255,255,.4);
-      border-radius: 20px;
-      padding: 6px 16px;
-      font-size: .8rem;
-      font-weight: 600;
-      white-space: nowrap;
+      background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
+      border-radius: 20px; padding: 6px 16px; font-size: .8rem; font-weight: 600; white-space: nowrap;
     }
 
-    /* ── Layout ── */
-    .container { max-width: 1100px; margin: 0 auto; padding: 28px 20px 60px; }
-
+    .container { max-width: 1150px; margin: 0 auto; padding: 28px 20px 60px; }
     section { margin-bottom: 32px; }
 
-    .card {
-      background: var(--white);
-      border-radius: 10px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.07);
-      overflow: hidden;
-    }
+    .card { background: var(--white); border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.07); overflow: hidden; }
     .card-header {
-      background: var(--primary);
-      color: var(--white);
-      padding: 12px 20px;
-      font-weight: 600;
-      font-size: .95rem;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      background: var(--primary); color: var(--white); padding: 12px 20px;
+      font-weight: 600; font-size: .95rem; display: flex; align-items: center; gap: 8px;
     }
-    .card-header .icon { font-size: 1.1rem; }
     .card-body { padding: 20px; }
 
-    /* ── Grid helpers ── */
     .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
     .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
     .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
-    @media(max-width:720px){
-      .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; }
-    }
+    @media(max-width:720px){ .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
 
-    /* ── Form fields ── */
     .field { display: flex; flex-direction: column; gap: 4px; }
     .field label { font-size: .78rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: .4px; }
-    .field input,
-    .field select,
-    .field textarea {
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 8px 10px;
-      font-size: .9rem;
-      color: var(--text);
-      transition: border .2s;
-      background: #fff;
+    .field input, .field select, .field textarea {
+      border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
+      font-size: .9rem; color: var(--text); transition: border .2s; background: #fff;
     }
-    .field input:focus,
-    .field select:focus,
-    .field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,134,193,.12); }
+    .field input:focus, .field select:focus, .field textarea:focus {
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,134,193,.12);
+    }
     .field textarea { resize: vertical; min-height: 60px; }
 
-    /* ── Summary cards ── */
+    /* ── Stat cards ── */
     .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 8px; }
     @media(max-width:720px){ .summary-grid { grid-template-columns:1fr 1fr; } }
-    .stat-card {
-      border-radius: 10px;
-      padding: 18px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
+    .stat-card { border-radius: 10px; padding: 18px 16px; display: flex; flex-direction: column; gap: 4px; }
     .stat-card .stat-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
     .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; }
     .stat-card .stat-sub   { font-size: .78rem; opacity: .8; }
@@ -127,118 +78,107 @@
     tr:last-child td { border-bottom: none; }
     tr:hover td { background: #f8fafc; }
     td input, td select {
-      border: 1px solid var(--border);
-      border-radius: 5px;
-      padding: 5px 8px;
-      font-size: .82rem;
-      width: 100%;
-      background: #fff;
+      border: 1px solid var(--border); border-radius: 5px; padding: 5px 8px;
+      font-size: .82rem; width: 100%; background: #fff;
     }
     td input:focus, td select:focus { outline: none; border-color: var(--accent); }
     .td-total { font-weight: 700; color: var(--primary); }
-    .td-usd   { font-size: .78rem; color: #888; }
+    .totals-row td { background: #eef2f7 !important; font-weight: 700; color: var(--primary); border-top: 2px solid var(--border); }
 
     /* ── Buttons ── */
     .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 8px 16px;
-      border: none;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: .85rem;
-      font-weight: 600;
-      transition: opacity .15s, transform .1s;
+      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
+      border: none; border-radius: 6px; cursor: pointer; font-size: .85rem;
+      font-weight: 600; transition: opacity .15s, transform .1s;
     }
     .btn:hover { opacity: .88; transform: translateY(-1px); }
     .btn:active { transform: translateY(0); }
-    .btn-primary  { background: var(--accent);   color: #fff; }
-    .btn-success  { background: var(--success);  color: #fff; }
-    .btn-danger   { background: var(--danger);   color: #fff; padding: 4px 10px; font-size: .78rem; }
-    .btn-outline  { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
-    .btn-warn     { background: var(--warn); color: #fff; }
-    .btn-row      { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+    .btn-primary { background: var(--accent);  color: #fff; }
+    .btn-success { background: var(--success); color: #fff; }
+    .btn-danger  { background: var(--danger);  color: #fff; padding: 4px 10px; font-size: .78rem; }
+    .btn-outline { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
+    .btn-warn    { background: var(--warn); color: #fff; }
+    .btn-teal    { background: #148f77; color: #fff; }
+    .btn-row     { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
-    /* ── Alert balance ── */
+    /* ── Rates panel ── */
+    .rates-panel {
+      background: #f0f8ff; border: 1px solid #b3d4f0; border-radius: 8px;
+      padding: 14px 16px; margin-top: 16px;
+    }
+    .rates-panel .rates-header {
+      display: flex; justify-content: space-between; align-items: center;
+      margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
+    }
+    .rates-panel h4 { font-size: .85rem; color: var(--primary); font-weight: 700; }
+    .rates-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .rate-chip {
+      background: #fff; border: 1px solid #c8e0f5; border-radius: 8px;
+      padding: 6px 12px; font-size: .78rem; color: #1a3a5c;
+      display: flex; flex-direction: column; align-items: center; min-width: 80px;
+    }
+    .rate-chip .rc-code { font-weight: 700; font-size: .8rem; }
+    .rate-chip .rc-val  { color: #555; font-size: .73rem; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .dot-green  { background: #27ae60; }
+    .dot-red    { background: #e74c3c; }
+    .dot-gray   { background: #aaa; }
+
+    /* ── Manual rate row ── */
+    .manual-rate-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+    .manual-rate-row input, .manual-rate-row select { max-width: 130px; }
+
+    /* ── Balance ── */
     .balance-box {
-      border-radius: 8px;
-      padding: 14px 18px;
-      font-size: 1rem;
-      font-weight: 600;
-      margin-top: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      border-radius: 8px; padding: 14px 18px; font-size: 1rem; font-weight: 600;
+      margin-top: 16px; display: flex; align-items: center; gap: 10px;
     }
     .balance-positive { background: #eafaf1; color: var(--success); border-left: 4px solid var(--success); }
     .balance-negative { background: #fdedec; color: var(--danger);  border-left: 4px solid var(--danger); }
     .balance-zero     { background: #eef2f7; color: var(--primary); border-left: 4px solid var(--accent); }
 
-    /* ── Progress bar ── */
     .progress-wrap { background: #e9ecef; border-radius: 20px; height: 10px; overflow: hidden; margin-top: 6px; }
     .progress-bar  { height: 100%; border-radius: 20px; transition: width .4s; }
 
-    /* ── Tag chips ── */
-    .chip {
-      display: inline-block;
-      padding: 2px 10px;
-      border-radius: 12px;
-      font-size: .72rem;
-      font-weight: 600;
-    }
-    .chip-blue   { background: #d6eaf8; color: #1a5276; }
-    .chip-green  { background: #d5f5e3; color: #1e8449; }
-    .chip-orange { background: #fdebd0; color: #7d6608; }
-    .chip-red    { background: #fadbd8; color: #922b21; }
-    .chip-gray   { background: #eaecee; color: #555; }
+    hr.section-sep { border: none; border-top: 2px dashed var(--border); margin: 8px 0 18px; }
+    .note { font-size: .78rem; color: #888; margin-top: 6px; }
 
-    /* ── Print ── */
+    /* ── Currency tag in row ── */
+    select.cur-sel { max-width: 80px !important; font-weight: 700; color: var(--primary); }
+
     @media print {
       body { background: #fff; }
-      .page-header { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .page-header, thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .card { box-shadow: none; border: 1px solid #ccc; }
       .no-print { display: none !important; }
-      .btn-row { display: none; }
-      thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      .btn-row  { display: none; }
     }
-
-    /* ── Divider ── */
-    hr.section-sep { border: none; border-top: 2px dashed var(--border); margin: 8px 0 18px; }
-
-    /* ── Totals row ── */
-    .totals-row td { background: #eef2f7 !important; font-weight: 700; color: var(--primary); border-top: 2px solid var(--border); }
-
-    /* ── Notes ── */
-    .note { font-size: .78rem; color: #888; margin-top: 6px; }
   </style>
 </head>
 <body>
 
-<!-- ══════════════════════ HEADER ══════════════════════ -->
 <div class="page-header">
   <div>
     <h1>&#9992;&#65039; Reporte de Viaje</h1>
-    <p>Gestión de gastos, clientes y cambio de moneda &mdash; Para Gerencia</p>
+    <p>Gestión de gastos multi-moneda, clientes y cambio en tiempo real &mdash; Para Gerencia</p>
   </div>
   <div class="badge-status" id="statusBadge">EN CURSO</div>
 </div>
 
-<!-- ══════════════════════ MAIN ══════════════════════ -->
 <div class="container">
 
-  <!-- ─── RESUMEN FINANCIERO (dinámico) ─── -->
-  <section id="secSummary">
+  <!-- ═══ RESUMEN ═══ -->
+  <section>
     <div class="summary-grid">
       <div class="stat-card stat-blue">
         <span class="stat-label">&#128200; Total Gastado</span>
         <span class="stat-value" id="sumTotalGastado">$0.00</span>
-        <span class="stat-sub" id="sumTotalGastadoLocal">— moneda local</span>
+        <span class="stat-sub" id="sumTotalSub">en moneda base</span>
       </div>
       <div class="stat-card stat-orange">
         <span class="stat-label">&#128181; Adelanto Recibido</span>
         <span class="stat-value" id="sumAdelanto">$0.00</span>
-        <span class="stat-sub" id="sumAdelantoLocal">— moneda local</span>
+        <span class="stat-sub" id="sumAdelantoSub">moneda base</span>
       </div>
       <div class="stat-card stat-green">
         <span class="stat-label">&#9989; Saldo a Favor</span>
@@ -256,10 +196,10 @@
     </div>
   </section>
 
-  <!-- ─── 1. INFORMACIÓN BÁSICA ─── -->
+  <!-- ═══ 1. INFORMACIÓN BÁSICA ═══ -->
   <section>
     <div class="card">
-      <div class="card-header"><span class="icon">&#128203;</span> 1. Información Básica del Viaje</div>
+      <div class="card-header">&#128203; 1. Información Básica del Viaje</div>
       <div class="card-body">
         <div class="grid-3" style="margin-bottom:14px;">
           <div class="field">
@@ -270,10 +210,8 @@
             <label>Cargo / Rol</label>
             <select id="travelerRole" onchange="refreshAll()">
               <option value="">Seleccionar…</option>
-              <option>Vendedor</option>
-              <option>Comprador</option>
-              <option>Representante Comercial</option>
-              <option>Gerente de Ventas</option>
+              <option>Vendedor</option><option>Comprador</option>
+              <option>Representante Comercial</option><option>Gerente de Ventas</option>
               <option>Director Comercial</option>
             </select>
           </div>
@@ -285,7 +223,7 @@
         <div class="grid-4">
           <div class="field">
             <label>País de Destino</label>
-            <input type="text" id="destCountry" placeholder="Ej. México" oninput="suggestCurrency()" />
+            <input type="text" id="destCountry" placeholder="Ej. México" />
           </div>
           <div class="field">
             <label>Ciudad de Destino</label>
@@ -310,75 +248,66 @@
     </div>
   </section>
 
-  <!-- ─── 2. CONFIGURACIÓN DE MONEDA ─── -->
+  <!-- ═══ 2. MONEDA Y TASAS ═══ -->
   <section>
     <div class="card">
-      <div class="card-header"><span class="icon">&#128176;</span> 2. Moneda y Adelanto de Viaje</div>
+      <div class="card-header">&#128176; 2. Moneda Base, Tasas en Vivo y Adelanto</div>
       <div class="card-body">
         <div class="grid-4">
           <div class="field">
-            <label>Moneda Base (tu país)</label>
+            <label>Moneda Base (tu moneda de reporte)</label>
             <select id="baseCurrency" onchange="refreshAll()">
-              <option value="USD">USD – Dólar Americano</option>
-              <option value="EUR">EUR – Euro</option>
-              <option value="MXN">MXN – Peso Mexicano</option>
-              <option value="COP">COP – Peso Colombiano</option>
-              <option value="ARS">ARS – Peso Argentino</option>
-              <option value="BRL">BRL – Real Brasileño</option>
-              <option value="CLP">CLP – Peso Chileno</option>
-              <option value="PEN">PEN – Sol Peruano</option>
-              <option value="VES">VES – Bolívar Venezolano</option>
-              <option value="GTQ">GTQ – Quetzal Guatemalteco</option>
-              <option value="HNL">HNL – Lempira Hondureño</option>
-              <option value="CRC">CRC – Colón Costarricense</option>
-              <option value="DOP">DOP – Peso Dominicano</option>
-              <option value="BOB">BOB – Boliviano</option>
-              <option value="PYG">PYG – Guaraní Paraguayo</option>
-              <option value="UYU">UYU – Peso Uruguayo</option>
-              <option value="GBP">GBP – Libra Esterlina</option>
-              <option value="CAD">CAD – Dólar Canadiense</option>
-              <option value="JPY">JPY – Yen Japonés</option>
-              <option value="CNY">CNY – Yuan Chino</option>
+              <!-- populated by JS -->
             </select>
           </div>
           <div class="field">
-            <label>Moneda del País Visitado</label>
-            <select id="localCurrency" onchange="refreshAll()">
-              <option value="USD">USD – Dólar Americano</option>
-              <option value="EUR">EUR – Euro</option>
-              <option value="MXN">MXN – Peso Mexicano</option>
-              <option value="COP">COP – Peso Colombiano</option>
-              <option value="ARS">ARS – Peso Argentino</option>
-              <option value="BRL">BRL – Real Brasileño</option>
-              <option value="CLP">CLP – Peso Chileno</option>
-              <option value="PEN">PEN – Sol Peruano</option>
-              <option value="VES">VES – Bolívar Venezolano</option>
-              <option value="GTQ">GTQ – Quetzal Guatemalteco</option>
-              <option value="HNL">HNL – Lempira Hondureño</option>
-              <option value="CRC">CRC – Colón Costarricense</option>
-              <option value="DOP">DOP – Peso Dominicano</option>
-              <option value="BOB">BOB – Boliviano</option>
-              <option value="PYG">PYG – Guaraní Paraguayo</option>
-              <option value="UYU">UYU – Peso Uruguayo</option>
-              <option value="GBP">GBP – Libra Esterlina</option>
-              <option value="CAD">CAD – Dólar Canadiense</option>
-              <option value="JPY">JPY – Yen Japonés</option>
-              <option value="CNY">CNY – Yuan Chino</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Tasa de Cambio (1 <span id="labelBase1">USD</span> = ? <span id="labelLocal1">USD</span>)</label>
-            <input type="number" id="exchangeRate" value="1" min="0.000001" step="any" oninput="refreshAll()" />
-          </div>
-          <div class="field">
-            <label>Adelanto Recibido (en <span id="labelBase2">USD</span>)</label>
+            <label>Adelanto Recibido (en moneda base)</label>
             <input type="number" id="advance" value="0" min="0" step="any" oninput="refreshAll()" />
           </div>
+          <div class="field" style="grid-column: span 2;">
+            <label>Estado de Tasas</label>
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;">
+              <span id="ratesStatus" style="font-size:.82rem;">
+                <span class="status-dot dot-gray"></span>Sin cargar
+              </span>
+              <button class="btn btn-teal no-print" onclick="fetchRates()" style="padding:6px 14px;font-size:.8rem;">
+                &#8635; Actualizar tasas en vivo
+              </button>
+              <span id="ratesTime" style="font-size:.75rem;color:#888;"></span>
+            </div>
+          </div>
         </div>
-        <p class="note" id="rateNote">1 USD equivale a 1.00 USD · Ingrese la tasa de cambio oficial o del mercado.</p>
 
-        <!-- Barra de uso del adelanto -->
+        <!-- Live rates display -->
+        <div class="rates-panel" id="ratesPanel" style="display:none;">
+          <div class="rates-header">
+            <h4>&#127758; Tasas de cambio en tiempo real (relativas a 1 <span id="baseLabel">USD</span>)</h4>
+            <span style="font-size:.75rem;color:#777;">Fuente: frankfurter.app</span>
+          </div>
+          <div class="rates-grid" id="ratesGrid"><!-- chips --></div>
+        </div>
+
+        <!-- Manual rate override for currencies not in API (e.g. VES) -->
         <div style="margin-top:14px;">
+          <p style="font-size:.8rem;font-weight:600;color:#555;margin-bottom:6px;">
+            &#128295; Agregar / corregir tasa manual (para monedas no disponibles en la API):
+          </p>
+          <div class="manual-rate-row">
+            <select id="manualCur" style="max-width:160px;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:.85rem;">
+              <!-- populated by JS -->
+            </select>
+            <span style="font-size:.85rem;color:#555;">1 <span id="baseLabel2">USD</span> =</span>
+            <input type="number" id="manualRate" placeholder="ej. 36.5" min="0" step="any"
+              style="max-width:120px;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:.85rem;" />
+            <button class="btn btn-outline no-print" onclick="applyManualRate()" style="padding:6px 14px;font-size:.8rem;">
+              Aplicar
+            </button>
+            <span id="manualMsg" style="font-size:.78rem;color:var(--success);"></span>
+          </div>
+        </div>
+
+        <!-- Advance usage bar -->
+        <div style="margin-top:16px;">
           <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:600;color:#555;margin-bottom:4px;">
             <span>Uso del adelanto</span>
             <span id="advanceUsedPct">0%</span>
@@ -391,33 +320,31 @@
     </div>
   </section>
 
-  <!-- ─── 3. GASTOS DIARIOS ─── -->
+  <!-- ═══ 3. GASTOS DIARIOS ═══ -->
   <section>
     <div class="card">
-      <div class="card-header"><span class="icon">&#128179;</span> 3. Gestión de Gastos Diarios</div>
+      <div class="card-header">&#128179; 3. Gestión de Gastos Diarios (multi-moneda)</div>
       <div class="card-body">
         <div class="table-wrap">
-          <table id="expensesTable">
+          <table>
             <thead>
               <tr>
                 <th>#</th>
                 <th>Fecha</th>
                 <th>Categoría</th>
                 <th>Descripción</th>
-                <th>Monto (<span class="lbl-local">Local</span>)</th>
-                <th>Equivalente (<span class="lbl-base">Base</span>)</th>
+                <th>Moneda</th>
+                <th>Monto</th>
+                <th>= Base (<span id="thBase">?</span>)</th>
                 <th>Comprobante</th>
                 <th class="no-print">&#128465;</th>
               </tr>
             </thead>
-            <tbody id="expensesBody">
-              <!-- rows injected by JS -->
-            </tbody>
+            <tbody id="expensesBody"></tbody>
             <tfoot>
               <tr class="totals-row">
-                <td colspan="4" style="text-align:right;">TOTALES</td>
-                <td id="totalLocal">0.00</td>
-                <td id="totalBase">0.00</td>
+                <td colspan="6" style="text-align:right;">TOTAL EN MONEDA BASE</td>
+                <td id="totalBase" style="white-space:nowrap;">0.00</td>
                 <td colspan="2"></td>
               </tr>
             </tfoot>
@@ -425,20 +352,20 @@
         </div>
         <div class="btn-row no-print">
           <button class="btn btn-success" onclick="addExpenseRow()">&#43; Agregar Gasto</button>
-          <button class="btn btn-outline" onclick="addExpenseRowsDate()">&#43; Día Completo</button>
+          <button class="btn btn-outline"  onclick="addDayTemplate()">&#43; Día Completo</button>
         </div>
-        <p class="note">* El monto en moneda base se calcula automáticamente usando la tasa de cambio ingresada arriba.</p>
+        <p class="note">* Cada gasto puede estar en una moneda diferente. La conversión usa las tasas en vivo (o manuales si no hay conexión).</p>
       </div>
     </div>
   </section>
 
-  <!-- ─── 4. GESTIÓN DE CLIENTES ─── -->
+  <!-- ═══ 4. CLIENTES ═══ -->
   <section>
     <div class="card">
-      <div class="card-header"><span class="icon">&#128101;</span> 4. Gestión de Clientes Visitados</div>
+      <div class="card-header">&#128101; 4. Gestión de Clientes Visitados</div>
       <div class="card-body">
         <div class="table-wrap">
-          <table id="clientsTable">
+          <table>
             <thead>
               <tr>
                 <th>#</th>
@@ -446,18 +373,18 @@
                 <th>Ciudad</th>
                 <th>Contacto</th>
                 <th>Tipo</th>
-                <th>Monto Negociado (<span class="lbl-base2">Base</span>)</th>
+                <th>Moneda</th>
+                <th>Monto Negociado</th>
+                <th>= Base</th>
                 <th>Estado</th>
                 <th>Notas</th>
                 <th class="no-print">&#128465;</th>
               </tr>
             </thead>
-            <tbody id="clientsBody">
-              <!-- rows injected by JS -->
-            </tbody>
+            <tbody id="clientsBody"></tbody>
             <tfoot>
               <tr class="totals-row">
-                <td colspan="5" style="text-align:right;">TOTAL NEGOCIADO</td>
+                <td colspan="7" style="text-align:right;">TOTAL NEGOCIADO (base)</td>
                 <td id="totalNegotiated">0.00</td>
                 <td colspan="3"></td>
               </tr>
@@ -471,48 +398,45 @@
     </div>
   </section>
 
-  <!-- ─── 5. RESUMEN FINANCIERO DETALLADO ─── -->
+  <!-- ═══ 5. RESUMEN PARA GERENCIA ═══ -->
   <section>
     <div class="card">
-      <div class="card-header"><span class="icon">&#128196;</span> 5. Resumen Financiero para Gerencia</div>
+      <div class="card-header">&#128196; 5. Resumen Financiero para Gerencia</div>
       <div class="card-body">
         <div class="grid-2">
-          <!-- Desglose por categoría -->
           <div>
             <h4 style="margin-bottom:12px;color:var(--primary);">Gastos por Categoría</h4>
-            <table id="catBreakdown">
-              <thead>
-                <tr><th>Categoría</th><th>Local</th><th>Base</th><th>%</th></tr>
-              </thead>
+            <table id="catTable">
+              <thead><tr><th>Categoría</th><th>Subtotal Base</th><th>%</th></tr></thead>
               <tbody id="catBody"></tbody>
             </table>
           </div>
-          <!-- Flujo de caja -->
           <div>
-            <h4 style="margin-bottom:12px;color:var(--primary);">Flujo de Caja del Viaje</h4>
+            <h4 style="margin-bottom:12px;color:var(--primary);">Flujo de Caja</h4>
             <table>
               <tbody>
-                <tr><td>Adelanto entregado</td><td class="td-total" id="r_adelanto" style="text-align:right;">0.00</td></tr>
-                <tr><td>Total gastos</td><td class="td-total" style="color:var(--danger);text-align:right;" id="r_gastos">0.00</td></tr>
-                <tr style="background:#eef2f7;font-weight:700;">
-                  <td>Saldo</td>
-                  <td id="r_saldo" style="text-align:right;">0.00</td>
-                </tr>
+                <tr><td>Adelanto entregado</td><td style="text-align:right;" id="r_adelanto">0.00</td></tr>
+                <tr><td>Total gastos</td><td style="text-align:right;color:var(--danger);font-weight:700;" id="r_gastos">0.00</td></tr>
+                <tr style="background:#eef2f7;font-weight:700;"><td>Saldo</td><td id="r_saldo" style="text-align:right;">0.00</td></tr>
                 <tr><td colspan="2"><hr class="section-sep"/></td></tr>
-                <tr><td>Total negociado con clientes</td><td class="td-total" style="color:var(--success);text-align:right;" id="r_negociado">0.00</td></tr>
+                <tr><td>Total negociado con clientes</td><td style="text-align:right;color:var(--success);font-weight:700;" id="r_negociado">0.00</td></tr>
                 <tr><td>Días de viaje</td><td style="text-align:right;" id="r_dias">—</td></tr>
-                <tr><td>Gasto promedio diario</td><td class="td-total" style="text-align:right;" id="r_promedio">0.00</td></tr>
+                <tr><td>Gasto promedio diario</td><td style="text-align:right;font-weight:700;" id="r_promedio">0.00</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Alert de saldo -->
+        <!-- Desglose por moneda usada -->
+        <div style="margin-top:20px;">
+          <h4 style="margin-bottom:10px;color:var(--primary);">Gastos por Moneda Utilizada</h4>
+          <div id="currencyBreakdown" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
+        </div>
+
         <div id="balanceAlertBottom" class="balance-box balance-zero" style="margin-top:20px;">
           &#128269; Los datos se actualizan en tiempo real.
         </div>
 
-        <!-- Observaciones gerenciales -->
         <div style="margin-top:20px;">
           <div class="field">
             <label>Observaciones / Conclusiones (para Gerencia)</label>
@@ -520,7 +444,6 @@
           </div>
         </div>
 
-        <!-- Firmas -->
         <div class="grid-3" style="margin-top:24px;gap:32px;">
           <div style="text-align:center;">
             <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
@@ -529,7 +452,7 @@
           </div>
           <div style="text-align:center;">
             <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
-              Vo. Bo. Supervisor Inmediato<br/><strong>___________________</strong>
+              Vo. Bo. Supervisor<br/><strong>___________________</strong>
             </div>
           </div>
           <div style="text-align:center;">
@@ -540,10 +463,10 @@
         </div>
 
         <div class="btn-row no-print" style="margin-top:20px;justify-content:flex-end;">
-          <button class="btn btn-warn" onclick="window.print()">&#128438;&#65039; Imprimir / Exportar PDF</button>
-          <button class="btn btn-primary" onclick="saveToLocalStorage()">&#128190; Guardar Borrador</button>
-          <button class="btn btn-outline" onclick="loadFromLocalStorage()">&#128196; Cargar Borrador</button>
-          <button class="btn btn-danger" onclick="clearAll()">&#128465; Limpiar Todo</button>
+          <button class="btn btn-warn"    onclick="window.print()">&#128438;&#65039; Imprimir / PDF</button>
+          <button class="btn btn-primary" onclick="saveData()">&#128190; Guardar Borrador</button>
+          <button class="btn btn-outline" onclick="loadData()">&#128196; Cargar Borrador</button>
+          <button class="btn btn-danger"  onclick="clearAll()" style="padding:8px 14px;font-size:.85rem;">&#128465; Limpiar</button>
         </div>
       </div>
     </div>
@@ -551,274 +474,386 @@
 
 </div><!-- /container -->
 
-<!-- ══════════════════════ JAVASCRIPT ══════════════════════ -->
 <script>
-// ── Currency symbols map ──
+// ═══════════════════════════════════════════════════
+//  CURRENCY DATA
+// ═══════════════════════════════════════════════════
+const ALL_CURRENCIES = [
+  ['USD','Dólar Americano'],['EUR','Euro'],['GBP','Libra Esterlina'],
+  ['MXN','Peso Mexicano'],['COP','Peso Colombiano'],['ARS','Peso Argentino'],
+  ['BRL','Real Brasileño'],['CLP','Peso Chileno'],['PEN','Sol Peruano'],
+  ['VES','Bolívar Venezolano'],['GTQ','Quetzal Guatemalteco'],['HNL','Lempira Hondureño'],
+  ['CRC','Colón Costarricense'],['DOP','Peso Dominicano'],['BOB','Boliviano'],
+  ['PYG','Guaraní Paraguayo'],['UYU','Peso Uruguayo'],['CAD','Dólar Canadiense'],
+  ['JPY','Yen Japonés'],['CNY','Yuan Chino'],['CHF','Franco Suizo'],
+  ['AUD','Dólar Australiano'],['INR','Rupia India'],['MYR','Ringgit Malayo'],
+  ['SGD','Dólar de Singapur'],['ZAR','Rand Sudafricano'],['TRY','Lira Turca'],
+  ['SAR','Riyal Saudí'],['AED','Dírham Emiratí'],['KRW','Won Coreano'],
+];
+
 const SYMBOLS = {
-  USD:'$', EUR:'€', MXN:'$', COP:'$', ARS:'$', BRL:'R$', CLP:'$',
-  PEN:'S/', VES:'Bs.', GTQ:'Q', HNL:'L', CRC:'₡', DOP:'RD$',
-  BOB:'Bs', PYG:'₲', UYU:'$U', GBP:'£', CAD:'CA$', JPY:'¥', CNY:'¥'
+  USD:'$',EUR:'€',GBP:'£',MXN:'$',COP:'$',ARS:'$',BRL:'R$',CLP:'$',
+  PEN:'S/',VES:'Bs.',GTQ:'Q',HNL:'L',CRC:'₡',DOP:'RD$',BOB:'Bs',
+  PYG:'₲',UYU:'$U',CAD:'CA$',JPY:'¥',CNY:'¥',CHF:'Fr',AUD:'A$',
+  INR:'₹',MYR:'RM',SGD:'S$',ZAR:'R',TRY:'₺',SAR:'ر.س',AED:'د.إ',KRW:'₩',
 };
 
-// ── Categories ──
 const CATEGORIES = [
   'Transporte Aéreo','Transporte Terrestre','Hospedaje','Alimentación',
   'Gasolina / Combustible','Representación / Entretenimiento',
   'Comunicaciones','Materiales / Papelería','Visa / Trámites',
-  'Propinas / Varios','Otro'
+  'Propinas / Varios','Otro',
 ];
 
-// ── Expense row counter ──
+// ═══════════════════════════════════════════════════
+//  EXCHANGE RATES  (keyed relative to USD)
+// ═══════════════════════════════════════════════════
+// rates[code] = how many `code` per 1 USD
+let rates = { USD: 1 };
+let ratesLoaded = false;
+
+// Convert `amount` in `fromCur` → `baseCur` using rates (all vs USD)
+function convert(amount, fromCur, baseCur) {
+  if (fromCur === baseCur) return amount;
+  const rFrom = rates[fromCur] || 1;
+  const rBase = rates[baseCur] || 1;
+  // amount / rFrom = amount in USD; * rBase = amount in baseCur
+  return amount / rFrom * rBase;
+}
+
+// ─── Fetch live rates from frankfurter.app ───
+async function fetchRates() {
+  const statusEl = document.getElementById('ratesStatus');
+  statusEl.innerHTML = '<span class="status-dot dot-gray"></span>Consultando…';
+  try {
+    const res = await fetch('https://api.frankfurter.app/latest?from=USD');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+    // frankfurter returns rates relative to USD (USD not included, it's 1)
+    rates = { USD: 1, ...data.rates };
+    ratesLoaded = true;
+    const now = new Date().toLocaleString('es-MX');
+    statusEl.innerHTML = `<span class="status-dot dot-green"></span>En vivo`;
+    document.getElementById('ratesTime').textContent = 'Actualizado: ' + now;
+    renderRatesPanel();
+    recalcAll();
+  } catch (e) {
+    statusEl.innerHTML = `<span class="status-dot dot-red"></span>Sin conexión — usando tasas manuales`;
+    document.getElementById('ratesTime').textContent = '';
+  }
+}
+
+function renderRatesPanel() {
+  const base = document.getElementById('baseCurrency').value;
+  document.getElementById('ratesPanel').style.display = 'block';
+  document.getElementById('baseLabel').textContent  = base;
+  document.getElementById('baseLabel2').textContent = base;
+
+  const priority = ['USD','EUR','GBP','MXN','COP','ARS','BRL','CLP','PEN','CAD','JPY','CNY','CHF','AUD'];
+  const grid = document.getElementById('ratesGrid');
+  grid.innerHTML = '';
+  priority.forEach(code => {
+    if (code === base) return;
+    const val = convert(1, base, code);
+    if (!val) return;
+    const chip = document.createElement('div');
+    chip.className = 'rate-chip';
+    chip.innerHTML = `<span class="rc-code">${code}</span><span class="rc-val">${fmtRate(val)}</span>`;
+    grid.appendChild(chip);
+  });
+}
+
+function applyManualRate() {
+  const cur  = document.getElementById('manualCur').value;
+  const val  = parseFloat(document.getElementById('manualRate').value);
+  const base = document.getElementById('baseCurrency').value;
+  if (!cur || isNaN(val) || val <= 0) { alert('Ingresa una moneda y una tasa válida.'); return; }
+  // Store: how many `cur` per 1 USD → we derive from base
+  // 1 base = val cur → 1 USD = val * (1/rates[base]) cur → rates[cur] relative to USD
+  const rBase = rates[base] || 1;
+  rates[cur] = val * rBase;
+  document.getElementById('manualMsg').textContent = `✓ 1 ${base} = ${val} ${cur} aplicado`;
+  if (ratesLoaded) renderRatesPanel();
+  recalcAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  POPULATE SELECTS
+// ═══════════════════════════════════════════════════
+function curOptions(selected) {
+  return ALL_CURRENCIES.map(([code, name]) =>
+    `<option value="${code}" ${code === selected ? 'selected' : ''}>${code} – ${name}</option>`
+  ).join('');
+}
+function curOptionsShort(selected) {
+  return ALL_CURRENCIES.map(([code]) =>
+    `<option value="${code}" ${code === selected ? 'selected' : ''}>${code}</option>`
+  ).join('');
+}
+
+function populateBaseSelect() {
+  document.getElementById('baseCurrency').innerHTML = curOptions('USD');
+  document.getElementById('manualCur').innerHTML    = curOptionsShort('MXN');
+}
+
+// ═══════════════════════════════════════════════════
+//  ROW IDs
+// ═══════════════════════════════════════════════════
 let expRowId = 0;
 let cliRowId = 0;
 
-// ─────────────────────────────────────────
-// ADD EXPENSE ROW
-// ─────────────────────────────────────────
-function addExpenseRow(date='', cat='', desc='', amtLocal=0) {
-  const id = ++expRowId;
-  const base = document.getElementById('baseCurrency').value;
-  const local = document.getElementById('localCurrency').value;
+// ═══════════════════════════════════════════════════
+//  EXPENSE ROWS
+// ═══════════════════════════════════════════════════
+function addExpenseRow(date, cat, desc, cur, amt, voucher) {
+  const id   = ++expRowId;
+  const today = date || new Date().toISOString().slice(0, 10);
   const tbody = document.getElementById('expensesBody');
-  const today = date || new Date().toISOString().slice(0,10);
 
-  const catOptions = CATEGORIES.map(c =>
-    `<option value="${c}" ${c===cat?'selected':''}>${c}</option>`
+  const catOpts = CATEGORIES.map(c =>
+    `<option value="${c}" ${c === cat ? 'selected' : ''}>${c}</option>`
   ).join('');
-
-  const voucherOptions = [
-    ['Sin comprobante','chip-gray'],
-    ['Factura electrónica','chip-green'],
-    ['Recibo','chip-blue'],
-    ['Voucher','chip-orange'],
-  ].map(([v,c]) => `<option value="${v}">${v}</option>`).join('');
+  const voucherOpts = ['Sin comprobante','Factura electrónica','Recibo','Voucher']
+    .map(v => `<option value="${v}" ${v === voucher ? 'selected' : ''}>${v}</option>`).join('');
 
   const tr = document.createElement('tr');
-  tr.id = `erow-${id}`;
+  tr.id = `er-${id}`;
   tr.innerHTML = `
-    <td style="color:#aaa;font-size:.78rem;">${id}</td>
-    <td><input type="date" value="${today}" onchange="recalcExpenses()" /></td>
+    <td style="color:#aaa;font-size:.75rem;white-space:nowrap;">${id}</td>
+    <td><input type="date" value="${today}" onchange="recalcAll()" style="min-width:130px;" /></td>
     <td>
-      <select onchange="recalcExpenses()">
-        <option value="">—</option>${catOptions}
+      <select onchange="recalcAll()" style="min-width:155px;">
+        <option value="">—</option>${catOpts}
       </select>
     </td>
-    <td><input type="text" value="${desc}" placeholder="Descripción…" /></td>
+    <td><input type="text" value="${desc || ''}" placeholder="Descripción…" style="min-width:130px;" /></td>
     <td>
-      <input type="number" class="amt-local" value="${amtLocal||''}" min="0" step="any"
-        placeholder="0.00" oninput="recalcExpenses()" style="max-width:110px;" />
-    </td>
-    <td class="td-total">
-      <span class="amt-base-display">—</span>
-    </td>
-    <td>
-      <select onchange="recalcExpenses()">
-        ${voucherOptions}
+      <select class="cur-sel" onchange="recalcAll()">
+        ${curOptionsShort(cur || 'USD')}
       </select>
+    </td>
+    <td>
+      <input type="number" class="amt-inp" value="${amt || ''}" min="0" step="any"
+        placeholder="0.00" oninput="recalcAll()" style="max-width:100px;" />
+    </td>
+    <td class="td-total base-col" style="white-space:nowrap;">—</td>
+    <td>
+      <select style="min-width:140px;">${voucherOpts}</select>
     </td>
     <td class="no-print">
-      <button class="btn btn-danger" onclick="removeRow('erow-${id}')">✕</button>
+      <button class="btn btn-danger" onclick="removeRow('er-${id}')">&#10005;</button>
     </td>
   `;
   tbody.appendChild(tr);
-  recalcExpenses();
+  recalcAll();
 }
 
-// Add a "full day" template (Hospedaje + Alimentación + Transporte)
-function addExpenseRowsDate() {
-  const today = new Date().toISOString().slice(0,10);
-  addExpenseRow(today, 'Hospedaje', 'Hospedaje', 0);
-  addExpenseRow(today, 'Alimentación', 'Desayuno / Almuerzo / Cena', 0);
-  addExpenseRow(today, 'Transporte Terrestre', 'Traslado', 0);
+function addDayTemplate() {
+  const today = new Date().toISOString().slice(0, 10);
+  const base  = document.getElementById('baseCurrency').value;
+  addExpenseRow(today, 'Hospedaje',              'Hotel', base, '', 'Sin comprobante');
+  addExpenseRow(today, 'Alimentación',           'Desayuno / Almuerzo / Cena', base, '', 'Sin comprobante');
+  addExpenseRow(today, 'Transporte Terrestre',   'Traslado', base, '', 'Sin comprobante');
 }
 
-// ─────────────────────────────────────────
-// ADD CLIENT ROW
-// ─────────────────────────────────────────
-function addClientRow() {
-  const id = ++cliRowId;
+// ═══════════════════════════════════════════════════
+//  CLIENT ROWS
+// ═══════════════════════════════════════════════════
+function addClientRow(name, city, contact, type, cur, amt, status, notes) {
+  const id    = ++cliRowId;
   const tbody = document.getElementById('clientsBody');
-  const base = document.getElementById('baseCurrency').value;
 
   const typeOpts = ['Cliente Nuevo','Cliente Existente','Prospecto','Proveedor','Socio Estratégico']
-    .map(t => `<option value="${t}">${t}</option>`).join('');
-  const statusOpts = [
-    ['En negociación','chip-orange'],['Cerrado','chip-green'],
-    ['Perdido','chip-red'],['Seguimiento','chip-blue'],['Pendiente','chip-gray']
-  ].map(([s]) => `<option value="${s}">${s}</option>`).join('');
+    .map(t => `<option value="${t}" ${t === type ? 'selected' : ''}>${t}</option>`).join('');
+  const statusOpts = ['En negociación','Cerrado','Perdido','Seguimiento','Pendiente']
+    .map(s => `<option value="${s}" ${s === status ? 'selected' : ''}>${s}</option>`).join('');
 
   const tr = document.createElement('tr');
-  tr.id = `crow-${id}`;
+  tr.id = `cr-${id}`;
   tr.innerHTML = `
-    <td style="color:#aaa;font-size:.78rem;">${id}</td>
-    <td><input type="text" placeholder="Nombre o Empresa…" /></td>
-    <td><input type="text" placeholder="Ciudad" /></td>
-    <td><input type="text" placeholder="Tel / Email" /></td>
+    <td style="color:#aaa;font-size:.75rem;">${id}</td>
+    <td><input type="text" value="${name    || ''}" placeholder="Nombre o Empresa…" style="min-width:130px;" /></td>
+    <td><input type="text" value="${city    || ''}" placeholder="Ciudad" style="min-width:90px;" /></td>
+    <td><input type="text" value="${contact || ''}" placeholder="Tel / Email" style="min-width:110px;" /></td>
     <td><select>${typeOpts}</select></td>
     <td>
-      <input type="number" class="amt-negotiated" min="0" step="any"
-        placeholder="0.00" oninput="recalcClients()" style="max-width:120px;" />
+      <select class="cur-sel cli-cur" onchange="recalcAll()">
+        ${curOptionsShort(cur || 'USD')}
+      </select>
     </td>
-    <td><select class="status-sel">${statusOpts}</select></td>
-    <td><input type="text" placeholder="Notas breves…" /></td>
+    <td>
+      <input type="number" class="cli-amt" value="${amt || ''}" min="0" step="any"
+        placeholder="0.00" oninput="recalcAll()" style="max-width:100px;" />
+    </td>
+    <td class="td-total cli-base" style="white-space:nowrap;">—</td>
+    <td><select>${statusOpts}</select></td>
+    <td><input type="text" value="${notes || ''}" placeholder="Notas…" style="min-width:110px;" /></td>
     <td class="no-print">
-      <button class="btn btn-danger" onclick="removeRow('crow-${id}')">✕</button>
+      <button class="btn btn-danger" onclick="removeRow('cr-${id}')">&#10005;</button>
     </td>
   `;
   tbody.appendChild(tr);
-  recalcClients();
+  recalcAll();
 }
 
 function removeRow(id) {
   const el = document.getElementById(id);
-  if (el) { el.remove(); recalcExpenses(); recalcClients(); }
+  if (el) { el.remove(); recalcAll(); }
 }
 
-// ─────────────────────────────────────────
-// RECALCULATE EXPENSES
-// ─────────────────────────────────────────
-function recalcExpenses() {
-  const rate   = parseFloat(document.getElementById('exchangeRate').value) || 1;
-  const base   = document.getElementById('baseCurrency').value;
-  const local  = document.getElementById('localCurrency').value;
-  const sym_b  = SYMBOLS[base]  || base;
-  const sym_l  = SYMBOLS[local] || local;
+// ═══════════════════════════════════════════════════
+//  RECALCULATE
+// ═══════════════════════════════════════════════════
+function recalcAll() {
+  const base  = document.getElementById('baseCurrency').value;
+  const sym   = SYMBOLS[base] || base;
+  const adv   = parseFloat(document.getElementById('advance').value) || 0;
 
-  let sumLocal = 0, sumBase = 0;
+  // Update column header
+  document.getElementById('thBase').textContent = base;
+
+  // ── Expenses ──
+  let totalBase = 0;
+  const catMap  = {};
+  const curMap  = {};
 
   document.querySelectorAll('#expensesBody tr').forEach(tr => {
-    const inp = tr.querySelector('.amt-local');
-    const disp = tr.querySelector('.amt-base-display');
-    if (!inp || !disp) return;
-    const v = parseFloat(inp.value) || 0;
-    const inBase = v / rate;
-    sumLocal += v;
-    sumBase  += inBase;
-    disp.textContent = sym_b + fmt(inBase);
+    const amtInp  = tr.querySelector('.amt-inp');
+    const curSel  = tr.querySelector('.cur-sel');
+    const baseCol = tr.querySelector('.base-col');
+    if (!amtInp || !curSel || !baseCol) return;
+
+    const amt = parseFloat(amtInp.value) || 0;
+    const cur = curSel.value;
+    const inBase = convert(amt, cur, base);
+    totalBase += inBase;
+    baseCol.textContent = sym + fmt(inBase);
+
+    // category
+    const catSel = tr.querySelectorAll('select')[0];
+    const cat = catSel ? (catSel.value || 'Sin categoría') : 'Sin categoría';
+    catMap[cat] = (catMap[cat] || 0) + inBase;
+
+    // currency breakdown
+    if (amt > 0) {
+      if (!curMap[cur]) curMap[cur] = { local: 0, base: 0 };
+      curMap[cur].local += amt;
+      curMap[cur].base  += inBase;
+    }
   });
 
-  document.getElementById('totalLocal').textContent = sym_l + fmt(sumLocal);
-  document.getElementById('totalBase').textContent  = sym_b + fmt(sumBase);
+  document.getElementById('totalBase').textContent = sym + fmt(totalBase);
 
-  // Update label spans
-  document.querySelectorAll('.lbl-local').forEach(el => el.textContent = local);
-  document.querySelectorAll('.lbl-base').forEach(el => el.textContent = base);
-
-  refreshAll();
-}
-
-// ─────────────────────────────────────────
-// RECALCULATE CLIENTS
-// ─────────────────────────────────────────
-function recalcClients() {
-  const base   = document.getElementById('baseCurrency').value;
-  const sym_b  = SYMBOLS[base] || base;
-  let total = 0;
-  document.querySelectorAll('#clientsBody tr .amt-negotiated').forEach(inp => {
-    total += parseFloat(inp.value) || 0;
-  });
-  document.getElementById('totalNegotiated').textContent = sym_b + fmt(total);
-  document.querySelectorAll('.lbl-base2').forEach(el => el.textContent = base);
-  refreshAll();
-}
-
-// ─────────────────────────────────────────
-// REFRESH ALL SUMMARY
-// ─────────────────────────────────────────
-function refreshAll() {
-  const base    = document.getElementById('baseCurrency').value;
-  const local   = document.getElementById('localCurrency').value;
-  const rate    = parseFloat(document.getElementById('exchangeRate').value) || 1;
-  const advance = parseFloat(document.getElementById('advance').value) || 0;
-  const sym_b   = SYMBOLS[base]  || base;
-  const sym_l   = SYMBOLS[local] || local;
-
-  // Rate note
-  document.getElementById('rateNote').textContent =
-    `1 ${base} equivale a ${fmt(rate)} ${local} · Ingrese la tasa de cambio oficial o del mercado.`;
-  document.getElementById('labelBase1').textContent = base;
-  document.getElementById('labelLocal1').textContent = local;
-  document.getElementById('labelBase2').textContent = base;
-
-  // Total expenses in base currency
-  let sumBase = 0, sumLocal = 0;
-  document.querySelectorAll('#expensesBody tr .amt-local').forEach(inp => {
-    const v = parseFloat(inp.value) || 0;
-    sumLocal += v;
-    sumBase  += v / rate;
-  });
-
-  // Total negotiated
+  // ── Clients ──
   let totalNeg = 0;
-  document.querySelectorAll('#clientsBody tr .amt-negotiated').forEach(inp => {
-    totalNeg += parseFloat(inp.value) || 0;
+  document.querySelectorAll('#clientsBody tr').forEach(tr => {
+    const amtInp  = tr.querySelector('.cli-amt');
+    const curSel  = tr.querySelector('.cli-cur');
+    const baseCol = tr.querySelector('.cli-base');
+    if (!amtInp || !curSel || !baseCol) return;
+    const amt    = parseFloat(amtInp.value) || 0;
+    const cur    = curSel.value;
+    const inBase = convert(amt, cur, base);
+    totalNeg += inBase;
+    baseCol.textContent = sym + fmt(inBase);
   });
+  document.getElementById('totalNegotiated').textContent = sym + fmt(totalNeg);
 
-  // Balance
-  const saldo = advance - sumBase;
+  // ── Summary cards ──
+  const saldo = adv - totalBase;
+  document.getElementById('sumTotalGastado').textContent = sym + fmt(totalBase);
+  document.getElementById('sumTotalSub').textContent     = 'en ' + base;
+  document.getElementById('sumAdelanto').textContent     = sym + fmt(adv);
+  document.getElementById('sumAdelantoSub').textContent  = 'en ' + base;
+  document.getElementById('sumFavor').textContent        = sym + fmt(Math.max(0, saldo));
+  document.getElementById('sumReembolso').textContent    = sym + fmt(Math.max(0, -saldo));
 
-  // Top summary cards
-  document.getElementById('sumTotalGastado').textContent     = sym_b + fmt(sumBase);
-  document.getElementById('sumTotalGastadoLocal').textContent= sym_l + fmt(sumLocal) + ' (moneda local)';
-  document.getElementById('sumAdelanto').textContent         = sym_b + fmt(advance);
-  document.getElementById('sumAdelantoLocal').textContent    = sym_l + fmt(advance * rate) + ' equiv. local';
-  document.getElementById('sumFavor').textContent            = sym_b + fmt(Math.max(0, saldo));
-  document.getElementById('sumReembolso').textContent        = sym_b + fmt(Math.max(0, -saldo));
-
-  // Progress bar
-  const pct = advance > 0 ? Math.min(100, (sumBase / advance) * 100) : 0;
-  document.getElementById('advanceUsedPct').textContent = fmt(pct, 1) + '%';
+  // ── Progress bar ──
+  const pct = adv > 0 ? Math.min(150, (totalBase / adv) * 100) : 0;
+  document.getElementById('advanceUsedPct').textContent = fmt(Math.min(pct, 100), 1) + '%';
   const bar = document.getElementById('advanceBar');
-  bar.style.width = pct + '%';
+  bar.style.width    = Math.min(100, pct) + '%';
   bar.style.background = pct > 100 ? 'var(--danger)' : pct > 80 ? 'var(--warn)' : 'var(--success)';
 
-  // Balance alert (top)
-  setBalanceAlert('balanceAlert', saldo, sym_b, advance);
-  setBalanceAlert('balanceAlertBottom', saldo, sym_b, advance);
+  // ── Balance alerts ──
+  setAlert('balanceAlert', saldo, sym, adv);
+  setAlert('balanceAlertBottom', saldo, sym, adv);
 
-  // Detailed summary
-  document.getElementById('r_adelanto').textContent  = sym_b + fmt(advance);
-  document.getElementById('r_gastos').textContent    = sym_b + fmt(sumBase);
-  const rsaldo = document.getElementById('r_saldo');
-  rsaldo.textContent = sym_b + fmt(Math.abs(saldo));
-  rsaldo.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
-  document.getElementById('r_negociado').textContent = sym_b + fmt(totalNeg);
+  // ── Flow table ──
+  document.getElementById('r_adelanto').textContent  = sym + fmt(adv);
+  document.getElementById('r_gastos').textContent    = sym + fmt(totalBase);
+  const rSaldo = document.getElementById('r_saldo');
+  rSaldo.textContent  = sym + fmt(Math.abs(saldo));
+  rSaldo.style.color  = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
+  document.getElementById('r_negociado').textContent = sym + fmt(totalNeg);
 
-  // Days of travel
   const ds = document.getElementById('dateStart').value;
   const de = document.getElementById('dateEnd').value;
-  let dias = '—';
-  let avg = 0;
+  let dias = '—', avg = 0;
   if (ds && de) {
-    const diff = (new Date(de) - new Date(ds)) / 86400000;
-    dias = diff >= 0 ? diff + (diff === 1 ? ' día' : ' días') : '—';
-    if (diff > 0) avg = sumBase / diff;
+    const d = (new Date(de) - new Date(ds)) / 86400000;
+    if (d >= 0) { dias = d + (d === 1 ? ' día' : ' días'); if (d > 0) avg = totalBase / d; }
   }
   document.getElementById('r_dias').textContent    = dias;
-  document.getElementById('r_promedio').textContent = sym_b + fmt(avg);
+  document.getElementById('r_promedio').textContent = sym + fmt(avg);
 
-  // Category breakdown
-  buildCategoryBreakdown(sym_b, sym_l, rate, sumBase);
+  // ── Category breakdown ──
+  const catTbody = document.getElementById('catBody');
+  catTbody.innerHTML = '';
+  Object.entries(catMap).sort((a,b) => b[1]-a[1]).forEach(([cat, val]) => {
+    const pct = totalBase > 0 ? (val/totalBase*100).toFixed(1) : '0.0';
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td>${cat}</td>
+      <td class="td-total">${sym}${fmt(val)}</td>
+      <td>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <div class="progress-wrap" style="flex:1;height:7px;">
+            <div class="progress-bar" style="width:${pct}%;background:var(--accent);"></div>
+          </div>
+          <span style="font-size:.72rem;width:38px;">${pct}%</span>
+        </div>
+      </td>`;
+    catTbody.appendChild(tr);
+  });
+  if (!Object.keys(catMap).length)
+    catTbody.innerHTML = '<tr><td colspan="3" style="color:#aaa;text-align:center;">Sin gastos.</td></tr>';
 
-  // Signature name
-  const n = document.getElementById('travelerName').value;
-  document.getElementById('sigName').textContent = n || '___________________';
+  // ── Currency breakdown chips ──
+  const cbDiv = document.getElementById('currencyBreakdown');
+  cbDiv.innerHTML = '';
+  Object.entries(curMap).forEach(([cur, vals]) => {
+    const chip = document.createElement('div');
+    chip.className = 'rate-chip';
+    chip.style.minWidth = '110px';
+    chip.innerHTML = `
+      <span class="rc-code">${cur}</span>
+      <span class="rc-val">${(SYMBOLS[cur]||cur)}${fmt(vals.local)}</span>
+      <span class="rc-val" style="color:#2e86c1;">${sym}${fmt(vals.base)} ${base}</span>`;
+    cbDiv.appendChild(chip);
+  });
+  if (!Object.keys(curMap).length)
+    cbDiv.innerHTML = '<span style="color:#aaa;font-size:.8rem;">Sin gastos registrados.</span>';
 
-  // Status badge
+  // ── Signature & status ──
+  document.getElementById('sigName').textContent =
+    document.getElementById('travelerName').value || '___________________';
+
   const statusEl = document.getElementById('statusBadge');
   if (ds && de) {
     const now = new Date().toISOString().slice(0,10);
-    if (now < ds)       { statusEl.textContent = 'PROGRAMADO'; }
-    else if (now > de)  { statusEl.textContent = 'FINALIZADO'; }
-    else                { statusEl.textContent = 'EN CURSO'; }
+    statusEl.textContent = now < ds ? 'PROGRAMADO' : now > de ? 'FINALIZADO' : 'EN CURSO';
   }
+
+  // Update rates panel if open
+  if (ratesLoaded) renderRatesPanel();
 }
 
-function setBalanceAlert(id, saldo, sym, advance) {
+function setAlert(id, saldo, sym, adv) {
   const el = document.getElementById(id);
-  if (advance === 0) {
+  if (adv === 0) {
     el.className = 'balance-box balance-zero';
-    el.innerHTML = '&#128269; Sin adelanto configurado. Ingrese el adelanto recibido para ver el saldo.';
+    el.innerHTML = '&#128269; Sin adelanto configurado. Ingrese el monto recibido.';
     return;
   }
   if (saldo > 0) {
@@ -826,78 +861,59 @@ function setBalanceAlert(id, saldo, sym, advance) {
     el.innerHTML = `&#9989; Saldo a favor: <strong>${sym}${fmt(saldo)}</strong> — El viajero debe devolver este monto.`;
   } else if (saldo < 0) {
     el.className = 'balance-box balance-negative';
-    el.innerHTML = `&#9888;&#65039; Gastos exceden el adelanto por: <strong>${sym}${fmt(-saldo)}</strong> — La empresa debe reembolsar este monto.`;
+    el.innerHTML = `&#9888;&#65039; Gastos exceden el adelanto por: <strong>${sym}${fmt(-saldo)}</strong> — La empresa debe reembolsar.`;
   } else {
     el.className = 'balance-box balance-zero';
     el.innerHTML = '&#9889; El adelanto cubre exactamente los gastos. Saldo: $0.00';
   }
 }
 
-function buildCategoryBreakdown(sym_b, sym_l, rate, total) {
-  const map = {};
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+function refreshAll() { recalcAll(); }
+
+function fmt(n, dec = 2) {
+  return (isNaN(n) ? 0 : n).toLocaleString('es-MX', {
+    minimumFractionDigits: dec, maximumFractionDigits: dec
+  });
+}
+function fmtRate(n) {
+  if (n >= 100)  return n.toLocaleString('es-MX', { maximumFractionDigits: 2 });
+  if (n >= 1)    return n.toLocaleString('es-MX', { maximumFractionDigits: 4 });
+  return n.toLocaleString('es-MX', { maximumFractionDigits: 6 });
+}
+
+// ═══════════════════════════════════════════════════
+//  SAVE / LOAD / CLEAR
+// ═══════════════════════════════════════════════════
+function saveData() {
+  const expenses = [];
   document.querySelectorAll('#expensesBody tr').forEach(tr => {
-    const sel = tr.querySelector('select');
-    const inp = tr.querySelector('.amt-local');
-    if (!sel || !inp) return;
-    const cat = sel.value || 'Sin categoría';
-    const v   = parseFloat(inp.value) || 0;
-    if (!map[cat]) map[cat] = { local: 0, base: 0 };
-    map[cat].local += v;
-    map[cat].base  += v / rate;
+    const inputs  = tr.querySelectorAll('input');
+    const selects = tr.querySelectorAll('select');
+    if (inputs.length < 2) return;
+    expenses.push({
+      date:    inputs[0].value,
+      cat:     selects[0]?.value,
+      desc:    inputs[1].value,
+      cur:     selects[1]?.value,
+      amt:     inputs[2]?.value,
+      voucher: selects[2]?.value,
+    });
   });
-
-  const tbody = document.getElementById('catBody');
-  tbody.innerHTML = '';
-  const entries = Object.entries(map).sort((a,b) => b[1].base - a[1].base);
-  entries.forEach(([cat, vals]) => {
-    const pct = total > 0 ? (vals.base / total * 100).toFixed(1) : '0.0';
-    const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${cat}</td>
-      <td>${sym_l}${fmt(vals.local)}</td>
-      <td class="td-total">${sym_b}${fmt(vals.base)}</td>
-      <td>
-        <div style="display:flex;align-items:center;gap:6px;">
-          <div class="progress-wrap" style="flex:1;height:7px;">
-            <div class="progress-bar" style="width:${pct}%;background:var(--accent);"></div>
-          </div>
-          <span style="font-size:.72rem;width:36px;">${pct}%</span>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
+  const clients = [];
+  document.querySelectorAll('#clientsBody tr').forEach(tr => {
+    const inputs  = tr.querySelectorAll('input');
+    const selects = tr.querySelectorAll('select');
+    if (!inputs.length) return;
+    clients.push({
+      name: inputs[0].value, city: inputs[1].value, contact: inputs[2].value,
+      type: selects[0]?.value, cur: selects[1]?.value, amt: inputs[3]?.value,
+      status: selects[2]?.value, notes: inputs[4]?.value,
+    });
   });
-
-  if (!entries.length) {
-    tbody.innerHTML = '<tr><td colspan="4" style="color:#aaa;text-align:center;">Sin gastos registrados.</td></tr>';
-  }
-}
-
-// ─────────────────────────────────────────
-// AUTO-SUGGEST CURRENCY
-// ─────────────────────────────────────────
-const COUNTRY_CURRENCY = {
-  'méxico':'MXN','mexico':'MXN','colombia':'COP','argentina':'ARS',
-  'brasil':'BRL','brazil':'BRL','chile':'CLP','peru':'PEN','perú':'PEN',
-  'venezuela':'VES','guatemala':'GTQ','honduras':'HNL','costa rica':'CRC',
-  'republica dominicana':'DOP','república dominicana':'DOP','bolivia':'BOB',
-  'paraguay':'PYG','uruguay':'UYU','estados unidos':'USD','usa':'USD',
-  'reino unido':'GBP','españa':'EUR','alemania':'EUR','france':'EUR',
-  'canada':'CAD','canadá':'CAD','japon':'JPY','japón':'JPY','china':'CNY',
-};
-function suggestCurrency() {
-  const c = document.getElementById('destCountry').value.toLowerCase().trim();
-  if (COUNTRY_CURRENCY[c]) {
-    document.getElementById('localCurrency').value = COUNTRY_CURRENCY[c];
-    refreshAll();
-  }
-}
-
-// ─────────────────────────────────────────
-// SAVE / LOAD / CLEAR
-// ─────────────────────────────────────────
-function saveToLocalStorage() {
-  const data = {
+  const d = {
     travelerName: document.getElementById('travelerName').value,
     travelerRole: document.getElementById('travelerRole').value,
     company:      document.getElementById('company').value,
@@ -907,130 +923,60 @@ function saveToLocalStorage() {
     dateEnd:      document.getElementById('dateEnd').value,
     tripPurpose:  document.getElementById('tripPurpose').value,
     baseCurrency: document.getElementById('baseCurrency').value,
-    localCurrency:document.getElementById('localCurrency').value,
-    exchangeRate: document.getElementById('exchangeRate').value,
     advance:      document.getElementById('advance').value,
     mgmtNotes:    document.getElementById('mgmtNotes').value,
-    expenses: collectExpenses(),
-    clients:  collectClients(),
+    rates, expenses, clients,
   };
-  localStorage.setItem('travelReport_v1', JSON.stringify(data));
-  alert('✅ Borrador guardado localmente en este navegador.');
+  localStorage.setItem('travelReport_v2', JSON.stringify(d));
+  alert('✅ Borrador guardado en el navegador.');
 }
 
-function collectExpenses() {
-  const rows = [];
-  document.querySelectorAll('#expensesBody tr').forEach(tr => {
-    const inputs  = tr.querySelectorAll('input');
-    const selects = tr.querySelectorAll('select');
-    if (inputs.length < 2) return;
-    rows.push({
-      date:    inputs[0].value,
-      cat:     selects[0] ? selects[0].value : '',
-      desc:    inputs[1].value,
-      amt:     inputs[2] ? inputs[2].value : '',
-      voucher: selects[1] ? selects[1].value : '',
-    });
-  });
-  return rows;
-}
-
-function collectClients() {
-  const rows = [];
-  document.querySelectorAll('#clientsBody tr').forEach(tr => {
-    const inputs  = tr.querySelectorAll('input');
-    const selects = tr.querySelectorAll('select');
-    if (!inputs.length) return;
-    rows.push({
-      name:   inputs[0].value,
-      city:   inputs[1].value,
-      contact:inputs[2].value,
-      type:   selects[0] ? selects[0].value : '',
-      amt:    inputs[3] ? inputs[3].value : '',
-      status: selects[1] ? selects[1].value : '',
-      notes:  inputs[4] ? inputs[4].value : '',
-    });
-  });
-  return rows;
-}
-
-function loadFromLocalStorage() {
-  const raw = localStorage.getItem('travelReport_v1');
+function loadData() {
+  const raw = localStorage.getItem('travelReport_v2');
   if (!raw) { alert('No hay borrador guardado.'); return; }
-  const data = JSON.parse(raw);
+  const d = JSON.parse(raw);
 
-  document.getElementById('travelerName').value  = data.travelerName || '';
-  document.getElementById('travelerRole').value  = data.travelerRole || '';
-  document.getElementById('company').value       = data.company || '';
-  document.getElementById('destCountry').value   = data.destCountry || '';
-  document.getElementById('destCity').value      = data.destCity || '';
-  document.getElementById('dateStart').value     = data.dateStart || '';
-  document.getElementById('dateEnd').value       = data.dateEnd || '';
-  document.getElementById('tripPurpose').value   = data.tripPurpose || '';
-  document.getElementById('baseCurrency').value  = data.baseCurrency || 'USD';
-  document.getElementById('localCurrency').value = data.localCurrency || 'USD';
-  document.getElementById('exchangeRate').value  = data.exchangeRate || '1';
-  document.getElementById('advance').value       = data.advance || '0';
-  document.getElementById('mgmtNotes').value     = data.mgmtNotes || '';
+  ['travelerName','company','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
+    .forEach(id => { document.getElementById(id).value = d[id] || ''; });
+  document.getElementById('travelerRole').value  = d.travelerRole  || '';
+  document.getElementById('baseCurrency').value  = d.baseCurrency  || 'USD';
+  document.getElementById('advance').value       = d.advance       || '0';
+
+  if (d.rates) { rates = d.rates; ratesLoaded = true; renderRatesPanel(); }
 
   document.getElementById('expensesBody').innerHTML = '';
   expRowId = 0;
-  (data.expenses || []).forEach(e => addExpenseRow(e.date, e.cat, e.desc, e.amt));
+  (d.expenses || []).forEach(e => addExpenseRow(e.date, e.cat, e.desc, e.cur, e.amt, e.voucher));
 
   document.getElementById('clientsBody').innerHTML = '';
   cliRowId = 0;
-  (data.clients || []).forEach(c => {
-    addClientRow();
-    const last = document.querySelector('#clientsBody tr:last-child');
-    const inputs  = last.querySelectorAll('input');
-    const selects = last.querySelectorAll('select');
-    if (inputs[0]) inputs[0].value = c.name    || '';
-    if (inputs[1]) inputs[1].value = c.city    || '';
-    if (inputs[2]) inputs[2].value = c.contact || '';
-    if (selects[0]) selects[0].value = c.type  || '';
-    if (inputs[3]) inputs[3].value = c.amt     || '';
-    if (selects[1]) selects[1].value = c.status || '';
-    if (inputs[4]) inputs[4].value = c.notes   || '';
-  });
+  (d.clients || []).forEach(c => addClientRow(c.name, c.city, c.contact, c.type, c.cur, c.amt, c.status, c.notes));
 
-  recalcExpenses();
-  recalcClients();
-  alert('✅ Borrador cargado correctamente.');
+  recalcAll();
+  alert('✅ Borrador cargado.');
 }
 
 function clearAll() {
-  if (!confirm('¿Limpiar todo el reporte? Esta acción no se puede deshacer.')) return;
+  if (!confirm('¿Limpiar todo el reporte?')) return;
   document.getElementById('expensesBody').innerHTML = '';
   document.getElementById('clientsBody').innerHTML  = '';
   expRowId = 0; cliRowId = 0;
   ['travelerName','company','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
     .forEach(id => { document.getElementById(id).value = ''; });
   document.getElementById('advance').value = '0';
-  document.getElementById('exchangeRate').value = '1';
-  recalcExpenses();
-  recalcClients();
+  recalcAll();
 }
 
-// ─────────────────────────────────────────
-// FORMAT NUMBER
-// ─────────────────────────────────────────
-function fmt(n, decimals=2) {
-  return (isNaN(n) ? 0 : n).toLocaleString('es-MX', {
-    minimumFractionDigits: decimals,
-    maximumFractionDigits: decimals
-  });
-}
-
-// ─────────────────────────────────────────
-// INIT — seed with 3 blank rows
-// ─────────────────────────────────────────
+// ═══════════════════════════════════════════════════
+//  INIT
+// ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  addExpenseRow();
-  addExpenseRow();
-  addExpenseRow();
-  addClientRow();
-  addClientRow();
-  refreshAll();
+  populateBaseSelect();
+  addExpenseRow(); addExpenseRow(); addExpenseRow();
+  addClientRow();  addClientRow();
+  recalcAll();
+  // Auto-fetch rates on load
+  fetchRates();
 });
 </script>
 </body>

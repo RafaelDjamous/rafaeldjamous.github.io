@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Reporte de Viaje - Vendedor / Comprador</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>Reporte de Viaje</title>
   <style>
     :root {
       --primary: #1a3a5c;
@@ -15,152 +15,240 @@
       --border:  #d5d8dc;
       --text:    #212529;
       --white:   #ffffff;
+      --touch:   44px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); font-size: 14px; }
+    body { font-family: 'Segoe UI', Arial, sans-serif; background: var(--light); color: var(--text); font-size: 15px; }
 
+    /* ── Header ── */
     .page-header {
       background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      color: var(--white); padding: 28px 40px;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;
+      color: var(--white); padding: 20px 20px;
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
     }
-    .page-header h1 { font-size: 1.6rem; font-weight: 700; letter-spacing: .5px; }
-    .page-header p  { font-size: .85rem; opacity: .85; margin-top: 4px; }
+    .page-header h1 { font-size: 1.35rem; font-weight: 700; }
+    .page-header p  { font-size: .82rem; opacity: .85; margin-top: 3px; }
     .badge-status {
       background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
-      border-radius: 20px; padding: 6px 16px; font-size: .8rem; font-weight: 600; white-space: nowrap;
+      border-radius: 20px; padding: 6px 14px; font-size: .78rem; font-weight: 600; white-space: nowrap;
     }
 
-    .container { max-width: 1150px; margin: 0 auto; padding: 28px 20px 60px; }
-    section { margin-bottom: 32px; }
+    /* ── Layout ── */
+    .container { max-width: 1150px; margin: 0 auto; padding: 16px 12px 60px; }
+    section { margin-bottom: 24px; }
 
-    .card { background: var(--white); border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,.07); overflow: hidden; }
+    .card { background: var(--white); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.07); overflow: hidden; }
     .card-header {
-      background: var(--primary); color: var(--white); padding: 12px 20px;
-      font-weight: 600; font-size: .95rem; display: flex; align-items: center; gap: 8px;
+      background: var(--primary); color: var(--white); padding: 13px 18px;
+      font-weight: 600; font-size: .92rem; display: flex; align-items: center; gap: 8px;
     }
-    .card-body { padding: 20px; }
+    .card-body { padding: 16px; }
 
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
-    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; }
-    @media(max-width:720px){ .grid-2,.grid-3,.grid-4 { grid-template-columns:1fr; } }
+    /* ── Grids ── */
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; }
 
-    .field { display: flex; flex-direction: column; gap: 4px; }
-    .field label { font-size: .78rem; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: .4px; }
+    /* ── Fields ── */
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: .76rem; font-weight: 700; color: #555; text-transform: uppercase; letter-spacing: .4px; }
     .field input, .field select, .field textarea {
-      border: 1px solid var(--border); border-radius: 6px; padding: 8px 10px;
-      font-size: .9rem; color: var(--text); transition: border .2s; background: #fff;
+      border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 12px;
+      font-size: 1rem; color: var(--text); transition: border .2s; background: #fff; width: 100%;
+      min-height: var(--touch);
     }
     .field input:focus, .field select:focus, .field textarea:focus {
-      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,134,193,.12);
+      outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(46,134,193,.15);
     }
-    .field textarea { resize: vertical; min-height: 60px; }
+    .field textarea { resize: vertical; min-height: 72px; }
 
-    /* ── Stat cards ── */
-    .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 8px; }
-    @media(max-width:720px){ .summary-grid { grid-template-columns:1fr 1fr; } }
-    .stat-card { border-radius: 10px; padding: 18px 16px; display: flex; flex-direction: column; gap: 4px; }
-    .stat-card .stat-label { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
-    .stat-card .stat-value { font-size: 1.5rem; font-weight: 700; }
-    .stat-card .stat-sub   { font-size: .78rem; opacity: .8; }
+    /* ── Summary cards ── */
+    .summary-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin-bottom: 8px; }
+    .stat-card { border-radius: 10px; padding: 14px 12px; display: flex; flex-direction: column; gap: 3px; }
+    .stat-card .stat-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
+    .stat-card .stat-value { font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
+    .stat-card .stat-sub   { font-size: .72rem; opacity: .8; }
     .stat-blue   { background: #eaf2fb; color: var(--primary); }
     .stat-green  { background: #eafaf1; color: var(--success); }
     .stat-red    { background: #fdedec; color: var(--danger); }
     .stat-orange { background: #fef9e7; color: var(--warn); }
 
-    /* ── Tables ── */
-    .table-wrap { overflow-x: auto; }
-    table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    thead tr { background: #eef2f7; }
-    th { padding: 10px 12px; text-align: left; font-weight: 600; color: #555; white-space: nowrap; border-bottom: 2px solid var(--border); }
-    td { padding: 8px 10px; border-bottom: 1px solid #eee; vertical-align: middle; }
-    tr:last-child td { border-bottom: none; }
-    tr:hover td { background: #f8fafc; }
-    td input, td select {
-      border: 1px solid var(--border); border-radius: 5px; padding: 5px 8px;
-      font-size: .82rem; width: 100%; background: #fff;
+    /* ── Desktop table ── */
+    .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    table.desktop-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    table.desktop-table thead tr { background: #eef2f7; }
+    table.desktop-table th { padding: 10px 10px; text-align: left; font-weight: 600; color: #555; white-space: nowrap; border-bottom: 2px solid var(--border); }
+    table.desktop-table td { padding: 7px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
+    table.desktop-table tr:last-child td { border-bottom: none; }
+    table.desktop-table tr:hover td { background: #f8fafc; }
+    table.desktop-table td input,
+    table.desktop-table td select {
+      border: 1.5px solid var(--border); border-radius: 6px; padding: 6px 8px;
+      font-size: .82rem; width: 100%; background: #fff; min-height: 36px;
     }
-    td input:focus, td select:focus { outline: none; border-color: var(--accent); }
+    table.desktop-table td input:focus,
+    table.desktop-table td select:focus { outline: none; border-color: var(--accent); }
     .td-total { font-weight: 700; color: var(--primary); }
     .totals-row td { background: #eef2f7 !important; font-weight: 700; color: var(--primary); border-top: 2px solid var(--border); }
 
+    /* ── Mobile expense cards ── */
+    .mobile-cards { display: none; }
+    .m-card {
+      background: #fff; border: 1.5px solid var(--border); border-radius: 10px;
+      margin-bottom: 10px; overflow: hidden;
+    }
+    .m-card-header {
+      background: #eef2f7; padding: 8px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: .78rem; font-weight: 700; color: var(--primary);
+    }
+    .m-card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
+    .m-field { display: flex; flex-direction: column; gap: 4px; }
+    .m-field label { font-size: .72rem; font-weight: 700; color: #777; text-transform: uppercase; letter-spacing: .3px; }
+    .m-field input, .m-field select {
+      border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 12px;
+      font-size: 1rem; width: 100%; background: #fff; min-height: var(--touch);
+    }
+    .m-field input:focus, .m-field select:focus { outline: none; border-color: var(--accent); }
+    .m-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .m-base-display {
+      background: #eaf2fb; border-radius: 8px; padding: 10px 12px;
+      font-size: .9rem; font-weight: 700; color: var(--primary); text-align: center;
+    }
+
     /* ── Buttons ── */
     .btn {
-      display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px;
-      border: none; border-radius: 6px; cursor: pointer; font-size: .85rem;
-      font-weight: 600; transition: opacity .15s, transform .1s;
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 11px 18px; border: none; border-radius: 8px; cursor: pointer;
+      font-size: .9rem; font-weight: 600; transition: opacity .15s, transform .1s;
+      min-height: var(--touch); touch-action: manipulation;
     }
-    .btn:hover { opacity: .88; transform: translateY(-1px); }
-    .btn:active { transform: translateY(0); }
+    .btn:active { transform: scale(.97); }
     .btn-primary { background: var(--accent);  color: #fff; }
     .btn-success { background: var(--success); color: #fff; }
-    .btn-danger  { background: var(--danger);  color: #fff; padding: 4px 10px; font-size: .78rem; }
+    .btn-danger  { background: var(--danger);  color: #fff; }
     .btn-outline { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
-    .btn-warn    { background: var(--warn); color: #fff; }
-    .btn-teal    { background: #148f77; color: #fff; }
+    .btn-warn    { background: var(--warn);    color: #fff; }
+    .btn-teal    { background: #148f77;        color: #fff; }
+    .btn-sm      { padding: 6px 12px; font-size: .8rem; min-height: 32px; border-radius: 6px; }
     .btn-row     { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
     /* ── Rates panel ── */
     .rates-panel {
-      background: #f0f8ff; border: 1px solid #b3d4f0; border-radius: 8px;
-      padding: 14px 16px; margin-top: 16px;
+      background: #f0f8ff; border: 1px solid #b3d4f0; border-radius: 8px; padding: 14px 14px; margin-top: 14px;
     }
-    .rates-panel .rates-header {
-      display: flex; justify-content: space-between; align-items: center;
-      margin-bottom: 10px; flex-wrap: wrap; gap: 8px;
-    }
-    .rates-panel h4 { font-size: .85rem; color: var(--primary); font-weight: 700; }
+    .rates-panel h4 { font-size: .82rem; color: var(--primary); font-weight: 700; margin-bottom: 10px; }
     .rates-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .rate-chip {
       background: #fff; border: 1px solid #c8e0f5; border-radius: 8px;
       padding: 6px 12px; font-size: .78rem; color: #1a3a5c;
-      display: flex; flex-direction: column; align-items: center; min-width: 80px;
+      display: flex; flex-direction: column; align-items: center; min-width: 72px;
     }
-    .rate-chip .rc-code { font-weight: 700; font-size: .8rem; }
-    .rate-chip .rc-val  { color: #555; font-size: .73rem; }
-    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; }
+    .rate-chip .rc-code { font-weight: 700; font-size: .78rem; }
+    .rate-chip .rc-val  { color: #555; font-size: .7rem; }
+    .status-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 4px; }
     .dot-green  { background: #27ae60; }
     .dot-red    { background: #e74c3c; }
     .dot-gray   { background: #aaa; }
 
-    /* ── Manual rate row ── */
-    .manual-rate-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
-    .manual-rate-row input, .manual-rate-row select { max-width: 130px; }
-
-    /* ── Balance ── */
+    /* ── Balance alert ── */
     .balance-box {
-      border-radius: 8px; padding: 14px 18px; font-size: 1rem; font-weight: 600;
-      margin-top: 16px; display: flex; align-items: center; gap: 10px;
+      border-radius: 10px; padding: 14px 16px; font-size: .92rem; font-weight: 600;
+      margin-top: 12px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4;
     }
     .balance-positive { background: #eafaf1; color: var(--success); border-left: 4px solid var(--success); }
     .balance-negative { background: #fdedec; color: var(--danger);  border-left: 4px solid var(--danger); }
     .balance-zero     { background: #eef2f7; color: var(--primary); border-left: 4px solid var(--accent); }
 
+    /* ── Progress ── */
     .progress-wrap { background: #e9ecef; border-radius: 20px; height: 10px; overflow: hidden; margin-top: 6px; }
     .progress-bar  { height: 100%; border-radius: 20px; transition: width .4s; }
 
-    hr.section-sep { border: none; border-top: 2px dashed var(--border); margin: 8px 0 18px; }
-    .note { font-size: .78rem; color: #888; margin-top: 6px; }
+    /* ── Manual rate ── */
+    .manual-rate-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+    .manual-rate-row input, .manual-rate-row select {
+      border: 1.5px solid var(--border); border-radius: 8px; padding: 10px 10px;
+      font-size: .9rem; min-height: var(--touch);
+    }
 
-    /* ── Currency tag in row ── */
-    select.cur-sel { max-width: 80px !important; font-weight: 700; color: var(--primary); }
+    hr.sep { border: none; border-top: 2px dashed var(--border); margin: 8px 0 16px; }
+    .note { font-size: .76rem; color: #888; margin-top: 8px; line-height: 1.4; }
+    select.cur-sel { font-weight: 700; color: var(--primary); }
 
+    /* ── Currency breakdown chips ── */
+    .cur-chip {
+      background: #fff; border: 1px solid #c8e0f5; border-radius: 10px;
+      padding: 10px 14px; min-width: 110px; text-align: center;
+    }
+    .cur-chip .cc-code { font-size: .85rem; font-weight: 700; color: var(--primary); }
+    .cur-chip .cc-local { font-size: .8rem; color: #333; }
+    .cur-chip .cc-base  { font-size: .75rem; color: var(--accent); }
+
+    /* ── Print ── */
     @media print {
-      body { background: #fff; }
+      body { background: #fff; font-size: 12px; }
       .page-header, thead tr { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
       .card { box-shadow: none; border: 1px solid #ccc; }
       .no-print { display: none !important; }
-      .btn-row  { display: none; }
+      .btn-row  { display: none !important; }
+      .mobile-cards { display: none !important; }
+      .desktop-only { display: block !important; }
+    }
+
+    /* ═══════════════════════════════
+       MOBILE  ≤ 700px
+    ═══════════════════════════════ */
+    @media (max-width: 700px) {
+      .container { padding: 12px 10px 80px; }
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; }
+      .summary-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+      .stat-card .stat-value { font-size: 1.1rem; }
+
+      /* Tables → hide on mobile, show cards */
+      .desktop-table-wrap { display: none; }
+      .mobile-cards { display: block; }
+
+      /* Totals strip stays visible */
+      .totals-strip {
+        background: #eef2f7; border-radius: 8px; padding: 12px 14px;
+        display: flex; justify-content: space-between; align-items: center;
+        font-weight: 700; color: var(--primary); margin-top: 4px; font-size: .9rem;
+      }
+
+      .btn { width: 100%; justify-content: center; }
+      .btn-row { flex-direction: column; }
+      .btn-row .btn { width: 100%; }
+
+      /* Keep small delete button compact */
+      .btn-del { width: auto !important; padding: 8px 14px; }
+
+      .rates-grid { gap: 6px; }
+      .rate-chip  { min-width: 64px; padding: 5px 8px; }
+
+      .manual-rate-row { flex-direction: column; align-items: stretch; }
+      .manual-rate-row input,
+      .manual-rate-row select { max-width: 100%; width: 100%; }
+
+      .m-row-2 { grid-template-columns: 1fr 1fr; }
+
+      .grid-2.sig-grid { grid-template-columns: 1fr; }
+      .sig-block { margin-bottom: 20px; }
+    }
+
+    @media (min-width: 701px) {
+      .desktop-table-wrap { display: block; }
+      .mobile-cards { display: none; }
+      .totals-strip { display: none; }
     }
   </style>
 </head>
 <body>
 
+<!-- ═══ HEADER ═══ -->
 <div class="page-header">
   <div>
-    <h1>&#9992;&#65039; Reporte de Viaje</h1>
-    <p>Gestión de gastos multi-moneda, clientes y cambio en tiempo real &mdash; Para Gerencia</p>
+    <h1>✈️ Reporte de Viaje</h1>
+    <p>Gestión de gastos multi-moneda, clientes y tasas en tiempo real</p>
   </div>
   <div class="badge-status" id="statusBadge">EN CURSO</div>
 </div>
@@ -171,40 +259,40 @@
   <section>
     <div class="summary-grid">
       <div class="stat-card stat-blue">
-        <span class="stat-label">&#128200; Total Gastado</span>
+        <span class="stat-label">💰 Total Gastado</span>
         <span class="stat-value" id="sumTotalGastado">$0.00</span>
-        <span class="stat-sub" id="sumTotalSub">en moneda base</span>
+        <span class="stat-sub" id="sumTotalSub">moneda base</span>
       </div>
       <div class="stat-card stat-orange">
-        <span class="stat-label">&#128181; Adelanto Recibido</span>
+        <span class="stat-label">💵 Adelanto</span>
         <span class="stat-value" id="sumAdelanto">$0.00</span>
-        <span class="stat-sub" id="sumAdelantoSub">moneda base</span>
+        <span class="stat-sub" id="sumAdelantoSub">recibido</span>
       </div>
       <div class="stat-card stat-green">
-        <span class="stat-label">&#9989; Saldo a Favor</span>
+        <span class="stat-label">✅ A Devolver</span>
         <span class="stat-value" id="sumFavor">$0.00</span>
-        <span class="stat-sub">Adelanto &minus; Gastos</span>
+        <span class="stat-sub">adelanto − gastos</span>
       </div>
       <div class="stat-card stat-red">
-        <span class="stat-label">&#9888;&#65039; Por Reembolsar</span>
+        <span class="stat-label">⚠️ Reembolso</span>
         <span class="stat-value" id="sumReembolso">$0.00</span>
-        <span class="stat-sub">Gastos &minus; Adelanto</span>
+        <span class="stat-sub">gastos − adelanto</span>
       </div>
     </div>
     <div class="balance-box balance-zero" id="balanceAlert">
-      &#128269; Complete la información para ver el resumen.
+      🔍 Complete la información para ver el resumen.
     </div>
   </section>
 
   <!-- ═══ 1. INFORMACIÓN BÁSICA ═══ -->
   <section>
     <div class="card">
-      <div class="card-header">&#128203; 1. Información Básica del Viaje</div>
+      <div class="card-header">📋 1. Información Básica del Viaje</div>
       <div class="card-body">
         <div class="grid-3" style="margin-bottom:14px;">
           <div class="field">
             <label>Nombre del Viajero</label>
-            <input type="text" id="travelerName" placeholder="Ej. Juan Pérez" oninput="refreshAll()" />
+            <input type="text" id="travelerName" placeholder="Juan Pérez" oninput="refreshAll()" />
           </div>
           <div class="field">
             <label>Cargo / Rol</label>
@@ -217,31 +305,31 @@
           </div>
           <div class="field">
             <label>Empresa / Departamento</label>
-            <input type="text" id="company" placeholder="Ej. Empresa S.A." />
+            <input type="text" id="company" placeholder="Empresa S.A." />
           </div>
         </div>
         <div class="grid-4">
           <div class="field">
             <label>País de Destino</label>
-            <input type="text" id="destCountry" placeholder="Ej. México" />
+            <input type="text" id="destCountry" placeholder="México" />
           </div>
           <div class="field">
-            <label>Ciudad de Destino</label>
-            <input type="text" id="destCity" placeholder="Ej. Ciudad de México" />
+            <label>Ciudad</label>
+            <input type="text" id="destCity" placeholder="Ciudad de México" />
           </div>
           <div class="field">
-            <label>Fecha de Salida</label>
+            <label>Fecha Salida</label>
             <input type="date" id="dateStart" onchange="refreshAll()" />
           </div>
           <div class="field">
-            <label>Fecha de Regreso</label>
+            <label>Fecha Regreso</label>
             <input type="date" id="dateEnd" onchange="refreshAll()" />
           </div>
         </div>
         <div style="margin-top:14px;">
           <div class="field">
             <label>Objetivo del Viaje</label>
-            <textarea id="tripPurpose" placeholder="Describe el propósito del viaje, metas comerciales, etc."></textarea>
+            <textarea id="tripPurpose" placeholder="Describe el propósito, metas comerciales, etc."></textarea>
           </div>
         </div>
       </div>
@@ -251,64 +339,56 @@
   <!-- ═══ 2. MONEDA Y TASAS ═══ -->
   <section>
     <div class="card">
-      <div class="card-header">&#128176; 2. Moneda Base, Tasas en Vivo y Adelanto</div>
+      <div class="card-header">💱 2. Moneda Base, Tasas en Vivo y Adelanto</div>
       <div class="card-body">
-        <div class="grid-4">
+        <div class="grid-2">
           <div class="field">
             <label>Moneda Base (tu moneda de reporte)</label>
-            <select id="baseCurrency" onchange="refreshAll()">
-              <!-- populated by JS -->
-            </select>
+            <select id="baseCurrency" onchange="refreshAll()"></select>
           </div>
           <div class="field">
             <label>Adelanto Recibido (en moneda base)</label>
             <input type="number" id="advance" value="0" min="0" step="any" oninput="refreshAll()" />
           </div>
-          <div class="field" style="grid-column: span 2;">
-            <label>Estado de Tasas</label>
-            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:4px;">
-              <span id="ratesStatus" style="font-size:.82rem;">
-                <span class="status-dot dot-gray"></span>Sin cargar
-              </span>
-              <button class="btn btn-teal no-print" onclick="fetchRates()" style="padding:6px 14px;font-size:.8rem;">
-                &#8635; Actualizar tasas en vivo
-              </button>
-              <span id="ratesTime" style="font-size:.75rem;color:#888;"></span>
-            </div>
-          </div>
         </div>
 
-        <!-- Live rates display -->
+        <!-- Rates status + button -->
+        <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+          <span id="ratesStatus" style="font-size:.85rem;">
+            <span class="status-dot dot-gray"></span>Sin cargar
+          </span>
+          <button class="btn btn-teal no-print" onclick="fetchRates()" style="padding:10px 18px;">
+            🔄 Actualizar tasas en vivo
+          </button>
+          <span id="ratesTime" style="font-size:.75rem;color:#888;"></span>
+        </div>
+
+        <!-- Live rates chips -->
         <div class="rates-panel" id="ratesPanel" style="display:none;">
-          <div class="rates-header">
-            <h4>&#127758; Tasas de cambio en tiempo real (relativas a 1 <span id="baseLabel">USD</span>)</h4>
-            <span style="font-size:.75rem;color:#777;">Fuente: frankfurter.app</span>
-          </div>
-          <div class="rates-grid" id="ratesGrid"><!-- chips --></div>
+          <h4>🌍 Tasas en tiempo real (1 <span id="baseLabel">USD</span> equivale a…)</h4>
+          <div class="rates-grid" id="ratesGrid"></div>
+          <p style="font-size:.7rem;color:#888;margin-top:8px;">Fuente: frankfurter.app</p>
         </div>
 
-        <!-- Manual rate override for currencies not in API (e.g. VES) -->
+        <!-- Manual rate -->
         <div style="margin-top:14px;">
-          <p style="font-size:.8rem;font-weight:600;color:#555;margin-bottom:6px;">
-            &#128295; Agregar / corregir tasa manual (para monedas no disponibles en la API):
+          <p style="font-size:.8rem;font-weight:700;color:#555;margin-bottom:6px;">
+            🔧 Agregar / corregir tasa manual (ej. VES, otras):
           </p>
           <div class="manual-rate-row">
-            <select id="manualCur" style="max-width:160px;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:.85rem;">
-              <!-- populated by JS -->
-            </select>
-            <span style="font-size:.85rem;color:#555;">1 <span id="baseLabel2">USD</span> =</span>
-            <input type="number" id="manualRate" placeholder="ej. 36.5" min="0" step="any"
-              style="max-width:120px;border:1px solid var(--border);border-radius:6px;padding:7px 9px;font-size:.85rem;" />
-            <button class="btn btn-outline no-print" onclick="applyManualRate()" style="padding:6px 14px;font-size:.8rem;">
-              Aplicar
-            </button>
-            <span id="manualMsg" style="font-size:.78rem;color:var(--success);"></span>
+            <select id="manualCur" style="max-width:200px;"></select>
+            <span style="font-size:.9rem;color:#555;white-space:nowrap;">
+              1 <span id="baseLabel2">USD</span> =
+            </span>
+            <input type="number" id="manualRate" placeholder="ej. 36.5" min="0" step="any" style="max-width:140px;" />
+            <button class="btn btn-outline no-print" onclick="applyManualRate()">Aplicar</button>
+            <span id="manualMsg" style="font-size:.8rem;color:var(--success);"></span>
           </div>
         </div>
 
-        <!-- Advance usage bar -->
+        <!-- Advance bar -->
         <div style="margin-top:16px;">
-          <div style="display:flex;justify-content:space-between;font-size:.8rem;font-weight:600;color:#555;margin-bottom:4px;">
+          <div style="display:flex;justify-content:space-between;font-size:.82rem;font-weight:600;color:#555;margin-bottom:4px;">
             <span>Uso del adelanto</span>
             <span id="advanceUsedPct">0%</span>
           </div>
@@ -320,41 +400,45 @@
     </div>
   </section>
 
-  <!-- ═══ 3. GASTOS DIARIOS ═══ -->
+  <!-- ═══ 3. GASTOS ═══ -->
   <section>
     <div class="card">
-      <div class="card-header">&#128179; 3. Gestión de Gastos Diarios (multi-moneda)</div>
+      <div class="card-header">💳 3. Gastos Diarios (multi-moneda)</div>
       <div class="card-body">
-        <div class="table-wrap">
-          <table>
+
+        <!-- DESKTOP table -->
+        <div class="desktop-table-wrap table-wrap">
+          <table class="desktop-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Fecha</th>
-                <th>Categoría</th>
-                <th>Descripción</th>
-                <th>Moneda</th>
-                <th>Monto</th>
-                <th>= Base (<span id="thBase">?</span>)</th>
-                <th>Comprobante</th>
-                <th class="no-print">&#128465;</th>
+                <th>#</th><th>Fecha</th><th>Categoría</th><th>Descripción</th>
+                <th>Moneda</th><th>Monto</th><th>= Base (<span id="thBase">?</span>)</th>
+                <th>Comprobante</th><th class="no-print">🗑</th>
               </tr>
             </thead>
             <tbody id="expensesBody"></tbody>
             <tfoot>
               <tr class="totals-row">
-                <td colspan="6" style="text-align:right;">TOTAL EN MONEDA BASE</td>
+                <td colspan="6" style="text-align:right;font-size:.85rem;">TOTAL EN MONEDA BASE</td>
                 <td id="totalBase" style="white-space:nowrap;">0.00</td>
                 <td colspan="2"></td>
               </tr>
             </tfoot>
           </table>
         </div>
-        <div class="btn-row no-print">
-          <button class="btn btn-success" onclick="addExpenseRow()">&#43; Agregar Gasto</button>
-          <button class="btn btn-outline"  onclick="addDayTemplate()">&#43; Día Completo</button>
+
+        <!-- MOBILE cards -->
+        <div class="mobile-cards" id="expensesMobile"></div>
+        <div class="totals-strip">
+          <span>TOTAL BASE</span>
+          <span id="totalBaseMobile">$0.00</span>
         </div>
-        <p class="note">* Cada gasto puede estar en una moneda diferente. La conversión usa las tasas en vivo (o manuales si no hay conexión).</p>
+
+        <div class="btn-row no-print">
+          <button class="btn btn-success" onclick="addExpenseRow()">+ Agregar Gasto</button>
+          <button class="btn btn-outline"  onclick="addDayTemplate()">+ Día Completo</button>
+        </div>
+        <p class="note">* Cada gasto puede estar en una moneda diferente. Se convierte automáticamente a tu moneda base.</p>
       </div>
     </div>
   </section>
@@ -362,111 +446,114 @@
   <!-- ═══ 4. CLIENTES ═══ -->
   <section>
     <div class="card">
-      <div class="card-header">&#128101; 4. Gestión de Clientes Visitados</div>
+      <div class="card-header">👥 4. Clientes Visitados</div>
       <div class="card-body">
-        <div class="table-wrap">
-          <table>
+
+        <!-- DESKTOP -->
+        <div class="desktop-table-wrap table-wrap">
+          <table class="desktop-table">
             <thead>
               <tr>
-                <th>#</th>
-                <th>Nombre / Empresa</th>
-                <th>Ciudad</th>
-                <th>Contacto</th>
-                <th>Tipo</th>
-                <th>Moneda</th>
-                <th>Monto Negociado</th>
-                <th>= Base</th>
-                <th>Estado</th>
-                <th>Notas</th>
-                <th class="no-print">&#128465;</th>
+                <th>#</th><th>Nombre / Empresa</th><th>Ciudad</th><th>Contacto</th>
+                <th>Tipo</th><th>Moneda</th><th>Monto Negociado</th><th>= Base</th>
+                <th>Estado</th><th>Notas</th><th class="no-print">🗑</th>
               </tr>
             </thead>
             <tbody id="clientsBody"></tbody>
             <tfoot>
               <tr class="totals-row">
-                <td colspan="7" style="text-align:right;">TOTAL NEGOCIADO (base)</td>
+                <td colspan="7" style="text-align:right;font-size:.85rem;">TOTAL NEGOCIADO (base)</td>
                 <td id="totalNegotiated">0.00</td>
                 <td colspan="3"></td>
               </tr>
             </tfoot>
           </table>
         </div>
+
+        <!-- MOBILE cards -->
+        <div class="mobile-cards" id="clientsMobile"></div>
+        <div class="totals-strip">
+          <span>TOTAL NEGOCIADO</span>
+          <span id="totalNegotiatedMobile">$0.00</span>
+        </div>
+
         <div class="btn-row no-print">
-          <button class="btn btn-success" onclick="addClientRow()">&#43; Agregar Cliente</button>
+          <button class="btn btn-success" onclick="addClientRow()">+ Agregar Cliente</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- ═══ 5. RESUMEN PARA GERENCIA ═══ -->
+  <!-- ═══ 5. RESUMEN GERENCIA ═══ -->
   <section>
     <div class="card">
-      <div class="card-header">&#128196; 5. Resumen Financiero para Gerencia</div>
+      <div class="card-header">📄 5. Resumen para Gerencia</div>
       <div class="card-body">
         <div class="grid-2">
           <div>
-            <h4 style="margin-bottom:12px;color:var(--primary);">Gastos por Categoría</h4>
-            <table id="catTable">
-              <thead><tr><th>Categoría</th><th>Subtotal Base</th><th>%</th></tr></thead>
+            <h4 style="margin-bottom:10px;color:var(--primary);font-size:.9rem;">Gastos por Categoría</h4>
+            <table class="desktop-table">
+              <thead><tr><th>Categoría</th><th>Subtotal</th><th>%</th></tr></thead>
               <tbody id="catBody"></tbody>
             </table>
           </div>
           <div>
-            <h4 style="margin-bottom:12px;color:var(--primary);">Flujo de Caja</h4>
-            <table>
+            <h4 style="margin-bottom:10px;color:var(--primary);font-size:.9rem;">Flujo de Caja</h4>
+            <table class="desktop-table">
               <tbody>
-                <tr><td>Adelanto entregado</td><td style="text-align:right;" id="r_adelanto">0.00</td></tr>
+                <tr><td>Adelanto entregado</td><td style="text-align:right;font-weight:700;" id="r_adelanto">0.00</td></tr>
                 <tr><td>Total gastos</td><td style="text-align:right;color:var(--danger);font-weight:700;" id="r_gastos">0.00</td></tr>
                 <tr style="background:#eef2f7;font-weight:700;"><td>Saldo</td><td id="r_saldo" style="text-align:right;">0.00</td></tr>
-                <tr><td colspan="2"><hr class="section-sep"/></td></tr>
-                <tr><td>Total negociado con clientes</td><td style="text-align:right;color:var(--success);font-weight:700;" id="r_negociado">0.00</td></tr>
+                <tr><td colspan="2"><hr class="sep"/></td></tr>
+                <tr><td>Negociado con clientes</td><td style="text-align:right;color:var(--success);font-weight:700;" id="r_negociado">0.00</td></tr>
                 <tr><td>Días de viaje</td><td style="text-align:right;" id="r_dias">—</td></tr>
-                <tr><td>Gasto promedio diario</td><td style="text-align:right;font-weight:700;" id="r_promedio">0.00</td></tr>
+                <tr><td>Promedio diario</td><td style="text-align:right;font-weight:700;" id="r_promedio">0.00</td></tr>
               </tbody>
             </table>
           </div>
         </div>
 
-        <!-- Desglose por moneda usada -->
-        <div style="margin-top:20px;">
-          <h4 style="margin-bottom:10px;color:var(--primary);">Gastos por Moneda Utilizada</h4>
+        <!-- Currency breakdown -->
+        <div style="margin-top:18px;">
+          <h4 style="margin-bottom:10px;color:var(--primary);font-size:.9rem;">Gastos por Moneda Utilizada</h4>
           <div id="currencyBreakdown" style="display:flex;flex-wrap:wrap;gap:10px;"></div>
         </div>
 
-        <div id="balanceAlertBottom" class="balance-box balance-zero" style="margin-top:20px;">
-          &#128269; Los datos se actualizan en tiempo real.
+        <div id="balanceAlertBottom" class="balance-box balance-zero" style="margin-top:16px;">
+          🔍 Los datos se actualizan en tiempo real.
         </div>
 
-        <div style="margin-top:20px;">
+        <div style="margin-top:18px;">
           <div class="field">
             <label>Observaciones / Conclusiones (para Gerencia)</label>
-            <textarea id="mgmtNotes" rows="4" placeholder="Incluye logros, dificultades, próximos pasos, etc."></textarea>
+            <textarea id="mgmtNotes" rows="4" placeholder="Logros, dificultades, próximos pasos…"></textarea>
           </div>
         </div>
 
-        <div class="grid-3" style="margin-top:24px;gap:32px;">
+        <!-- Signatures -->
+        <div class="grid-3" style="margin-top:24px;gap:24px;">
           <div style="text-align:center;">
-            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
+            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.8rem;color:#555;">
               Firma del Viajero<br/><strong id="sigName">___________________</strong>
             </div>
           </div>
           <div style="text-align:center;">
-            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
+            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.8rem;color:#555;">
               Vo. Bo. Supervisor<br/><strong>___________________</strong>
             </div>
           </div>
           <div style="text-align:center;">
-            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.82rem;color:#555;">
-              Aprobado por Gerencia<br/><strong>___________________</strong>
+            <div style="border-top:1.5px solid #aaa;padding-top:8px;font-size:.8rem;color:#555;">
+              Aprobado Gerencia<br/><strong>___________________</strong>
             </div>
           </div>
         </div>
 
-        <div class="btn-row no-print" style="margin-top:20px;justify-content:flex-end;">
-          <button class="btn btn-warn"    onclick="window.print()">&#128438;&#65039; Imprimir / PDF</button>
-          <button class="btn btn-primary" onclick="saveData()">&#128190; Guardar Borrador</button>
-          <button class="btn btn-outline" onclick="loadData()">&#128196; Cargar Borrador</button>
-          <button class="btn btn-danger"  onclick="clearAll()" style="padding:8px 14px;font-size:.85rem;">&#128465; Limpiar</button>
+        <div class="btn-row no-print" style="margin-top:20px;">
+          <button class="btn btn-warn"    onclick="window.print()">🖨️ Imprimir / PDF</button>
+          <button class="btn btn-primary" onclick="saveData()">💾 Guardar</button>
+          <button class="btn btn-outline" onclick="loadData()">📂 Cargar</button>
+          <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 Limpiar</button>
         </div>
       </div>
     </div>
@@ -476,69 +563,64 @@
 
 <script>
 // ═══════════════════════════════════════════════════
-//  CURRENCY DATA
+//  DATA
 // ═══════════════════════════════════════════════════
 const ALL_CURRENCIES = [
   ['USD','Dólar Americano'],['EUR','Euro'],['GBP','Libra Esterlina'],
   ['MXN','Peso Mexicano'],['COP','Peso Colombiano'],['ARS','Peso Argentino'],
   ['BRL','Real Brasileño'],['CLP','Peso Chileno'],['PEN','Sol Peruano'],
-  ['VES','Bolívar Venezolano'],['GTQ','Quetzal Guatemalteco'],['HNL','Lempira Hondureño'],
+  ['VES','Bolívar Venezolano'],['GTQ','Quetzal Guatemalteco'],['HNL','Lempira'],
   ['CRC','Colón Costarricense'],['DOP','Peso Dominicano'],['BOB','Boliviano'],
   ['PYG','Guaraní Paraguayo'],['UYU','Peso Uruguayo'],['CAD','Dólar Canadiense'],
   ['JPY','Yen Japonés'],['CNY','Yuan Chino'],['CHF','Franco Suizo'],
-  ['AUD','Dólar Australiano'],['INR','Rupia India'],['MYR','Ringgit Malayo'],
-  ['SGD','Dólar de Singapur'],['ZAR','Rand Sudafricano'],['TRY','Lira Turca'],
-  ['SAR','Riyal Saudí'],['AED','Dírham Emiratí'],['KRW','Won Coreano'],
+  ['AUD','Dólar Australiano'],['INR','Rupia India'],['SGD','Dólar Singapur'],
+  ['ZAR','Rand Sudafricano'],['TRY','Lira Turca'],['AED','Dírham Emiratí'],
+  ['SAR','Riyal Saudí'],['KRW','Won Coreano'],['MYR','Ringgit Malayo'],
 ];
-
 const SYMBOLS = {
   USD:'$',EUR:'€',GBP:'£',MXN:'$',COP:'$',ARS:'$',BRL:'R$',CLP:'$',
   PEN:'S/',VES:'Bs.',GTQ:'Q',HNL:'L',CRC:'₡',DOP:'RD$',BOB:'Bs',
-  PYG:'₲',UYU:'$U',CAD:'CA$',JPY:'¥',CNY:'¥',CHF:'Fr',AUD:'A$',
-  INR:'₹',MYR:'RM',SGD:'S$',ZAR:'R',TRY:'₺',SAR:'ر.س',AED:'د.إ',KRW:'₩',
+  PYG:'₲',UYU:'$U',CAD:'C$',JPY:'¥',CNY:'¥',CHF:'Fr',AUD:'A$',
+  INR:'₹',SGD:'S$',ZAR:'R',TRY:'₺',AED:'د.إ',SAR:'ر.س',KRW:'₩',MYR:'RM',
 };
-
 const CATEGORIES = [
   'Transporte Aéreo','Transporte Terrestre','Hospedaje','Alimentación',
   'Gasolina / Combustible','Representación / Entretenimiento',
-  'Comunicaciones','Materiales / Papelería','Visa / Trámites',
-  'Propinas / Varios','Otro',
+  'Comunicaciones','Materiales / Papelería','Visa / Trámites','Propinas / Varios','Otro',
 ];
+const VOUCHERS = ['Sin comprobante','Factura electrónica','Recibo','Voucher'];
 
-// ═══════════════════════════════════════════════════
-//  EXCHANGE RATES  (keyed relative to USD)
-// ═══════════════════════════════════════════════════
-// rates[code] = how many `code` per 1 USD
 let rates = { USD: 1 };
 let ratesLoaded = false;
+let expRowId = 0;
+let cliRowId = 0;
 
-// Convert `amount` in `fromCur` → `baseCur` using rates (all vs USD)
+// ═══════════════════════════════════════════════════
+//  RATES
+// ═══════════════════════════════════════════════════
 function convert(amount, fromCur, baseCur) {
   if (fromCur === baseCur) return amount;
   const rFrom = rates[fromCur] || 1;
   const rBase = rates[baseCur] || 1;
-  // amount / rFrom = amount in USD; * rBase = amount in baseCur
   return amount / rFrom * rBase;
 }
 
-// ─── Fetch live rates from frankfurter.app ───
 async function fetchRates() {
-  const statusEl = document.getElementById('ratesStatus');
-  statusEl.innerHTML = '<span class="status-dot dot-gray"></span>Consultando…';
+  const el = document.getElementById('ratesStatus');
+  el.innerHTML = '<span class="status-dot dot-gray"></span>Consultando…';
   try {
-    const res = await fetch('https://api.frankfurter.app/latest?from=USD');
+    const res  = await fetch('https://api.frankfurter.app/latest?from=USD');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    // frankfurter returns rates relative to USD (USD not included, it's 1)
     rates = { USD: 1, ...data.rates };
     ratesLoaded = true;
-    const now = new Date().toLocaleString('es-MX');
-    statusEl.innerHTML = `<span class="status-dot dot-green"></span>En vivo`;
-    document.getElementById('ratesTime').textContent = 'Actualizado: ' + now;
+    el.innerHTML = '<span class="status-dot dot-green"></span>En vivo';
+    document.getElementById('ratesTime').textContent =
+      'Actualizado: ' + new Date().toLocaleString('es-MX');
     renderRatesPanel();
     recalcAll();
-  } catch (e) {
-    statusEl.innerHTML = `<span class="status-dot dot-red"></span>Sin conexión — usando tasas manuales`;
+  } catch(e) {
+    el.innerHTML = '<span class="status-dot dot-red"></span>Sin conexión — tasas manuales';
     document.getElementById('ratesTime').textContent = '';
   }
 }
@@ -548,8 +630,7 @@ function renderRatesPanel() {
   document.getElementById('ratesPanel').style.display = 'block';
   document.getElementById('baseLabel').textContent  = base;
   document.getElementById('baseLabel2').textContent = base;
-
-  const priority = ['USD','EUR','GBP','MXN','COP','ARS','BRL','CLP','PEN','CAD','JPY','CNY','CHF','AUD'];
+  const priority = ['USD','EUR','GBP','MXN','COP','ARS','BRL','CLP','PEN','CAD','JPY','CHF','AUD','CNY'];
   const grid = document.getElementById('ratesGrid');
   grid.innerHTML = '';
   priority.forEach(code => {
@@ -567,322 +648,432 @@ function applyManualRate() {
   const cur  = document.getElementById('manualCur').value;
   const val  = parseFloat(document.getElementById('manualRate').value);
   const base = document.getElementById('baseCurrency').value;
-  if (!cur || isNaN(val) || val <= 0) { alert('Ingresa una moneda y una tasa válida.'); return; }
-  // Store: how many `cur` per 1 USD → we derive from base
-  // 1 base = val cur → 1 USD = val * (1/rates[base]) cur → rates[cur] relative to USD
-  const rBase = rates[base] || 1;
-  rates[cur] = val * rBase;
-  document.getElementById('manualMsg').textContent = `✓ 1 ${base} = ${val} ${cur} aplicado`;
+  if (!cur || isNaN(val) || val <= 0) { alert('Ingresa moneda y tasa válida.'); return; }
+  rates[cur] = val * (rates[base] || 1);
+  document.getElementById('manualMsg').textContent = `✓ 1 ${base} = ${val} ${cur}`;
   if (ratesLoaded) renderRatesPanel();
   recalcAll();
 }
 
 // ═══════════════════════════════════════════════════
-//  POPULATE SELECTS
+//  SELECT OPTIONS
 // ═══════════════════════════════════════════════════
-function curOptions(selected) {
-  return ALL_CURRENCIES.map(([code, name]) =>
-    `<option value="${code}" ${code === selected ? 'selected' : ''}>${code} – ${name}</option>`
-  ).join('');
+function curOptions(sel) {
+  return ALL_CURRENCIES.map(([c,n]) =>
+    `<option value="${c}" ${c===sel?'selected':''}>${c} – ${n}</option>`).join('');
 }
-function curOptionsShort(selected) {
-  return ALL_CURRENCIES.map(([code]) =>
-    `<option value="${code}" ${code === selected ? 'selected' : ''}>${code}</option>`
-  ).join('');
+function curShort(sel) {
+  return ALL_CURRENCIES.map(([c]) =>
+    `<option value="${c}" ${c===sel?'selected':''}>${c}</option>`).join('');
+}
+function catOptions(sel) {
+  return CATEGORIES.map(c =>
+    `<option value="${c}" ${c===sel?'selected':''}>${c}</option>`).join('');
+}
+function voucherOptions(sel) {
+  return VOUCHERS.map(v =>
+    `<option value="${v}" ${v===sel?'selected':''}>${v}</option>`).join('');
 }
 
-function populateBaseSelect() {
+function populateSelects() {
   document.getElementById('baseCurrency').innerHTML = curOptions('USD');
-  document.getElementById('manualCur').innerHTML    = curOptionsShort('MXN');
+  document.getElementById('manualCur').innerHTML    = curShort('MXN');
 }
-
-// ═══════════════════════════════════════════════════
-//  ROW IDs
-// ═══════════════════════════════════════════════════
-let expRowId = 0;
-let cliRowId = 0;
 
 // ═══════════════════════════════════════════════════
 //  EXPENSE ROWS
 // ═══════════════════════════════════════════════════
 function addExpenseRow(date, cat, desc, cur, amt, voucher) {
-  const id   = ++expRowId;
-  const today = date || new Date().toISOString().slice(0, 10);
+  const id    = ++expRowId;
+  const today = date || new Date().toISOString().slice(0,10);
+  cur = cur || 'USD';
+
+  // ── Desktop row ──
   const tbody = document.getElementById('expensesBody');
-
-  const catOpts = CATEGORIES.map(c =>
-    `<option value="${c}" ${c === cat ? 'selected' : ''}>${c}</option>`
-  ).join('');
-  const voucherOpts = ['Sin comprobante','Factura electrónica','Recibo','Voucher']
-    .map(v => `<option value="${v}" ${v === voucher ? 'selected' : ''}>${v}</option>`).join('');
-
-  const tr = document.createElement('tr');
-  tr.id = `er-${id}`;
+  const tr    = document.createElement('tr');
+  tr.id = `edt-${id}`;
   tr.innerHTML = `
-    <td style="color:#aaa;font-size:.75rem;white-space:nowrap;">${id}</td>
-    <td><input type="date" value="${today}" onchange="recalcAll()" style="min-width:130px;" /></td>
-    <td>
-      <select onchange="recalcAll()" style="min-width:155px;">
-        <option value="">—</option>${catOpts}
-      </select>
-    </td>
-    <td><input type="text" value="${desc || ''}" placeholder="Descripción…" style="min-width:130px;" /></td>
-    <td>
-      <select class="cur-sel" onchange="recalcAll()">
-        ${curOptionsShort(cur || 'USD')}
-      </select>
-    </td>
-    <td>
-      <input type="number" class="amt-inp" value="${amt || ''}" min="0" step="any"
-        placeholder="0.00" oninput="recalcAll()" style="max-width:100px;" />
-    </td>
+    <td style="color:#aaa;font-size:.72rem;">${id}</td>
+    <td><input type="date" value="${today}" onchange="syncExpense(${id})" style="min-width:120px;" /></td>
+    <td><select onchange="syncExpense(${id})" style="min-width:150px;"><option value="">—</option>${catOptions(cat)}</select></td>
+    <td><input type="text" value="${desc||''}" placeholder="Descripción…" oninput="syncExpense(${id})" style="min-width:120px;" /></td>
+    <td><select class="cur-sel" onchange="syncExpense(${id})">${curShort(cur)}</select></td>
+    <td><input type="number" class="amt-inp" value="${amt||''}" min="0" step="any" placeholder="0.00" oninput="syncExpense(${id})" style="max-width:90px;" /></td>
     <td class="td-total base-col" style="white-space:nowrap;">—</td>
-    <td>
-      <select style="min-width:140px;">${voucherOpts}</select>
-    </td>
-    <td class="no-print">
-      <button class="btn btn-danger" onclick="removeRow('er-${id}')">&#10005;</button>
-    </td>
-  `;
+    <td><select style="min-width:130px;">${voucherOptions(voucher)}</select></td>
+    <td class="no-print"><button class="btn btn-danger btn-sm" onclick="removeExpense(${id})">✕</button></td>`;
   tbody.appendChild(tr);
+
+  // ── Mobile card ──
+  const mDiv  = document.getElementById('expensesMobile');
+  const mCard = document.createElement('div');
+  mCard.className = 'm-card';
+  mCard.id = `emo-${id}`;
+  mCard.innerHTML = `
+    <div class="m-card-header">
+      <span>Gasto #${id}</span>
+      <button class="btn btn-danger btn-del btn-sm no-print" onclick="removeExpense(${id})">✕ Eliminar</button>
+    </div>
+    <div class="m-card-body">
+      <div class="m-row-2">
+        <div class="m-field">
+          <label>Fecha</label>
+          <input type="date" id="em-date-${id}" value="${today}" onchange="syncFromMobile(${id})" />
+        </div>
+        <div class="m-field">
+          <label>Moneda</label>
+          <select id="em-cur-${id}" class="cur-sel" onchange="syncFromMobile(${id})">${curShort(cur)}</select>
+        </div>
+      </div>
+      <div class="m-field">
+        <label>Categoría</label>
+        <select id="em-cat-${id}" onchange="syncFromMobile(${id})"><option value="">—</option>${catOptions(cat)}</select>
+      </div>
+      <div class="m-field">
+        <label>Descripción</label>
+        <input type="text" id="em-desc-${id}" value="${desc||''}" placeholder="Descripción del gasto…" oninput="syncFromMobile(${id})" />
+      </div>
+      <div class="m-row-2">
+        <div class="m-field">
+          <label>Monto</label>
+          <input type="number" id="em-amt-${id}" value="${amt||''}" min="0" step="any" placeholder="0.00" oninput="syncFromMobile(${id})" />
+        </div>
+        <div class="m-field">
+          <label>Comprobante</label>
+          <select id="em-vou-${id}">${voucherOptions(voucher)}</select>
+        </div>
+      </div>
+      <div class="m-base-display" id="em-base-${id}">= —</div>
+    </div>`;
+  mDiv.appendChild(mCard);
+  recalcAll();
+}
+
+// Sync desktop → mobile
+function syncExpense(id) {
+  const dt = document.querySelector(`#edt-${id} input[type=date]`);
+  const cat = document.querySelector(`#edt-${id} select`);
+  const desc = document.querySelector(`#edt-${id} input[type=text]`);
+  const curSel = document.querySelectorAll(`#edt-${id} select`)[1];
+  const amtInp = document.querySelector(`#edt-${id} .amt-inp`);
+  if (document.getElementById(`em-date-${id}`)) {
+    if (dt)      document.getElementById(`em-date-${id}`).value = dt.value;
+    if (cat)     document.getElementById(`em-cat-${id}`).value  = cat.value;
+    if (desc)    document.getElementById(`em-desc-${id}`).value = desc.value;
+    if (curSel)  document.getElementById(`em-cur-${id}`).value  = curSel.value;
+    if (amtInp)  document.getElementById(`em-amt-${id}`).value  = amtInp.value;
+  }
+  recalcAll();
+}
+
+// Sync mobile → desktop
+function syncFromMobile(id) {
+  const inputs   = document.querySelectorAll(`#edt-${id} input`);
+  const selects  = document.querySelectorAll(`#edt-${id} select`);
+  const emDate   = document.getElementById(`em-date-${id}`);
+  const emCat    = document.getElementById(`em-cat-${id}`);
+  const emDesc   = document.getElementById(`em-desc-${id}`);
+  const emCur    = document.getElementById(`em-cur-${id}`);
+  const emAmt    = document.getElementById(`em-amt-${id}`);
+  if (inputs[0] && emDate)  inputs[0].value   = emDate.value;
+  if (selects[0] && emCat)  selects[0].value  = emCat.value;
+  if (inputs[1] && emDesc)  inputs[1].value   = emDesc.value;
+  if (selects[1] && emCur)  selects[1].value  = emCur.value;
+  if (inputs[2] && emAmt)   inputs[2].value   = emAmt.value;
+  recalcAll();
+}
+
+function removeExpense(id) {
+  ['edt-','emo-'].forEach(p => { const el = document.getElementById(p+id); if (el) el.remove(); });
   recalcAll();
 }
 
 function addDayTemplate() {
-  const today = new Date().toISOString().slice(0, 10);
+  const today = new Date().toISOString().slice(0,10);
   const base  = document.getElementById('baseCurrency').value;
-  addExpenseRow(today, 'Hospedaje',              'Hotel', base, '', 'Sin comprobante');
-  addExpenseRow(today, 'Alimentación',           'Desayuno / Almuerzo / Cena', base, '', 'Sin comprobante');
-  addExpenseRow(today, 'Transporte Terrestre',   'Traslado', base, '', 'Sin comprobante');
+  addExpenseRow(today,'Hospedaje','Hotel',base,'','Sin comprobante');
+  addExpenseRow(today,'Alimentación','Desayuno / Almuerzo / Cena',base,'','Sin comprobante');
+  addExpenseRow(today,'Transporte Terrestre','Traslado',base,'','Sin comprobante');
 }
 
 // ═══════════════════════════════════════════════════
 //  CLIENT ROWS
 // ═══════════════════════════════════════════════════
-function addClientRow(name, city, contact, type, cur, amt, status, notes) {
-  const id    = ++cliRowId;
-  const tbody = document.getElementById('clientsBody');
-
-  const typeOpts = ['Cliente Nuevo','Cliente Existente','Prospecto','Proveedor','Socio Estratégico']
-    .map(t => `<option value="${t}" ${t === type ? 'selected' : ''}>${t}</option>`).join('');
+function addClientRow(name,city,contact,type,cur,amt,status,notes) {
+  const id   = ++cliRowId;
+  cur = cur || 'USD';
+  const typeOpts   = ['Cliente Nuevo','Cliente Existente','Prospecto','Proveedor','Socio Estratégico']
+    .map(t=>`<option value="${t}" ${t===type?'selected':''}>${t}</option>`).join('');
   const statusOpts = ['En negociación','Cerrado','Perdido','Seguimiento','Pendiente']
-    .map(s => `<option value="${s}" ${s === status ? 'selected' : ''}>${s}</option>`).join('');
+    .map(s=>`<option value="${s}" ${s===status?'selected':''}>${s}</option>`).join('');
 
-  const tr = document.createElement('tr');
-  tr.id = `cr-${id}`;
+  // Desktop
+  const tbody = document.getElementById('clientsBody');
+  const tr    = document.createElement('tr');
+  tr.id = `cdt-${id}`;
   tr.innerHTML = `
-    <td style="color:#aaa;font-size:.75rem;">${id}</td>
-    <td><input type="text" value="${name    || ''}" placeholder="Nombre o Empresa…" style="min-width:130px;" /></td>
-    <td><input type="text" value="${city    || ''}" placeholder="Ciudad" style="min-width:90px;" /></td>
-    <td><input type="text" value="${contact || ''}" placeholder="Tel / Email" style="min-width:110px;" /></td>
-    <td><select>${typeOpts}</select></td>
-    <td>
-      <select class="cur-sel cli-cur" onchange="recalcAll()">
-        ${curOptionsShort(cur || 'USD')}
-      </select>
-    </td>
-    <td>
-      <input type="number" class="cli-amt" value="${amt || ''}" min="0" step="any"
-        placeholder="0.00" oninput="recalcAll()" style="max-width:100px;" />
-    </td>
+    <td style="color:#aaa;font-size:.72rem;">${id}</td>
+    <td><input type="text" value="${name||''}" placeholder="Empresa…" oninput="syncClient(${id})" style="min-width:120px;" /></td>
+    <td><input type="text" value="${city||''}" placeholder="Ciudad" oninput="syncClient(${id})" style="min-width:80px;" /></td>
+    <td><input type="text" value="${contact||''}" placeholder="Tel/Email" oninput="syncClient(${id})" style="min-width:100px;" /></td>
+    <td><select onchange="syncClient(${id})" style="min-width:120px;">${typeOpts}</select></td>
+    <td><select class="cur-sel" onchange="syncClient(${id})">${curShort(cur)}</select></td>
+    <td><input type="number" class="cli-amt" value="${amt||''}" min="0" step="any" placeholder="0.00" oninput="syncClient(${id})" style="max-width:90px;" /></td>
     <td class="td-total cli-base" style="white-space:nowrap;">—</td>
     <td><select>${statusOpts}</select></td>
-    <td><input type="text" value="${notes || ''}" placeholder="Notas…" style="min-width:110px;" /></td>
-    <td class="no-print">
-      <button class="btn btn-danger" onclick="removeRow('cr-${id}')">&#10005;</button>
-    </td>
-  `;
+    <td><input type="text" value="${notes||''}" placeholder="Notas…" style="min-width:100px;" /></td>
+    <td class="no-print"><button class="btn btn-danger btn-sm" onclick="removeClient(${id})">✕</button></td>`;
   tbody.appendChild(tr);
+
+  // Mobile card
+  const mDiv  = document.getElementById('clientsMobile');
+  const mCard = document.createElement('div');
+  mCard.className = 'm-card';
+  mCard.id = `cmo-${id}`;
+  mCard.innerHTML = `
+    <div class="m-card-header">
+      <span>Cliente #${id}</span>
+      <button class="btn btn-danger btn-del btn-sm no-print" onclick="removeClient(${id})">✕ Eliminar</button>
+    </div>
+    <div class="m-card-body">
+      <div class="m-field">
+        <label>Nombre / Empresa</label>
+        <input type="text" id="cm-name-${id}" value="${name||''}" placeholder="Empresa…" oninput="syncClientFromMobile(${id})" />
+      </div>
+      <div class="m-row-2">
+        <div class="m-field">
+          <label>Ciudad</label>
+          <input type="text" id="cm-city-${id}" value="${city||''}" placeholder="Ciudad" oninput="syncClientFromMobile(${id})" />
+        </div>
+        <div class="m-field">
+          <label>Contacto</label>
+          <input type="text" id="cm-contact-${id}" value="${contact||''}" placeholder="Tel/Email" oninput="syncClientFromMobile(${id})" />
+        </div>
+      </div>
+      <div class="m-row-2">
+        <div class="m-field">
+          <label>Tipo</label>
+          <select id="cm-type-${id}" onchange="syncClientFromMobile(${id})">${typeOpts}</select>
+        </div>
+        <div class="m-field">
+          <label>Estado</label>
+          <select id="cm-status-${id}" onchange="syncClientFromMobile(${id})">${statusOpts}</select>
+        </div>
+      </div>
+      <div class="m-row-2">
+        <div class="m-field">
+          <label>Moneda</label>
+          <select id="cm-cur-${id}" class="cur-sel" onchange="syncClientFromMobile(${id})">${curShort(cur)}</select>
+        </div>
+        <div class="m-field">
+          <label>Monto Negociado</label>
+          <input type="number" id="cm-amt-${id}" value="${amt||''}" min="0" step="any" placeholder="0.00" oninput="syncClientFromMobile(${id})" />
+        </div>
+      </div>
+      <div class="m-field">
+        <label>Notas</label>
+        <input type="text" id="cm-notes-${id}" value="${notes||''}" placeholder="Notas del cliente…" />
+      </div>
+      <div class="m-base-display" id="cm-base-${id}">= —</div>
+    </div>`;
+  mDiv.appendChild(mCard);
   recalcAll();
 }
 
-function removeRow(id) {
-  const el = document.getElementById(id);
-  if (el) { el.remove(); recalcAll(); }
+function syncClient(id) {
+  const inputs  = document.querySelectorAll(`#cdt-${id} input`);
+  const selects = document.querySelectorAll(`#cdt-${id} select`);
+  const set = (elId, val) => { const e = document.getElementById(elId); if(e) e.value = val; };
+  if (inputs[0])  set(`cm-name-${id}`,    inputs[0].value);
+  if (inputs[1])  set(`cm-city-${id}`,    inputs[1].value);
+  if (inputs[2])  set(`cm-contact-${id}`, inputs[2].value);
+  if (selects[0]) set(`cm-type-${id}`,    selects[0].value);
+  if (selects[1]) set(`cm-cur-${id}`,     selects[1].value);
+  if (inputs[3])  set(`cm-amt-${id}`,     inputs[3].value);
+  recalcAll();
+}
+
+function syncClientFromMobile(id) {
+  const inputs  = document.querySelectorAll(`#cdt-${id} input`);
+  const selects = document.querySelectorAll(`#cdt-${id} select`);
+  const get = elId => { const e = document.getElementById(elId); return e ? e.value : ''; };
+  if (inputs[0])  inputs[0].value   = get(`cm-name-${id}`);
+  if (inputs[1])  inputs[1].value   = get(`cm-city-${id}`);
+  if (inputs[2])  inputs[2].value   = get(`cm-contact-${id}`);
+  if (selects[0]) selects[0].value  = get(`cm-type-${id}`);
+  if (selects[1]) selects[1].value  = get(`cm-cur-${id}`);
+  if (inputs[3])  inputs[3].value   = get(`cm-amt-${id}`);
+  recalcAll();
+}
+
+function removeClient(id) {
+  ['cdt-','cmo-'].forEach(p => { const el = document.getElementById(p+id); if (el) el.remove(); });
+  recalcAll();
 }
 
 // ═══════════════════════════════════════════════════
 //  RECALCULATE
 // ═══════════════════════════════════════════════════
 function recalcAll() {
-  const base  = document.getElementById('baseCurrency').value;
-  const sym   = SYMBOLS[base] || base;
-  const adv   = parseFloat(document.getElementById('advance').value) || 0;
+  const base = document.getElementById('baseCurrency').value;
+  const sym  = SYMBOLS[base] || base;
+  const adv  = parseFloat(document.getElementById('advance').value) || 0;
 
-  // Update column header
   document.getElementById('thBase').textContent = base;
 
   // ── Expenses ──
   let totalBase = 0;
-  const catMap  = {};
-  const curMap  = {};
-
+  const catMap = {}, curMap = {};
   document.querySelectorAll('#expensesBody tr').forEach(tr => {
-    const amtInp  = tr.querySelector('.amt-inp');
-    const curSel  = tr.querySelector('.cur-sel');
+    const selects = tr.querySelectorAll('select');
+    const inputs  = tr.querySelectorAll('input');
     const baseCol = tr.querySelector('.base-col');
-    if (!amtInp || !curSel || !baseCol) return;
-
-    const amt = parseFloat(amtInp.value) || 0;
-    const cur = curSel.value;
+    if (!inputs[2] || !selects[1] || !baseCol) return;
+    const amt    = parseFloat(inputs[2].value) || 0;
+    const cur    = selects[1].value;
     const inBase = convert(amt, cur, base);
     totalBase += inBase;
     baseCol.textContent = sym + fmt(inBase);
-
+    // sync mobile display
+    const id = tr.id.replace('edt-','');
+    const emBase = document.getElementById(`em-base-${id}`);
+    if (emBase) emBase.textContent = `= ${sym}${fmt(inBase)} ${base}`;
     // category
-    const catSel = tr.querySelectorAll('select')[0];
-    const cat = catSel ? (catSel.value || 'Sin categoría') : 'Sin categoría';
+    const cat = selects[0]?.value || 'Sin categoría';
     catMap[cat] = (catMap[cat] || 0) + inBase;
-
-    // currency breakdown
+    // currency
     if (amt > 0) {
-      if (!curMap[cur]) curMap[cur] = { local: 0, base: 0 };
-      curMap[cur].local += amt;
-      curMap[cur].base  += inBase;
+      if (!curMap[cur]) curMap[cur] = { local:0, base:0 };
+      curMap[cur].local += amt; curMap[cur].base += inBase;
     }
   });
-
-  document.getElementById('totalBase').textContent = sym + fmt(totalBase);
+  const bSym = sym;
+  document.getElementById('totalBase').textContent      = bSym + fmt(totalBase);
+  document.getElementById('totalBaseMobile').textContent= bSym + fmt(totalBase);
 
   // ── Clients ──
   let totalNeg = 0;
   document.querySelectorAll('#clientsBody tr').forEach(tr => {
-    const amtInp  = tr.querySelector('.cli-amt');
-    const curSel  = tr.querySelector('.cli-cur');
+    const selects = tr.querySelectorAll('select');
+    const inputs  = tr.querySelectorAll('input');
     const baseCol = tr.querySelector('.cli-base');
-    if (!amtInp || !curSel || !baseCol) return;
-    const amt    = parseFloat(amtInp.value) || 0;
-    const cur    = curSel.value;
+    if (!inputs[3] || !selects[1] || !baseCol) return;
+    const amt    = parseFloat(inputs[3].value) || 0;
+    const cur    = selects[1].value;
     const inBase = convert(amt, cur, base);
     totalNeg += inBase;
-    baseCol.textContent = sym + fmt(inBase);
+    baseCol.textContent = bSym + fmt(inBase);
+    const id = tr.id.replace('cdt-','');
+    const cmBase = document.getElementById(`cm-base-${id}`);
+    if (cmBase) cmBase.textContent = `= ${bSym}${fmt(inBase)} ${base}`;
   });
-  document.getElementById('totalNegotiated').textContent = sym + fmt(totalNeg);
+  document.getElementById('totalNegotiated').textContent      = bSym + fmt(totalNeg);
+  document.getElementById('totalNegotiatedMobile').textContent= bSym + fmt(totalNeg);
 
-  // ── Summary cards ──
+  // ── Summary ──
   const saldo = adv - totalBase;
-  document.getElementById('sumTotalGastado').textContent = sym + fmt(totalBase);
+  document.getElementById('sumTotalGastado').textContent = bSym + fmt(totalBase);
   document.getElementById('sumTotalSub').textContent     = 'en ' + base;
-  document.getElementById('sumAdelanto').textContent     = sym + fmt(adv);
-  document.getElementById('sumAdelantoSub').textContent  = 'en ' + base;
-  document.getElementById('sumFavor').textContent        = sym + fmt(Math.max(0, saldo));
-  document.getElementById('sumReembolso').textContent    = sym + fmt(Math.max(0, -saldo));
+  document.getElementById('sumAdelanto').textContent     = bSym + fmt(adv);
+  document.getElementById('sumAdelantoSub').textContent  = 'recibido en ' + base;
+  document.getElementById('sumFavor').textContent        = bSym + fmt(Math.max(0, saldo));
+  document.getElementById('sumReembolso').textContent    = bSym + fmt(Math.max(0, -saldo));
 
-  // ── Progress bar ──
-  const pct = adv > 0 ? Math.min(150, (totalBase / adv) * 100) : 0;
-  document.getElementById('advanceUsedPct').textContent = fmt(Math.min(pct, 100), 1) + '%';
+  // ── Progress ──
+  const pct = adv > 0 ? Math.min(150, totalBase / adv * 100) : 0;
+  document.getElementById('advanceUsedPct').textContent = fmt(Math.min(pct,100),1) + '%';
   const bar = document.getElementById('advanceBar');
-  bar.style.width    = Math.min(100, pct) + '%';
-  bar.style.background = pct > 100 ? 'var(--danger)' : pct > 80 ? 'var(--warn)' : 'var(--success)';
+  bar.style.width      = Math.min(100,pct) + '%';
+  bar.style.background = pct>100 ? 'var(--danger)' : pct>80 ? 'var(--warn)' : 'var(--success)';
 
-  // ── Balance alerts ──
-  setAlert('balanceAlert', saldo, sym, adv);
-  setAlert('balanceAlertBottom', saldo, sym, adv);
+  // ── Alerts ──
+  ['balanceAlert','balanceAlertBottom'].forEach(id => setAlert(id, saldo, bSym, adv));
 
   // ── Flow table ──
-  document.getElementById('r_adelanto').textContent  = sym + fmt(adv);
-  document.getElementById('r_gastos').textContent    = sym + fmt(totalBase);
-  const rSaldo = document.getElementById('r_saldo');
-  rSaldo.textContent  = sym + fmt(Math.abs(saldo));
-  rSaldo.style.color  = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
-  document.getElementById('r_negociado').textContent = sym + fmt(totalNeg);
+  document.getElementById('r_adelanto').textContent  = bSym + fmt(adv);
+  document.getElementById('r_gastos').textContent    = bSym + fmt(totalBase);
+  const rs = document.getElementById('r_saldo');
+  rs.textContent = bSym + fmt(Math.abs(saldo));
+  rs.style.color = saldo >= 0 ? 'var(--success)' : 'var(--danger)';
+  document.getElementById('r_negociado').textContent = bSym + fmt(totalNeg);
 
   const ds = document.getElementById('dateStart').value;
   const de = document.getElementById('dateEnd').value;
   let dias = '—', avg = 0;
   if (ds && de) {
     const d = (new Date(de) - new Date(ds)) / 86400000;
-    if (d >= 0) { dias = d + (d === 1 ? ' día' : ' días'); if (d > 0) avg = totalBase / d; }
+    if (d >= 0) { dias = d + (d===1?' día':' días'); if(d>0) avg = totalBase/d; }
   }
   document.getElementById('r_dias').textContent    = dias;
-  document.getElementById('r_promedio').textContent = sym + fmt(avg);
+  document.getElementById('r_promedio').textContent= bSym + fmt(avg);
 
   // ── Category breakdown ──
   const catTbody = document.getElementById('catBody');
   catTbody.innerHTML = '';
-  Object.entries(catMap).sort((a,b) => b[1]-a[1]).forEach(([cat, val]) => {
+  Object.entries(catMap).sort((a,b)=>b[1]-a[1]).forEach(([cat,val]) => {
     const pct = totalBase > 0 ? (val/totalBase*100).toFixed(1) : '0.0';
-    const tr = document.createElement('tr');
+    const tr  = document.createElement('tr');
     tr.innerHTML = `
       <td>${cat}</td>
-      <td class="td-total">${sym}${fmt(val)}</td>
+      <td class="td-total">${bSym}${fmt(val)}</td>
       <td>
-        <div style="display:flex;align-items:center;gap:6px;">
+        <div style="display:flex;align-items:center;gap:5px;">
           <div class="progress-wrap" style="flex:1;height:7px;">
             <div class="progress-bar" style="width:${pct}%;background:var(--accent);"></div>
           </div>
-          <span style="font-size:.72rem;width:38px;">${pct}%</span>
+          <span style="font-size:.7rem;width:36px;">${pct}%</span>
         </div>
       </td>`;
     catTbody.appendChild(tr);
   });
   if (!Object.keys(catMap).length)
-    catTbody.innerHTML = '<tr><td colspan="3" style="color:#aaa;text-align:center;">Sin gastos.</td></tr>';
+    catTbody.innerHTML='<tr><td colspan="3" style="color:#aaa;text-align:center;">Sin gastos.</td></tr>';
 
-  // ── Currency breakdown chips ──
-  const cbDiv = document.getElementById('currencyBreakdown');
-  cbDiv.innerHTML = '';
-  Object.entries(curMap).forEach(([cur, vals]) => {
+  // ── Currency chips ──
+  const cbd = document.getElementById('currencyBreakdown');
+  cbd.innerHTML = '';
+  Object.entries(curMap).forEach(([cur,vals]) => {
     const chip = document.createElement('div');
-    chip.className = 'rate-chip';
-    chip.style.minWidth = '110px';
+    chip.className = 'cur-chip';
     chip.innerHTML = `
-      <span class="rc-code">${cur}</span>
-      <span class="rc-val">${(SYMBOLS[cur]||cur)}${fmt(vals.local)}</span>
-      <span class="rc-val" style="color:#2e86c1;">${sym}${fmt(vals.base)} ${base}</span>`;
-    cbDiv.appendChild(chip);
+      <div class="cc-code">${cur}</div>
+      <div class="cc-local">${(SYMBOLS[cur]||cur)}${fmt(vals.local)}</div>
+      <div class="cc-base">${bSym}${fmt(vals.base)} ${base}</div>`;
+    cbd.appendChild(chip);
   });
   if (!Object.keys(curMap).length)
-    cbDiv.innerHTML = '<span style="color:#aaa;font-size:.8rem;">Sin gastos registrados.</span>';
+    cbd.innerHTML='<span style="color:#aaa;font-size:.8rem;">Sin gastos registrados.</span>';
 
-  // ── Signature & status ──
+  // ── Signature / Status ──
   document.getElementById('sigName').textContent =
     document.getElementById('travelerName').value || '___________________';
-
-  const statusEl = document.getElementById('statusBadge');
+  const sb = document.getElementById('statusBadge');
   if (ds && de) {
     const now = new Date().toISOString().slice(0,10);
-    statusEl.textContent = now < ds ? 'PROGRAMADO' : now > de ? 'FINALIZADO' : 'EN CURSO';
+    sb.textContent = now<ds?'PROGRAMADO':now>de?'FINALIZADO':'EN CURSO';
   }
-
-  // Update rates panel if open
   if (ratesLoaded) renderRatesPanel();
 }
 
 function setAlert(id, saldo, sym, adv) {
   const el = document.getElementById(id);
   if (adv === 0) {
-    el.className = 'balance-box balance-zero';
-    el.innerHTML = '&#128269; Sin adelanto configurado. Ingrese el monto recibido.';
-    return;
+    el.className='balance-box balance-zero';
+    el.innerHTML='🔍 Sin adelanto. Ingrese el monto recibido para ver el saldo.'; return;
   }
   if (saldo > 0) {
-    el.className = 'balance-box balance-positive';
-    el.innerHTML = `&#9989; Saldo a favor: <strong>${sym}${fmt(saldo)}</strong> — El viajero debe devolver este monto.`;
+    el.className='balance-box balance-positive';
+    el.innerHTML=`✅ Saldo a favor: <strong>${sym}${fmt(saldo)}</strong> — El viajero debe devolver este monto.`;
   } else if (saldo < 0) {
-    el.className = 'balance-box balance-negative';
-    el.innerHTML = `&#9888;&#65039; Gastos exceden el adelanto por: <strong>${sym}${fmt(-saldo)}</strong> — La empresa debe reembolsar.`;
+    el.className='balance-box balance-negative';
+    el.innerHTML=`⚠️ Gastos exceden el adelanto por: <strong>${sym}${fmt(-saldo)}</strong> — La empresa debe reembolsar.`;
   } else {
-    el.className = 'balance-box balance-zero';
-    el.innerHTML = '&#9889; El adelanto cubre exactamente los gastos. Saldo: $0.00';
+    el.className='balance-box balance-zero';
+    el.innerHTML='⚡ Saldo exacto: $0.00';
   }
 }
 
-// ═══════════════════════════════════════════════════
-//  HELPERS
-// ═══════════════════════════════════════════════════
 function refreshAll() { recalcAll(); }
-
-function fmt(n, dec = 2) {
-  return (isNaN(n) ? 0 : n).toLocaleString('es-MX', {
-    minimumFractionDigits: dec, maximumFractionDigits: dec
-  });
-}
-function fmtRate(n) {
-  if (n >= 100)  return n.toLocaleString('es-MX', { maximumFractionDigits: 2 });
-  if (n >= 1)    return n.toLocaleString('es-MX', { maximumFractionDigits: 4 });
-  return n.toLocaleString('es-MX', { maximumFractionDigits: 6 });
-}
 
 // ═══════════════════════════════════════════════════
 //  SAVE / LOAD / CLEAR
@@ -890,68 +1081,57 @@ function fmtRate(n) {
 function saveData() {
   const expenses = [];
   document.querySelectorAll('#expensesBody tr').forEach(tr => {
-    const inputs  = tr.querySelectorAll('input');
-    const selects = tr.querySelectorAll('select');
-    if (inputs.length < 2) return;
-    expenses.push({
-      date:    inputs[0].value,
-      cat:     selects[0]?.value,
-      desc:    inputs[1].value,
-      cur:     selects[1]?.value,
-      amt:     inputs[2]?.value,
-      voucher: selects[2]?.value,
-    });
+    const sel = tr.querySelectorAll('select');
+    const inp = tr.querySelectorAll('input');
+    if (inp.length < 3) return;
+    expenses.push({ date:inp[0].value, cat:sel[0]?.value, desc:inp[1].value,
+                    cur:sel[1]?.value, amt:inp[2].value, voucher:sel[2]?.value });
   });
   const clients = [];
   document.querySelectorAll('#clientsBody tr').forEach(tr => {
-    const inputs  = tr.querySelectorAll('input');
-    const selects = tr.querySelectorAll('select');
-    if (!inputs.length) return;
-    clients.push({
-      name: inputs[0].value, city: inputs[1].value, contact: inputs[2].value,
-      type: selects[0]?.value, cur: selects[1]?.value, amt: inputs[3]?.value,
-      status: selects[2]?.value, notes: inputs[4]?.value,
-    });
+    const sel = tr.querySelectorAll('select');
+    const inp = tr.querySelectorAll('input');
+    if (inp.length < 4) return;
+    clients.push({ name:inp[0].value, city:inp[1].value, contact:inp[2].value,
+                   type:sel[0]?.value, cur:sel[1]?.value, amt:inp[3].value,
+                   status:sel[2]?.value, notes:inp[4]?.value });
   });
   const d = {
-    travelerName: document.getElementById('travelerName').value,
-    travelerRole: document.getElementById('travelerRole').value,
-    company:      document.getElementById('company').value,
-    destCountry:  document.getElementById('destCountry').value,
-    destCity:     document.getElementById('destCity').value,
-    dateStart:    document.getElementById('dateStart').value,
-    dateEnd:      document.getElementById('dateEnd').value,
-    tripPurpose:  document.getElementById('tripPurpose').value,
-    baseCurrency: document.getElementById('baseCurrency').value,
-    advance:      document.getElementById('advance').value,
-    mgmtNotes:    document.getElementById('mgmtNotes').value,
+    travelerName:document.getElementById('travelerName').value,
+    travelerRole:document.getElementById('travelerRole').value,
+    company:document.getElementById('company').value,
+    destCountry:document.getElementById('destCountry').value,
+    destCity:document.getElementById('destCity').value,
+    dateStart:document.getElementById('dateStart').value,
+    dateEnd:document.getElementById('dateEnd').value,
+    tripPurpose:document.getElementById('tripPurpose').value,
+    baseCurrency:document.getElementById('baseCurrency').value,
+    advance:document.getElementById('advance').value,
+    mgmtNotes:document.getElementById('mgmtNotes').value,
     rates, expenses, clients,
   };
-  localStorage.setItem('travelReport_v2', JSON.stringify(d));
-  alert('✅ Borrador guardado en el navegador.');
+  localStorage.setItem('travelReport_v3', JSON.stringify(d));
+  alert('✅ Borrador guardado.');
 }
 
 function loadData() {
-  const raw = localStorage.getItem('travelReport_v2');
+  const raw = localStorage.getItem('travelReport_v3');
   if (!raw) { alert('No hay borrador guardado.'); return; }
   const d = JSON.parse(raw);
-
   ['travelerName','company','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
-    .forEach(id => { document.getElementById(id).value = d[id] || ''; });
-  document.getElementById('travelerRole').value  = d.travelerRole  || '';
-  document.getElementById('baseCurrency').value  = d.baseCurrency  || 'USD';
-  document.getElementById('advance').value       = d.advance       || '0';
-
+    .forEach(id => { document.getElementById(id).value = d[id]||''; });
+  document.getElementById('travelerRole').value = d.travelerRole||'';
+  document.getElementById('baseCurrency').value = d.baseCurrency||'USD';
+  document.getElementById('advance').value      = d.advance||'0';
   if (d.rates) { rates = d.rates; ratesLoaded = true; renderRatesPanel(); }
-
   document.getElementById('expensesBody').innerHTML = '';
+  document.getElementById('expensesMobile').innerHTML = '';
   expRowId = 0;
-  (d.expenses || []).forEach(e => addExpenseRow(e.date, e.cat, e.desc, e.cur, e.amt, e.voucher));
-
+  (d.expenses||[]).forEach(e => addExpenseRow(e.date,e.cat,e.desc,e.cur,e.amt,e.voucher));
   document.getElementById('clientsBody').innerHTML = '';
+  document.getElementById('clientsMobile').innerHTML = '';
   cliRowId = 0;
-  (d.clients || []).forEach(c => addClientRow(c.name, c.city, c.contact, c.type, c.cur, c.amt, c.status, c.notes));
-
+  (d.clients||[]).forEach(c => addClientRow(c.name,c.city,c.contact,c.type,c.cur,c.amt,c.status,c.notes));
   recalcAll();
   alert('✅ Borrador cargado.');
 }
@@ -959,23 +1139,37 @@ function loadData() {
 function clearAll() {
   if (!confirm('¿Limpiar todo el reporte?')) return;
   document.getElementById('expensesBody').innerHTML = '';
-  document.getElementById('clientsBody').innerHTML  = '';
+  document.getElementById('expensesMobile').innerHTML = '';
+  document.getElementById('clientsBody').innerHTML = '';
+  document.getElementById('clientsMobile').innerHTML = '';
   expRowId = 0; cliRowId = 0;
   ['travelerName','company','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
-    .forEach(id => { document.getElementById(id).value = ''; });
+    .forEach(id => { document.getElementById(id).value=''; });
   document.getElementById('advance').value = '0';
   recalcAll();
+}
+
+// ═══════════════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════════════
+function fmt(n, dec=2) {
+  return (isNaN(n)?0:n).toLocaleString('es-MX',{minimumFractionDigits:dec,maximumFractionDigits:dec});
+}
+function fmtRate(n) {
+  if (n>=1000) return n.toLocaleString('es-MX',{maximumFractionDigits:0});
+  if (n>=100)  return n.toLocaleString('es-MX',{maximumFractionDigits:2});
+  if (n>=1)    return n.toLocaleString('es-MX',{maximumFractionDigits:4});
+  return n.toLocaleString('es-MX',{maximumFractionDigits:6});
 }
 
 // ═══════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
-  populateBaseSelect();
+  populateSelects();
   addExpenseRow(); addExpenseRow(); addExpenseRow();
   addClientRow();  addClientRow();
   recalcAll();
-  // Auto-fetch rates on load
   fetchRates();
 });
 </script>

@@ -3,18 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-  <title>Reporte de Viaje</title>
+  <title>Reporte de Viaje · Mays Zona Libre</title>
   <style>
     :root {
-      --primary: #1a3a5c;
-      --accent:  #2e86c1;
-      --success: #1e8449;
+      --primary: #1b5e20;
+      --accent:  #2e7d32;
+      --accent2: #388e3c;
+      --success: #1b5e20;
       --danger:  #c0392b;
-      --warn:    #d68910;
-      --light:   #f4f6f9;
-      --border:  #d5d8dc;
-      --text:    #212529;
+      --warn:    #f9a825;
+      --light:   #f1f8e9;
+      --border:  #c8e6c9;
+      --text:    #1a1a1a;
       --white:   #ffffff;
+      --gold:    #f9a825;
       --touch:   44px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -22,15 +24,35 @@
 
     /* ── Header ── */
     .page-header {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-      color: var(--white); padding: 20px 20px;
-      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 60%, #388e3c 100%);
+      color: var(--white); padding: 0;
+      box-shadow: 0 3px 12px rgba(0,0,0,.25);
     }
-    .page-header h1 { font-size: 1.35rem; font-weight: 700; }
-    .page-header p  { font-size: .82rem; opacity: .85; margin-top: 3px; }
+    .header-top {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 12px; padding: 16px 24px;
+    }
+    .header-logo-area {
+      display: flex; align-items: center; gap: 16px;
+    }
+    .logo-box {
+      background: #fff; border-radius: 10px; padding: 6px 12px;
+      display: flex; align-items: center; justify-content: center;
+      min-width: 90px; min-height: 52px;
+    }
+    .logo-box img { height: 42px; max-width: 130px; object-fit: contain; display: block; }
+    .logo-box .logo-fallback {
+      font-size: 1rem; font-weight: 900; color: #1b5e20; letter-spacing: -.5px; line-height: 1.1;
+    }
+    .header-title h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: .3px; }
+    .header-title p  { font-size: .78rem; opacity: .85; margin-top: 3px; }
     .badge-status {
-      background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.4);
-      border-radius: 20px; padding: 6px 14px; font-size: .78rem; font-weight: 600; white-space: nowrap;
+      background: var(--gold); color: #1b1b1b;
+      border-radius: 20px; padding: 7px 16px; font-size: .78rem; font-weight: 800;
+      white-space: nowrap; box-shadow: 0 2px 6px rgba(0,0,0,.2);
+    }
+    .header-bar {
+      background: var(--gold); height: 5px;
     }
 
     /* ── Layout ── */
@@ -39,8 +61,10 @@
 
     .card { background: var(--white); border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.07); overflow: hidden; }
     .card-header {
-      background: var(--primary); color: var(--white); padding: 13px 18px;
-      font-weight: 600; font-size: .92rem; display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(90deg, #1b5e20, #2e7d32);
+      color: var(--white); padding: 13px 18px;
+      font-weight: 700; font-size: .92rem; display: flex; align-items: center; gap: 8px;
+      border-left: 5px solid var(--gold);
     }
     .card-body { padding: 16px; }
 
@@ -68,15 +92,15 @@
     .stat-card .stat-label { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .5px; opacity: .75; }
     .stat-card .stat-value { font-size: 1.3rem; font-weight: 700; line-height: 1.2; }
     .stat-card .stat-sub   { font-size: .72rem; opacity: .8; }
-    .stat-blue   { background: #eaf2fb; color: var(--primary); }
-    .stat-green  { background: #eafaf1; color: var(--success); }
+    .stat-blue   { background: #e8f5e9; color: #1b5e20; }
+    .stat-green  { background: #f1f8e9; color: #33691e; }
     .stat-red    { background: #fdedec; color: var(--danger); }
-    .stat-orange { background: #fef9e7; color: var(--warn); }
+    .stat-orange { background: #fff8e1; color: #e65100; }
 
     /* ── Desktop table ── */
     .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
     table.desktop-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    table.desktop-table thead tr { background: #eef2f7; }
+    table.desktop-table thead tr { background: #e8f5e9; }
     table.desktop-table th { padding: 10px 10px; text-align: left; font-weight: 600; color: #555; white-space: nowrap; border-bottom: 2px solid var(--border); }
     table.desktop-table td { padding: 7px 8px; border-bottom: 1px solid #eee; vertical-align: middle; }
     table.desktop-table tr:last-child td { border-bottom: none; }
@@ -88,8 +112,8 @@
     }
     table.desktop-table td input:focus,
     table.desktop-table td select:focus { outline: none; border-color: var(--accent); }
-    .td-total { font-weight: 700; color: var(--primary); }
-    .totals-row td { background: #eef2f7 !important; font-weight: 700; color: var(--primary); border-top: 2px solid var(--border); }
+    .td-total { font-weight: 700; color: #1b5e20; }
+    .totals-row td { background: #e8f5e9 !important; font-weight: 700; color: #1b5e20; border-top: 2px solid #a5d6a7; }
 
     /* ── Mobile expense cards ── */
     .mobile-cards { display: none; }
@@ -98,9 +122,10 @@
       margin-bottom: 10px; overflow: hidden;
     }
     .m-card-header {
-      background: #eef2f7; padding: 8px 14px;
+      background: #e8f5e9; padding: 8px 14px;
       display: flex; justify-content: space-between; align-items: center;
-      font-size: .78rem; font-weight: 700; color: var(--primary);
+      font-size: .78rem; font-weight: 700; color: #1b5e20;
+      border-left: 4px solid var(--gold);
     }
     .m-card-body { padding: 12px 14px; display: flex; flex-direction: column; gap: 10px; }
     .m-field { display: flex; flex-direction: column; gap: 4px; }
@@ -124,24 +149,24 @@
       min-height: var(--touch); touch-action: manipulation;
     }
     .btn:active { transform: scale(.97); }
-    .btn-primary { background: var(--accent);  color: #fff; }
-    .btn-success { background: var(--success); color: #fff; }
+    .btn-primary { background: #2e7d32;  color: #fff; }
+    .btn-success { background: #1b5e20; color: #fff; }
     .btn-danger  { background: var(--danger);  color: #fff; }
-    .btn-outline { background: transparent; border: 1.5px solid var(--accent); color: var(--accent); }
-    .btn-warn    { background: var(--warn);    color: #fff; }
-    .btn-teal    { background: #148f77;        color: #fff; }
+    .btn-outline { background: transparent; border: 2px solid #2e7d32; color: #2e7d32; }
+    .btn-warn    { background: var(--gold);    color: #1a1a1a; font-weight: 700; }
+    .btn-teal    { background: #00695c;        color: #fff; }
     .btn-sm      { padding: 6px 12px; font-size: .8rem; min-height: 32px; border-radius: 6px; }
     .btn-row     { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
 
     /* ── Rates panel ── */
     .rates-panel {
-      background: #f0f8ff; border: 1px solid #b3d4f0; border-radius: 8px; padding: 14px 14px; margin-top: 14px;
+      background: #f1f8e9; border: 1px solid #a5d6a7; border-radius: 8px; padding: 14px 14px; margin-top: 14px;
     }
-    .rates-panel h4 { font-size: .82rem; color: var(--primary); font-weight: 700; margin-bottom: 10px; }
+    .rates-panel h4 { font-size: .82rem; color: #1b5e20; font-weight: 700; margin-bottom: 10px; }
     .rates-grid { display: flex; flex-wrap: wrap; gap: 8px; }
     .rate-chip {
-      background: #fff; border: 1px solid #c8e0f5; border-radius: 8px;
-      padding: 6px 12px; font-size: .78rem; color: #1a3a5c;
+      background: #fff; border: 1px solid #a5d6a7; border-radius: 8px;
+      padding: 6px 12px; font-size: .78rem; color: #1b5e20;
       display: flex; flex-direction: column; align-items: center; min-width: 72px;
     }
     .rate-chip .rc-code { font-weight: 700; font-size: .78rem; }
@@ -156,9 +181,9 @@
       border-radius: 10px; padding: 14px 16px; font-size: .92rem; font-weight: 600;
       margin-top: 12px; display: flex; align-items: flex-start; gap: 10px; line-height: 1.4;
     }
-    .balance-positive { background: #eafaf1; color: var(--success); border-left: 4px solid var(--success); }
+    .balance-positive { background: #e8f5e9; color: #1b5e20; border-left: 4px solid #2e7d32; }
     .balance-negative { background: #fdedec; color: var(--danger);  border-left: 4px solid var(--danger); }
-    .balance-zero     { background: #eef2f7; color: var(--primary); border-left: 4px solid var(--accent); }
+    .balance-zero     { background: #f1f8e9; color: #33691e; border-left: 4px solid #689f38; }
 
     /* ── Progress ── */
     .progress-wrap { background: #e9ecef; border-radius: 20px; height: 10px; overflow: hidden; margin-top: 6px; }
@@ -177,12 +202,12 @@
 
     /* ── Currency breakdown chips ── */
     .cur-chip {
-      background: #fff; border: 1px solid #c8e0f5; border-radius: 10px;
+      background: #fff; border: 1px solid #a5d6a7; border-radius: 10px;
       padding: 10px 14px; min-width: 110px; text-align: center;
     }
-    .cur-chip .cc-code { font-size: .85rem; font-weight: 700; color: var(--primary); }
+    .cur-chip .cc-code  { font-size: .85rem; font-weight: 700; color: #1b5e20; }
     .cur-chip .cc-local { font-size: .8rem; color: #333; }
-    .cur-chip .cc-base  { font-size: .75rem; color: var(--accent); }
+    .cur-chip .cc-base  { font-size: .75rem; color: #2e7d32; }
 
     /* ── Print ── */
     @media print {
@@ -210,9 +235,10 @@
 
       /* Totals strip stays visible */
       .totals-strip {
-        background: #eef2f7; border-radius: 8px; padding: 12px 14px;
+        background: #e8f5e9; border-radius: 8px; padding: 12px 14px;
         display: flex; justify-content: space-between; align-items: center;
-        font-weight: 700; color: var(--primary); margin-top: 4px; font-size: .9rem;
+        font-weight: 700; color: #1b5e20; margin-top: 4px; font-size: .9rem;
+        border-left: 4px solid var(--gold);
       }
 
       .btn { width: 100%; justify-content: center; }
@@ -246,11 +272,22 @@
 
 <!-- ═══ HEADER ═══ -->
 <div class="page-header">
-  <div>
-    <h1>✈️ Reporte de Viaje</h1>
-    <p>Gestión de gastos multi-moneda, clientes y tasas en tiempo real</p>
+  <div class="header-top">
+    <div class="header-logo-area">
+      <div class="logo-box">
+        <img src="https://www.mayszl.com/images/logo.png"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='block';"
+             alt="Mays Zona Libre" />
+        <div class="logo-fallback" style="display:none;">MAYS<br/>ZL</div>
+      </div>
+      <div class="header-title">
+        <h1>✈️ Reporte de Viaje</h1>
+        <p>Mays Zona Libre &nbsp;·&nbsp; Gestión de gastos multi-moneda y clientes</p>
+      </div>
+    </div>
+    <div class="badge-status" id="statusBadge">EN CURSO</div>
   </div>
-  <div class="badge-status" id="statusBadge">EN CURSO</div>
+  <div class="header-bar"></div>
 </div>
 
 <div class="container">

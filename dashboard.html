@@ -1251,6 +1251,8 @@
         </div>
       </div>
 
+      ${buildAttachGallery(r.expenses || [])}
+
       ${mgmtNotesSection}
 
       <div class="modal-section">
@@ -1282,6 +1284,52 @@
 
   // Unused helper left from build — safe to keep
   function buildExpRow(e, sym, fileCell) { return ''; }
+
+  function buildAttachGallery(expenses) {
+    const withFiles = expenses.filter(e => e.fileData);
+    if (!withFiles.length) return '';
+
+    let items = '';
+    withFiles.forEach(e => {
+      const label = [e.date, e.cat, e.desc].filter(Boolean).join(' · ') || 'Sin descripción';
+      if (e.fileType && e.fileType.startsWith('image/')) {
+        items += `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <img class="receipt-img"
+                 src="data:${escAttr(e.fileType)};base64,${escAttr(e.fileData)}"
+                 data-ftype="${escAttr(e.fileType)}" data-fdata="${escAttr(e.fileData)}"
+                 style="width:100%;max-width:160px;height:110px;object-fit:cover;border-radius:8px;
+                        border:2px solid #c8e6c9;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.12);"
+                 title="Click para ver completo" />
+            <span style="font-size:.72rem;color:#555;text-align:center;max-width:160px;
+                         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(label)}</span>
+          </div>`;
+      } else if (e.fileType === 'application/pdf') {
+        items += `
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;">
+            <a href="data:application/pdf;base64,${escAttr(e.fileData)}"
+               download="${escAttr(e.fileName || 'recibo.pdf')}"
+               style="display:flex;flex-direction:column;align-items:center;justify-content:center;
+                      width:120px;height:90px;border-radius:8px;border:2px solid #b2dfbb;
+                      background:#f4faf5;color:#0d3d1a;text-decoration:none;font-size:2rem;">
+              📄
+              <span style="font-size:.7rem;margin-top:4px;font-weight:700;">PDF</span>
+            </a>
+            <span style="font-size:.72rem;color:#555;text-align:center;max-width:130px;
+                         white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(label)}</span>
+          </div>`;
+      }
+    });
+
+    return `
+      <div class="modal-section">
+        <h3 class="modal-section-title">📎 Archivos Adjuntos (${withFiles.length})</h3>
+        <div style="display:flex;flex-wrap:wrap;gap:14px;padding:4px 0;">
+          ${items}
+        </div>
+        <p style="font-size:.72rem;color:#aaa;margin-top:8px;">Haz clic en una imagen para verla a tamaño completo.</p>
+      </div>`;
+  }
 
   function closeModal() {
     document.getElementById('tripModal').style.display = 'none';

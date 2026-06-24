@@ -502,7 +502,7 @@
               <tr>
                 <th>#</th><th>Fecha</th><th>Categoría</th><th>Descripción</th>
                 <th>Moneda</th><th>Monto</th><th>= Base (<span id="thBase">?</span>)</th>
-                <th>Archivo / Recibo</th><th class="no-print">🗑</th>
+                <th class="no-print">Archivo / Recibo</th><th class="no-print">🗑</th>
               </tr>
             </thead>
             <tbody id="expensesBody"></tbody>
@@ -510,7 +510,7 @@
               <tr class="totals-row">
                 <td colspan="6" style="text-align:right;font-size:.85rem;">TOTAL EN MONEDA BASE</td>
                 <td id="totalBase" style="white-space:nowrap;">0.00</td>
-                <td colspan="2"></td>
+                <td class="no-print" colspan="2"></td>
               </tr>
             </tfoot>
           </table>
@@ -639,8 +639,8 @@
         </div>
 
         <div class="btn-row no-print" style="margin-top:20px;">
-          <button class="btn btn-success" onclick="finalizeReport()" style="background:#0d6b2e;">📤 Finalizar y Enviar Reporte</button>
-          <button class="btn btn-warn"    onclick="window.print()">🖨️ Imprimir / PDF</button>
+          <button class="btn btn-success" onclick="finalizeReport()" style="background:#0d6b2e;">📤 Enviar a Dashboard (JSON)</button>
+          <button class="btn btn-warn"    onclick="printPDF()">🖨️ Imprimir / Exportar PDF</button>
           <button class="btn btn-primary" onclick="saveData()">💾 Guardar</button>
           <button class="btn btn-outline" onclick="loadData()">📂 Cargar</button>
           <button class="btn btn-danger btn-sm" onclick="clearAll()">🗑 Limpiar</button>
@@ -833,7 +833,7 @@ function addExpenseRow(date, cat, desc, cur, amt, fileName) {
     <td><select class="cur-sel" onchange="syncExpense(${id})">${curShort(cur)}</select></td>
     <td><input type="number" class="amt-inp" value="${amt||''}" min="0" step="any" placeholder="0.00" oninput="syncExpense(${id})" style="max-width:90px;" /></td>
     <td class="td-total base-col" style="white-space:nowrap;">—</td>
-    <td>
+    <td class="no-print">
       <label class="file-btn" id="fb-${id}" title="Subir recibo, factura o foto">
         <input type="file" accept="image/*,.pdf" onchange="onFileChange(${id},this)" />
         📎 <span id="fl-${id}">${fileName||'Adjuntar'}</span>
@@ -1338,6 +1338,10 @@ function clearAll() {
     .forEach(id => { document.getElementById(id).value=''; });
   document.getElementById('advance').value = '0';
   recalcAll();
+}
+
+function printPDF() {
+  window.print();
 }
 
 function finalizeReport() {

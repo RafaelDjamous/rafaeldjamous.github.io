@@ -228,6 +228,15 @@
     .cur-chip .cc-local { font-size: .8rem; color: #333; }
     .cur-chip .cc-base  { font-size: .75rem; color: #1a6b2e; }
 
+    /* ── Dashboard link ── */
+    .btn-dashboard-link {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 7px 14px; border: 2px solid #0d3d1a; border-radius: 20px;
+      font-size: .76rem; font-weight: 700; color: #0d3d1a;
+      text-decoration: none; white-space: nowrap; transition: background .15s;
+    }
+    .btn-dashboard-link:hover { background: #eaf4ec; }
+
     /* ── Print ── */
     @media print {
       body { background: #fff; font-size: 12px; }
@@ -314,7 +323,10 @@
         <p>Gestión de gastos · Multi-moneda · Clientes</p>
       </div>
     </div>
-    <div class="badge-status" id="statusBadge">EN CURSO</div>
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <a href="./dashboard.html" class="btn-dashboard-link no-print">📊 Ver Dashboard</a>
+      <div class="badge-status" id="statusBadge">EN CURSO</div>
+    </div>
   </div>
   <div class="header-bar"></div>
 </div>
@@ -358,6 +370,13 @@
         <!-- Empresa fija -->
         <div style="background:#eaf4ec;border-left:4px solid #1a6b2e;border-radius:6px;padding:8px 14px;margin-bottom:14px;font-size:.85rem;color:#0d3d1a;font-weight:600;">
           🏢 Empresa: <strong>Mays Zona Libre S.A.</strong>
+        </div>
+        <!-- Número de Viaje -->
+        <div style="margin-bottom:14px;">
+          <div class="field">
+            <label>Número de Viaje</label>
+            <input type="text" id="tripId" placeholder="MZL-YYYY-NNN" />
+          </div>
         </div>
         <div class="grid-2" style="margin-bottom:14px;">
           <div class="field">
@@ -620,6 +639,7 @@
         </div>
 
         <div class="btn-row no-print" style="margin-top:20px;">
+          <button class="btn btn-success" onclick="finalizeReport()" style="background:#0d6b2e;">📤 Finalizar y Enviar Reporte</button>
           <button class="btn btn-warn"    onclick="window.print()">🖨️ Imprimir / PDF</button>
           <button class="btn btn-primary" onclick="saveData()">💾 Guardar</button>
           <button class="btn btn-outline" onclick="loadData()">📂 Cargar</button>
@@ -635,6 +655,8 @@
 // ═══════════════════════════════════════════════════
 //  DATA
 // ═══════════════════════════════════════════════════
+const fileStore = new Map(); // key: expense row id, value: {name, type, data (base64)}
+
 // ═══════════════════════════════════════════════════
 //  COUNTRIES
 // ═══════════════════════════════════════════════════
@@ -865,6 +887,35 @@ function addExpenseRow(date, cat, desc, cur, amt, fileName) {
   recalcAll();
 }
 
+function storeFile(id, file) {
+  if (file.type === 'application/pdf') {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const b64 = e.target.result.split(',')[1];
+      fileStore.set(id, { name: file.name, type: 'application/pdf', data: b64 });
+    };
+    reader.readAsDataURL(file);
+  } else if (file.type.startsWith('image/')) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      const img = new Image();
+      img.onload = () => {
+        const maxW = 900;
+        let w = img.width, h = img.height;
+        if (w > maxW) { h = Math.round(h * maxW / w); w = maxW; }
+        const canvas = document.createElement('canvas');
+        canvas.width = w; canvas.height = h;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, w, h);
+        const b64 = canvas.toDataURL('image/jpeg', 0.82).split(',')[1];
+        fileStore.set(id, { name: file.name, type: 'image/jpeg', data: b64 });
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
 function onFileChange(id, inp) {
   const f = inp.files[0]; if (!f) return;
   const name = f.name.length > 18 ? f.name.slice(0,15)+'…' : f.name;
@@ -876,6 +927,7 @@ function onFileChange(id, inp) {
   const mb = document.getElementById(`mfb-${id}`);
   if (ml) ml.textContent = name;
   if (mb) mb.classList.add('file-attached');
+  storeFile(id, f);
 }
 function onFileMobileChange(id, inp) {
   const f = inp.files[0]; if (!f) return;
@@ -888,6 +940,7 @@ function onFileMobileChange(id, inp) {
   const db = document.getElementById(`fb-${id}`);
   if (dl) dl.textContent = name;
   if (db) db.classList.add('file-attached');
+  storeFile(id, f);
 }
 
 // Sync desktop → mobile
@@ -1287,6 +1340,103 @@ function clearAll() {
   recalcAll();
 }
 
+function finalizeReport() {
+  const base = document.getElementById('baseCurrency').value;
+  const sym  = SYMBOLS[base] || base;
+
+  // Collect expenses
+  const expenses = [];
+  document.querySelectorAll('#expensesBody tr').forEach(tr => {
+    const sel = tr.querySelectorAll('select');
+    const inp = tr.querySelectorAll('input');
+    const fbl = tr.querySelector('[id^="fl-"]');
+    if (inp.length < 3) return;
+    const amt    = parseFloat(inp[2]?.value) || 0;
+    const cur    = sel[1]?.value || base;
+    const amtBase = convert(amt, cur, base);
+    const rowId  = parseInt(tr.id.replace('edt-',''));
+    const stored = fileStore.get(rowId);
+    expenses.push({
+      date: inp[0]?.value,
+      cat:  sel[0]?.value,
+      desc: inp[1]?.value,
+      cur,
+      amt:  inp[2]?.value,
+      amtBase: parseFloat(amtBase.toFixed(2)),
+      fileName: stored ? stored.name : (fbl && fbl.textContent !== 'Adjuntar' ? fbl.textContent : ''),
+      fileType: stored ? stored.type : '',
+      fileData: stored ? stored.data : '',
+    });
+  });
+
+  // Collect clients
+  const clients = [];
+  document.querySelectorAll('#clientsBody tr').forEach(tr => {
+    const sel = tr.querySelectorAll('select');
+    const inp = tr.querySelectorAll('input');
+    if (inp.length < 4) return;
+    const amt    = parseFloat(inp[3]?.value) || 0;
+    const cur    = sel[1]?.value || base;
+    const amtBase = convert(amt, cur, base);
+    clients.push({
+      name:    inp[0]?.value,
+      city:    inp[1]?.value,
+      contact: inp[2]?.value,
+      type:    sel[0]?.value,
+      cur,
+      amt:     inp[3]?.value,
+      amtBase: parseFloat(amtBase.toFixed(2)),
+      status:  sel[2]?.value,
+      notes:   inp[4]?.value,
+    });
+  });
+
+  // Compute totals
+  let totalExpenses = 0;
+  expenses.forEach(e => { totalExpenses += e.amtBase || 0; });
+  const advance = parseFloat(document.getElementById('advance').value) || 0;
+  const balance = advance - totalExpenses;
+
+  const tripId = document.getElementById('tripId').value;
+  const report = {
+    tripId,
+    submittedAt: new Date().toISOString().slice(0,10),
+    travelerName: document.getElementById('travelerName').value,
+    travelerRole: document.getElementById('travelerRole').value,
+    destCountry:  document.getElementById('destCountry').value,
+    destCity:     document.getElementById('destCity').value,
+    dateStart:    document.getElementById('dateStart').value,
+    dateEnd:      document.getElementById('dateEnd').value,
+    tripPurpose:  document.getElementById('tripPurpose').value,
+    baseCurrency: base,
+    advance,
+    totalExpenses: parseFloat(totalExpenses.toFixed(2)),
+    balance: parseFloat(balance.toFixed(2)),
+    mgmtNotes: document.getElementById('mgmtNotes').value,
+    expenses,
+    clients,
+    status: 'pendiente',
+  };
+
+  // Save to localStorage mzl_reports array
+  let reports = [];
+  try { reports = JSON.parse(localStorage.getItem('mzl_reports') || '[]'); } catch(e){}
+  const idx = reports.findIndex(r => r.tripId === tripId);
+  if (idx >= 0) reports[idx] = report; else reports.push(report);
+  localStorage.setItem('mzl_reports', JSON.stringify(reports));
+
+  // Download JSON
+  const blob = new Blob([JSON.stringify(report, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `reporte-${tripId}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+
+  alert('✅ Reporte enviado y descargado. Compártelo con gerencia.');
+}
+
 // ═══════════════════════════════════════════════════
 //  HELPERS
 // ═══════════════════════════════════════════════════
@@ -1301,10 +1451,22 @@ function fmtRate(n) {
 }
 
 // ═══════════════════════════════════════════════════
+//  TRIP ID
+// ═══════════════════════════════════════════════════
+function initTripId() {
+  const year = new Date().getFullYear();
+  let num = parseInt(localStorage.getItem('mzl_last_trip_num') || '0') + 1;
+  localStorage.setItem('mzl_last_trip_num', num);
+  const id = `MZL-${year}-${String(num).padStart(3,'0')}`;
+  document.getElementById('tripId').value = id;
+}
+
+// ═══════════════════════════════════════════════════
 //  INIT
 // ═══════════════════════════════════════════════════
 window.addEventListener('DOMContentLoaded', () => {
   populateSelects();
+  initTripId();
   addExpenseRow(); addExpenseRow(); addExpenseRow();
   addClientRow();  addClientRow();
   recalcAll();

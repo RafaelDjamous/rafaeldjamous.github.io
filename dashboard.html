@@ -1,0 +1,1250 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel de Gerencia · Mays Zona Libre</title>
+  <style>
+    :root {
+      --primary: #0d3d1a;
+      --accent:  #1a6b2e;
+      --accent-light: #e8f5e9;
+      --accent-mid:   #b2dfbb;
+      --danger:  #c0392b;
+      --warn:    #e65100;
+      --warn-bg: #fff3e0;
+      --text:    #222;
+      --muted:   #666;
+      --border:  #dee2e6;
+      --radius:  8px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f6f4;
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── HEADER ─────────────────────────────────────────────── */
+    .site-header {
+      background: #fff;
+      border-bottom: 4px solid var(--primary);
+      box-shadow: 0 2px 8px rgba(0,0,0,.12);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .site-header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 10px 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+    .header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .header-divider {
+      width: 2px;
+      height: 44px;
+      background: var(--accent-mid);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .header-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--primary);
+      line-height: 1.2;
+    }
+    .header-subtitle {
+      font-size: .72rem;
+      color: var(--muted);
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .btn-new-report {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      color: var(--accent);
+      background: transparent;
+      font-size: .875rem;
+      font-weight: 700;
+      text-decoration: none;
+      white-space: nowrap;
+      transition: background .18s, color .18s;
+    }
+    .btn-new-report:hover {
+      background: var(--accent);
+      color: #fff;
+    }
+    .accent-bar {
+      height: 4px;
+      background: var(--accent);
+    }
+
+    /* ── LAYOUT ─────────────────────────────────────────────── */
+    .main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 28px 20px 60px;
+    }
+
+    /* ── IMPORT SECTION ─────────────────────────────────────── */
+    .import-section {
+      margin-bottom: 28px;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+    .btn-import {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .18s, box-shadow .18s;
+      box-shadow: 0 2px 6px rgba(26,107,46,.25);
+    }
+    .btn-import:hover {
+      background: var(--primary);
+      box-shadow: 0 4px 12px rgba(13,61,26,.3);
+    }
+    .import-hint {
+      font-size: .8rem;
+      color: var(--muted);
+    }
+
+    /* ── SUMMARY CARDS ──────────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: #fff;
+      border: 1.5px solid var(--accent-mid);
+      border-radius: 12px;
+      padding: 20px 18px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .stat-card-label {
+      font-size: .72rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .8px;
+    }
+    .stat-card-value {
+      font-size: 1.55rem;
+      font-weight: 900;
+      color: var(--primary);
+      line-height: 1.15;
+      word-break: break-word;
+    }
+    .stat-card-sub {
+      font-size: .72rem;
+      color: var(--muted);
+    }
+
+    /* ── FILTERS BAR ─────────────────────────────────────────── */
+    .filters-bar {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      margin-bottom: 18px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 12px;
+    }
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .filter-group label {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .filter-group select,
+    .filter-group input[type="date"] {
+      padding: 7px 10px;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: .875rem;
+      color: var(--text);
+      background: #fff;
+      min-width: 150px;
+    }
+    .filter-group select:focus,
+    .filter-group input[type="date"]:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+    .btn-clear-filters {
+      padding: 7px 16px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 6px;
+      font-size: .8rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+      align-self: flex-end;
+    }
+    .btn-clear-filters:hover {
+      border-color: var(--danger);
+      color: var(--danger);
+    }
+
+    /* ── ACTION BUTTONS ──────────────────────────────────────── */
+    .actions-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 18px;
+      flex-wrap: wrap;
+    }
+    .btn-action {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: .875rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background .15s, box-shadow .15s;
+      border: 1.5px solid transparent;
+    }
+    .btn-action-csv {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-action-csv:hover { background: var(--primary); border-color: var(--primary); }
+    .btn-action-print {
+      background: #fff;
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .btn-action-print:hover { background: var(--accent-light); }
+
+    /* ── DESKTOP TABLE ───────────────────────────────────────── */
+    .table-wrap {
+      overflow-x: auto;
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .trips-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .875rem;
+    }
+    .trips-table thead tr {
+      background: var(--primary);
+      color: #fff;
+    }
+    .trips-table thead th {
+      padding: 11px 12px;
+      text-align: left;
+      font-weight: 700;
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      white-space: nowrap;
+    }
+    .trips-table tbody tr {
+      border-bottom: 1px solid #f0f4f0;
+      transition: background .12s;
+    }
+    .trips-table tbody tr:hover { background: #f7fbf7; }
+    .trips-table tbody tr:last-child { border-bottom: none; }
+    .trips-table td {
+      padding: 10px 12px;
+      vertical-align: middle;
+    }
+
+    /* ── ACTION BUTTONS (table) ──────────────────────────────── */
+    .btn-act {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 6px;
+      font-size: .75rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid transparent;
+      transition: background .15s, color .15s;
+      margin-right: 4px;
+    }
+    .btn-act:last-child { margin-right: 0; }
+    .btn-act-view {
+      background: transparent;
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    .btn-act-view:hover { background: var(--accent-light); }
+    .btn-act-approve {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-act-approve:hover { background: var(--primary); border-color: var(--primary); }
+    .btn-act-reject {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+    }
+    .btn-act-reject:hover { background: #922b21; border-color: #922b21; }
+
+    /* ── MOBILE CARDS ────────────────────────────────────────── */
+    .trips-mobile { display: none; }
+    .mob-card {
+      background: #fff;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      overflow: hidden;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .mob-card-header {
+      background: var(--primary);
+      color: #fff;
+      padding: 12px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+    .mob-trip-id {
+      font-size: .9rem;
+      font-weight: 800;
+      letter-spacing: .3px;
+    }
+    .mob-traveler {
+      font-size: .75rem;
+      opacity: .85;
+      margin-top: 2px;
+    }
+    .mob-card-body {
+      padding: 12px 14px;
+    }
+    .mob-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 0;
+      border-bottom: 1px solid #f0f4f0;
+      font-size: .83rem;
+      gap: 8px;
+    }
+    .mob-row:last-of-type { border-bottom: none; }
+    .mob-row > span:first-child { color: var(--muted); font-weight: 600; flex-shrink: 0; }
+    .mob-actions {
+      margin-top: 12px;
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* ── MODAL ───────────────────────────────────────────────── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.6);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-box {
+      background: #fff;
+      border-radius: 12px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 28px 28px 24px;
+      position: relative;
+      box-shadow: 0 12px 48px rgba(0,0,0,.28);
+    }
+    .modal-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+      padding-bottom: 14px;
+      border-bottom: 2px solid var(--accent-mid);
+      gap: 12px;
+    }
+    .modal-topbar-title {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--primary);
+    }
+    .btn-modal-close {
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      width: 36px;
+      height: 36px;
+      font-size: 1.1rem;
+      cursor: pointer;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: background .15s, color .15s;
+    }
+    .btn-modal-close:hover { background: #fee; color: var(--danger); border-color: var(--danger); }
+
+    .modal-trip-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+    .modal-section {
+      margin-bottom: 22px;
+    }
+    .modal-section-title {
+      font-size: .82rem;
+      font-weight: 800;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      margin-bottom: 10px;
+      padding-bottom: 5px;
+      border-bottom: 1.5px solid var(--accent-mid);
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    .info-item {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .info-label {
+      font-size: .68rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    .info-item > span:last-child {
+      font-size: .88rem;
+      color: var(--text);
+    }
+
+    .fin-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    .fin-card {
+      background: var(--accent-light);
+      border: 1.5px solid var(--accent-mid);
+      border-radius: 10px;
+      padding: 14px 16px;
+      text-align: center;
+    }
+    .fin-label {
+      font-size: .7rem;
+      font-weight: 700;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+      margin-bottom: 6px;
+    }
+    .fin-value {
+      font-size: 1.15rem;
+      font-weight: 900;
+    }
+
+    .modal-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: .82rem;
+    }
+    .modal-table thead tr {
+      background: var(--primary);
+      color: #fff;
+    }
+    .modal-table thead th {
+      padding: 9px 10px;
+      text-align: left;
+      font-weight: 700;
+      font-size: .7rem;
+      text-transform: uppercase;
+      letter-spacing: .4px;
+      white-space: nowrap;
+    }
+    .modal-table tbody tr {
+      border-bottom: 1px solid #f0f4f0;
+    }
+    .modal-table tbody tr:hover { background: #f7fbf7; }
+    .modal-table tbody tr:last-child { border-bottom: none; }
+    .modal-table td {
+      padding: 8px 10px;
+      vertical-align: middle;
+    }
+
+    .btn-modal {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 11px 22px;
+      border-radius: 8px;
+      font-size: .9rem;
+      font-weight: 700;
+      cursor: pointer;
+      border: 2px solid transparent;
+      min-height: 44px;
+      transition: background .15s, border-color .15s;
+    }
+    .btn-modal-approve {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+    .btn-modal-approve:hover { background: var(--primary); border-color: var(--primary); }
+    .btn-modal-reject {
+      background: var(--danger);
+      color: #fff;
+      border-color: var(--danger);
+    }
+    .btn-modal-reject:hover { background: #922b21; border-color: #922b21; }
+    .btn-modal-pending {
+      background: var(--warn-bg);
+      color: var(--warn);
+      border-color: var(--warn);
+    }
+    .btn-modal-pending:hover { background: #ffe0b2; }
+
+    .modal-close-bottom {
+      margin-top: 24px;
+      padding-top: 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+    }
+    .btn-close-bottom {
+      padding: 9px 22px;
+      background: transparent;
+      border: 1.5px solid var(--border);
+      border-radius: 8px;
+      font-size: .875rem;
+      color: var(--muted);
+      cursor: pointer;
+      transition: border-color .15s, color .15s;
+    }
+    .btn-close-bottom:hover { border-color: var(--danger); color: var(--danger); }
+
+    /* ── RESPONSIVE ──────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .cards-grid { grid-template-columns: repeat(2, 1fr); }
+      .info-grid  { grid-template-columns: 1fr; }
+      .fin-grid   { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 700px) {
+      .table-wrap  { display: none; }
+      .trips-mobile { display: block; }
+      .cards-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .header-title { font-size: 1rem; }
+      .modal-box { padding: 18px 14px 16px; }
+      .filters-bar { padding: 10px 12px; }
+    }
+
+    @media (max-width: 420px) {
+      .cards-grid { grid-template-columns: 1fr; }
+    }
+
+    /* ── PRINT ───────────────────────────────────────────────── */
+    @media print {
+      .site-header,
+      .import-section,
+      .filters-bar,
+      .actions-row,
+      .btn-act-approve,
+      .btn-act-reject,
+      .btn-act-view,
+      .mob-actions,
+      .modal-overlay { display: none !important; }
+      body { background: #fff; }
+      .main { padding: 0; }
+      .table-wrap { box-shadow: none; border: 1px solid #ccc; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="site-header">
+  <div class="site-header-inner">
+    <div class="header-left">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 72" height="58" role="img" aria-label="May's Zona Libre S.A.">
+        <text x="4" y="52" font-family="Arial Black, Arial, sans-serif" font-weight="900"
+              font-size="52" fill="#1a6b2e" letter-spacing="-1">May's</text>
+        <text x="152" y="14" font-family="Arial, sans-serif" font-size="16" fill="#1a6b2e">★</text>
+        <text x="6" y="68" font-family="Arial, sans-serif" font-weight="700"
+              font-size="11.5" fill="#1a6b2e" letter-spacing="2.5">ZONA LIBRE</text>
+        <text x="125" y="68" font-family="Arial, sans-serif" font-weight="700"
+              font-size="11.5" fill="#1a6b2e" letter-spacing="1">S.A.</text>
+      </svg>
+      <div class="header-divider"></div>
+      <div>
+        <div class="header-title">Panel de Gerencia</div>
+        <div class="header-subtitle">Gestión de Reportes de Gastos de Viaje</div>
+      </div>
+    </div>
+    <a href="./reporte-viaje.html" class="btn-new-report">
+      ➕ Nueva Hoja de Gastos
+    </a>
+  </div>
+</header>
+<div class="accent-bar"></div>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- IMPORT -->
+  <div class="import-section">
+    <input type="file" id="fileInput" accept=".json" multiple style="display:none;" onchange="importJSON(this.files)" />
+    <button class="btn-import" onclick="document.getElementById('fileInput').click()">
+      📂 Importar Reporte (.json)
+    </button>
+    <span class="import-hint">Los reportes guardados en este navegador se cargan automáticamente.</span>
+  </div>
+
+  <!-- SUMMARY CARDS -->
+  <div class="cards-grid">
+    <div class="stat-card">
+      <div class="stat-card-label">Total Viajes</div>
+      <div class="stat-card-value" id="cTotalViajes">0</div>
+      <div class="stat-card-sub">Reportes registrados</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Gastos</div>
+      <div class="stat-card-value" id="cTotalGastos">0.00</div>
+      <div class="stat-card-sub">Suma de todos los reportes</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Pendientes</div>
+      <div class="stat-card-value" id="cPendientes" style="color:var(--warn);">0</div>
+      <div class="stat-card-sub">Requieren revisión</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-card-label">Total Negociado</div>
+      <div class="stat-card-value" id="cTotalNegociado">0.00</div>
+      <div class="stat-card-sub">Suma amtBase de clientes</div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filters-bar">
+    <div class="filter-group">
+      <label for="fVendedor">Vendedor</label>
+      <select id="fVendedor" onchange="renderAll()">
+        <option value="">Todos los vendedores</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="fEstado">Estado</label>
+      <select id="fEstado" onchange="renderAll()">
+        <option value="">Todos</option>
+        <option value="pendiente">Pendiente</option>
+        <option value="aprobado">Aprobado</option>
+        <option value="rechazado">Rechazado</option>
+      </select>
+    </div>
+    <div class="filter-group">
+      <label for="fDesde">Desde</label>
+      <input type="date" id="fDesde" onchange="renderAll()" />
+    </div>
+    <div class="filter-group">
+      <label for="fHasta">Hasta</label>
+      <input type="date" id="fHasta" onchange="renderAll()" />
+    </div>
+    <button class="btn-clear-filters" onclick="clearFilters()">✕ Limpiar filtros</button>
+  </div>
+
+  <!-- ACTION BUTTONS -->
+  <div class="actions-row">
+    <button class="btn-action btn-action-csv" onclick="exportCSV()">📥 Exportar CSV</button>
+    <button class="btn-action btn-action-print" onclick="window.print()">🖨️ Imprimir</button>
+  </div>
+
+  <!-- DESKTOP TABLE -->
+  <div class="table-wrap">
+    <table class="trips-table">
+      <thead>
+        <tr>
+          <th># Viaje</th>
+          <th>Vendedor</th>
+          <th>Destino</th>
+          <th>Fechas</th>
+          <th>Moneda</th>
+          <th>Total Gastos</th>
+          <th>Adelanto</th>
+          <th>Saldo</th>
+          <th>Clientes</th>
+          <th>Estado</th>
+          <th>Acciones</th>
+        </tr>
+      </thead>
+      <tbody id="tripsBody">
+        <tr>
+          <td colspan="11" style="text-align:center;color:#aaa;padding:32px;">
+            No hay reportes. Importe un .json o registre un reporte en la hoja de gastos.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- MOBILE CARDS -->
+  <div class="trips-mobile" id="tripsMobile">
+    <div style="text-align:center;color:#aaa;padding:24px;">No hay reportes registrados.</div>
+  </div>
+
+</main>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="tripModal" onclick="handleOverlayClick(event)">
+  <div class="modal-box" id="modalBox">
+    <div class="modal-topbar">
+      <div class="modal-topbar-title">Detalle del Reporte</div>
+      <button class="btn-modal-close" onclick="closeModal()" title="Cerrar">✕</button>
+    </div>
+    <div id="modalContent"></div>
+    <div class="modal-close-bottom">
+      <button class="btn-close-bottom" onclick="closeModal()">Cerrar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let reports = [];
+  let filteredReports = [];
+  let currentTripIdx = null;
+
+  function loadFromStorage() {
+    try {
+      reports = JSON.parse(localStorage.getItem('mzl_reports') || '[]');
+    } catch (e) {
+      reports = [];
+    }
+  }
+
+  function saveToStorage() {
+    localStorage.setItem('mzl_reports', JSON.stringify(reports));
+  }
+
+  function importJSON(files) {
+    let pending = files.length;
+    if (!pending) return;
+
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        try {
+          const rep = JSON.parse(e.target.result);
+          const arr = Array.isArray(rep) ? rep : [rep];
+          arr.forEach(r => {
+            const idx = reports.findIndex(x => x.tripId === r.tripId);
+            if (idx >= 0) {
+              reports[idx] = r;
+            } else {
+              reports.push(r);
+            }
+          });
+        } catch (ex) {
+          alert('Error leyendo JSON: ' + file.name);
+        }
+        pending--;
+        if (pending === 0) {
+          saveToStorage();
+          renderAll();
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Reset file input so the same file can be re-imported
+    document.getElementById('fileInput').value = '';
+  }
+
+  function applyFilters() {
+    const vendedor = document.getElementById('fVendedor').value;
+    const estado   = document.getElementById('fEstado').value;
+    const desde    = document.getElementById('fDesde').value;
+    const hasta    = document.getElementById('fHasta').value;
+
+    filteredReports = reports.filter(r => {
+      if (vendedor && r.travelerName !== vendedor) return false;
+      if (estado   && r.status !== estado)         return false;
+      if (desde    && r.dateEnd   && r.dateEnd   < desde) return false;
+      if (hasta    && r.dateStart && r.dateStart > hasta) return false;
+      return true;
+    });
+  }
+
+  function clearFilters() {
+    document.getElementById('fVendedor').value = '';
+    document.getElementById('fEstado').value   = '';
+    document.getElementById('fDesde').value    = '';
+    document.getElementById('fHasta').value    = '';
+    renderAll();
+  }
+
+  function renderAll() {
+    applyFilters();
+    updateSummaryCards();
+    updateFilters();
+    renderTable();
+  }
+
+  function updateSummaryCards() {
+    document.getElementById('cTotalViajes').textContent  = reports.length;
+    document.getElementById('cPendientes').textContent   = reports.filter(r => r.status === 'pendiente').length;
+
+    // Total gastos grouped by currency
+    const totByCur = {};
+    reports.forEach(r => {
+      const c = r.baseCurrency || 'USD';
+      totByCur[c] = (totByCur[c] || 0) + (r.totalExpenses || 0);
+    });
+    const gastoStr = Object.entries(totByCur)
+      .map(([c, v]) => `${c} ${fmtN(v)}`)
+      .join(' · ') || '0.00';
+    document.getElementById('cTotalGastos').textContent = gastoStr;
+
+    // Total negociado
+    let totNeg = 0;
+    reports.forEach(r => {
+      (r.clients || []).forEach(c => { totNeg += (c.amtBase || 0); });
+    });
+    document.getElementById('cTotalNegociado').textContent = fmtN(totNeg);
+  }
+
+  function updateFilters() {
+    const sel = document.getElementById('fVendedor');
+    const cur = sel.value;
+    const names = [...new Set(reports.map(r => r.travelerName).filter(Boolean))];
+    sel.innerHTML = '<option value="">Todos los vendedores</option>' +
+      names.map(n => `<option value="${escAttr(n)}"${n === cur ? ' selected' : ''}>${escHtml(n)}</option>`).join('');
+  }
+
+  function renderTable() {
+    const tbody = document.getElementById('tripsBody');
+    const mDiv  = document.getElementById('tripsMobile');
+    tbody.innerHTML = '';
+    mDiv.innerHTML  = '';
+
+    if (!filteredReports.length) {
+      tbody.innerHTML = '<tr><td colspan="11" style="text-align:center;color:#aaa;padding:32px;">No hay reportes. Importe un .json o registre un reporte en la hoja de gastos.</td></tr>';
+      mDiv.innerHTML  = '<div style="text-align:center;color:#aaa;padding:24px;">No hay reportes registrados.</div>';
+      return;
+    }
+
+    filteredReports.forEach(r => {
+      const ri         = reports.indexOf(r);
+      const saldo      = (r.advance || 0) - (r.totalExpenses || 0);
+      const saldoColor = saldo >= 0 ? '#1a6b2e' : '#c0392b';
+      const sym        = r.baseCurrency || 'USD';
+      const statusBadge = badgeHtml(r.status);
+      const fechas     = [r.dateStart, r.dateEnd].filter(Boolean).join(' → ') || '—';
+      const destino    = [r.destCity, r.destCountry].filter(Boolean).join(', ') || '—';
+      const numClientes = (r.clients || []).length;
+
+      // Desktop row
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td><strong>${escHtml(r.tripId || '—')}</strong></td>
+        <td>${escHtml(r.travelerName || '—')}</td>
+        <td>${escHtml(destino)}</td>
+        <td style="white-space:nowrap;font-size:.82rem;">${escHtml(fechas)}</td>
+        <td>${escHtml(sym)}</td>
+        <td><strong>${escHtml(sym)} ${fmtN(r.totalExpenses || 0)}</strong></td>
+        <td>${escHtml(sym)} ${fmtN(r.advance || 0)}</td>
+        <td style="color:${saldoColor};font-weight:700;">${escHtml(sym)} ${fmtN(Math.abs(saldo))} ${saldo >= 0 ? '✓' : '↑'}</td>
+        <td>${numClientes}</td>
+        <td>${statusBadge}</td>
+        <td style="white-space:nowrap;">
+          <button class="btn-act btn-act-view"    onclick="openModal(${ri})">👁 Ver</button>
+          <button class="btn-act btn-act-approve" onclick="quickApprove(${ri})">✅</button>
+          <button class="btn-act btn-act-reject"  onclick="quickReject(${ri})">❌</button>
+        </td>`;
+      tbody.appendChild(tr);
+
+      // Mobile card
+      const mc = document.createElement('div');
+      mc.className = 'mob-card';
+      mc.innerHTML = `
+        <div class="mob-card-header">
+          <div>
+            <div class="mob-trip-id">${escHtml(r.tripId || '—')}</div>
+            <div class="mob-traveler">${escHtml(r.travelerName || '—')}</div>
+          </div>
+          ${statusBadge}
+        </div>
+        <div class="mob-card-body">
+          <div class="mob-row"><span>Destino</span><span>${escHtml(destino)}</span></div>
+          <div class="mob-row"><span>Fechas</span><span style="font-size:.8rem;">${escHtml(fechas)}</span></div>
+          <div class="mob-row"><span>Total Gastos</span><span><strong>${escHtml(sym)} ${fmtN(r.totalExpenses || 0)}</strong></span></div>
+          <div class="mob-row"><span>Saldo</span><span style="color:${saldoColor};font-weight:700;">${escHtml(sym)} ${fmtN(Math.abs(saldo))}</span></div>
+          <div class="mob-actions">
+            <button class="btn-act btn-act-view"    onclick="openModal(${ri})">👁 Ver Detalle</button>
+            <button class="btn-act btn-act-approve" onclick="quickApprove(${ri})">✅ Aprobar</button>
+            <button class="btn-act btn-act-reject"  onclick="quickReject(${ri})">❌ Rechazar</button>
+          </div>
+        </div>`;
+      mDiv.appendChild(mc);
+    });
+  }
+
+  function badgeHtml(status) {
+    const map = {
+      pendiente: ['#fff3e0', '#e65100', 'Pendiente'],
+      aprobado:  ['#e8f5e9', '#1b5e20', 'Aprobado'],
+      rechazado: ['#ffebee', '#b71c1c', 'Rechazado'],
+    };
+    const [bg, color, label] = map[status] || ['#f5f5f5', '#555', '—'];
+    return `<span style="background:${bg};color:${color};border-radius:12px;padding:3px 10px;font-size:.75rem;font-weight:700;white-space:nowrap;display:inline-block;">${label}</span>`;
+  }
+
+  function fmtN(n, dec) {
+    dec = (dec === undefined) ? 2 : dec;
+    return (isNaN(n) ? 0 : n).toLocaleString('es-MX', {
+      minimumFractionDigits: dec,
+      maximumFractionDigits: dec
+    });
+  }
+
+  function escHtml(s) {
+    if (s == null) return '';
+    return String(s)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function escAttr(s) {
+    return escHtml(s);
+  }
+
+  function quickApprove(ri) {
+    if (!confirm('¿Aprobar este reporte?')) return;
+    reports[ri].status = 'aprobado';
+    saveToStorage();
+    renderAll();
+  }
+
+  function quickReject(ri) {
+    if (!confirm('¿Rechazar este reporte?')) return;
+    reports[ri].status = 'rechazado';
+    saveToStorage();
+    renderAll();
+  }
+
+  function openModal(ri) {
+    currentTripIdx = ri;
+    const r = reports[ri];
+    if (!r) return;
+
+    const sym        = r.baseCurrency || 'USD';
+    const saldo      = (r.advance || 0) - (r.totalExpenses || 0);
+    const saldoColor = saldo >= 0 ? '#1a6b2e' : '#c0392b';
+    const fechas     = [r.dateStart, r.dateEnd].filter(Boolean).join(' → ') || '—';
+
+    // Expenses rows
+    let expRows = '';
+    (r.expenses || []).forEach(e => {
+      let fileCell = '—';
+      if (e.fileData) {
+        if (e.fileType && e.fileType.startsWith('image/')) {
+          // Store safely — avoid inline event with raw base64 in attribute
+          const imgId = 'img_' + Math.random().toString(36).slice(2);
+          expRows += buildExpRow(e, sym, `<img id="${imgId}" src="data:${e.fileType};base64,${e.fileData}" style="max-width:80px;max-height:60px;border-radius:4px;cursor:pointer;border:1px solid #ddd;" title="Ver imagen" />`);
+          // We'll attach click after innerHTML — defer with data attrs instead
+          fileCell = `<img data-ftype="${escAttr(e.fileType)}" data-fdata="${escAttr(e.fileData)}" src="data:${e.fileType};base64,${e.fileData}" style="max-width:80px;max-height:60px;border-radius:4px;cursor:pointer;border:1px solid #ddd;" title="Ver imagen" class="receipt-img" />`;
+        } else if (e.fileType === 'application/pdf') {
+          fileCell = `<a href="data:application/pdf;base64,${e.fileData}" download="${escAttr(e.fileName || 'recibo.pdf')}" style="color:#1a6b2e;font-size:.8rem;text-decoration:none;">📄 PDF</a>`;
+        } else {
+          fileCell = e.fileName ? `<span style="font-size:.75rem;color:#aaa;">${escHtml(e.fileName)}</span>` : '—';
+        }
+      } else if (e.fileName) {
+        fileCell = `<span style="font-size:.75rem;color:#aaa;">${escHtml(e.fileName)}</span>`;
+      }
+
+      expRows += `<tr>
+        <td>${escHtml(e.date || '—')}</td>
+        <td>${escHtml(e.cat  || '—')}</td>
+        <td>${escHtml(e.desc || '—')}</td>
+        <td>${escHtml(e.cur  || '')}</td>
+        <td style="text-align:right;">${fmtN(e.amt)}</td>
+        <td style="text-align:right;font-weight:700;">${escHtml(sym)} ${fmtN(e.amtBase)}</td>
+        <td>${fileCell}</td>
+      </tr>`;
+    });
+    if (!expRows) expRows = '<tr><td colspan="7" style="text-align:center;color:#aaa;padding:12px;">Sin gastos registrados.</td></tr>';
+
+    // Clients rows
+    let cliRows = '';
+    (r.clients || []).forEach(c => {
+      cliRows += `<tr>
+        <td>${escHtml(c.name    || '—')}</td>
+        <td>${escHtml(c.city    || '—')}</td>
+        <td>${escHtml(c.contact || '—')}</td>
+        <td>${escHtml(c.type   || '—')}</td>
+        <td>${escHtml(c.cur    || '')}</td>
+        <td style="text-align:right;">${fmtN(c.amt)}</td>
+        <td style="text-align:right;font-weight:700;">${escHtml(sym)} ${fmtN(c.amtBase)}</td>
+        <td>${escHtml(c.status || '—')}</td>
+        <td>${escHtml(c.notes  || '—')}</td>
+      </tr>`;
+    });
+    if (!cliRows) cliRows = '<tr><td colspan="9" style="text-align:center;color:#aaa;padding:12px;">Sin clientes registrados.</td></tr>';
+
+    const mgmtNotesSection = r.mgmtNotes ? `
+      <div class="modal-section">
+        <h3 class="modal-section-title">Observaciones del Viajero</h3>
+        <p style="font-size:.9rem;line-height:1.6;color:#333;white-space:pre-wrap;">${escHtml(r.mgmtNotes)}</p>
+      </div>` : '';
+
+    document.getElementById('modalContent').innerHTML = `
+      <div class="modal-trip-header">
+        <div>
+          <div style="font-size:1.1rem;font-weight:800;color:#0d3d1a;">${escHtml(r.tripId || '—')}</div>
+          <div style="font-size:.85rem;color:#555;margin-top:2px;">${escHtml(r.travelerName || '—')}${r.travelerRole ? ' · ' + escHtml(r.travelerRole) : ''}</div>
+        </div>
+        ${badgeHtml(r.status)}
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Información del Viaje</h3>
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Destino</span>
+            <span>${escHtml([r.destCity, r.destCountry].filter(Boolean).join(', ') || '—')}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Fechas</span>
+            <span>${escHtml(fechas)}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Enviado</span>
+            <span>${escHtml(r.submittedAt || '—')}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Moneda Base</span>
+            <span>${escHtml(sym)}</span>
+          </div>
+          <div class="info-item" style="grid-column:1/-1;">
+            <span class="info-label">Objetivo del Viaje</span>
+            <span>${escHtml(r.tripPurpose || '—')}</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Resumen Financiero</h3>
+        <div class="fin-grid">
+          <div class="fin-card">
+            <div class="fin-label">Adelanto</div>
+            <div class="fin-value" style="color:#0d3d1a;">${escHtml(sym)} ${fmtN(r.advance || 0)}</div>
+          </div>
+          <div class="fin-card">
+            <div class="fin-label">Total Gastos</div>
+            <div class="fin-value" style="color:#c0392b;">${escHtml(sym)} ${fmtN(r.totalExpenses || 0)}</div>
+          </div>
+          <div class="fin-card">
+            <div class="fin-label">Saldo</div>
+            <div class="fin-value" style="color:${saldoColor};">${escHtml(sym)} ${fmtN(Math.abs(saldo))} ${saldo >= 0 ? '(a devolver)' : '(a reembolsar)'}</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Gastos (${(r.expenses || []).length})</h3>
+        <div style="overflow-x:auto;">
+          <table class="modal-table">
+            <thead>
+              <tr>
+                <th>Fecha</th><th>Categoría</th><th>Descripción</th>
+                <th>Moneda</th><th>Monto</th><th>Base</th><th>Recibo</th>
+              </tr>
+            </thead>
+            <tbody>${expRows}</tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Clientes Visitados (${(r.clients || []).length})</h3>
+        <div style="overflow-x:auto;">
+          <table class="modal-table">
+            <thead>
+              <tr>
+                <th>Empresa</th><th>Ciudad</th><th>Contacto</th><th>Tipo</th>
+                <th>Moneda</th><th>Negociado</th><th>Base</th><th>Estado</th><th>Notas</th>
+              </tr>
+            </thead>
+            <tbody>${cliRows}</tbody>
+          </table>
+        </div>
+      </div>
+
+      ${mgmtNotesSection}
+
+      <div class="modal-section">
+        <h3 class="modal-section-title">Decisión de Gerencia</h3>
+        <div style="margin-bottom:12px;">
+          <label style="display:block;font-size:.76rem;font-weight:700;color:#555;text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px;">Notas de Gerencia (opcional)</label>
+          <textarea id="modalNotes" rows="3"
+            style="border:1.5px solid #b2dfbb;border-radius:8px;padding:10px;font-size:.9rem;width:100%;resize:vertical;font-family:inherit;"
+            placeholder="Observaciones, condiciones, etc…">${escHtml(r.mgmtNotes_mgmt || '')}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+          <button class="btn-modal btn-modal-approve" onclick="setStatus('aprobado')">✅ Aprobar</button>
+          <button class="btn-modal btn-modal-reject"  onclick="setStatus('rechazado')">❌ Rechazar</button>
+          <button class="btn-modal btn-modal-pending" onclick="setStatus('pendiente')">✏️ Pendiente</button>
+        </div>
+      </div>
+    `;
+
+    // Attach click handlers to receipt images (avoids inline event with giant base64)
+    document.querySelectorAll('#modalContent .receipt-img').forEach(img => {
+      img.addEventListener('click', function () {
+        openImgPreview(this.dataset.ftype, this.dataset.fdata);
+      });
+    });
+
+    document.getElementById('tripModal').style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+  }
+
+  // Unused helper left from build — safe to keep
+  function buildExpRow(e, sym, fileCell) { return ''; }
+
+  function closeModal() {
+    document.getElementById('tripModal').style.display = 'none';
+    document.body.style.overflow = '';
+    currentTripIdx = null;
+  }
+
+  function handleOverlayClick(event) {
+    if (event.target === document.getElementById('tripModal')) {
+      closeModal();
+    }
+  }
+
+  function setStatus(status) {
+    if (currentTripIdx === null) return;
+    const notes = (document.getElementById('modalNotes') || {}).value || '';
+    reports[currentTripIdx].status = status;
+    reports[currentTripIdx].mgmtNotes_mgmt = notes;
+    saveToStorage();
+    closeModal();
+    renderAll();
+    alert('Reporte marcado como: ' + status);
+  }
+
+  function openImgPreview(type, b64) {
+    const w = window.open('', '_blank');
+    if (w) {
+      w.document.write('<html><body style="margin:0;background:#111;display:flex;align-items:center;justify-content:center;min-height:100vh;">'
+        + '<img src="data:' + type + ';base64,' + b64 + '" style="max-width:100%;height:auto;" />'
+        + '</body></html>');
+      w.document.close();
+    }
+  }
+
+  function exportCSV() {
+    if (!filteredReports.length) {
+      alert('No hay reportes para exportar con los filtros actuales.');
+      return;
+    }
+    const rows = [
+      ['TripID', 'Vendedor', 'Destino', 'FechaInicio', 'FechaFin', 'TotalGastos', 'Moneda', 'Adelanto', 'Saldo', 'Clientes', 'Estado']
+    ];
+    filteredReports.forEach(r => {
+      const saldo = (r.advance || 0) - (r.totalExpenses || 0);
+      rows.push([
+        r.tripId        || '',
+        r.travelerName  || '',
+        [r.destCity, r.destCountry].filter(Boolean).join(', '),
+        r.dateStart     || '',
+        r.dateEnd       || '',
+        (r.totalExpenses || 0).toFixed(2),
+        r.baseCurrency  || 'USD',
+        (r.advance      || 0).toFixed(2),
+        saldo.toFixed(2),
+        (r.clients      || []).length,
+        r.status        || '',
+      ]);
+    });
+    const csv  = rows.map(row => row.map(v => JSON.stringify(String(v))).join(',')).join('\n');
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8;' });
+    const a    = document.createElement('a');
+    a.href     = URL.createObjectURL(blob);
+    a.download = 'mzl-reportes-' + new Date().toISOString().slice(0, 10) + '.csv';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(a.href);
+  }
+
+  // Keyboard: close modal on Escape
+  document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.getElementById('tripModal').style.display === 'flex') {
+      closeModal();
+    }
+  });
+
+  window.addEventListener('DOMContentLoaded', function () {
+    loadFromStorage();
+    renderAll();
+  });
+</script>
+</body>
+</html>

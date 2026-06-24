@@ -198,6 +198,27 @@
     .note { font-size: .76rem; color: #888; margin-top: 8px; line-height: 1.4; }
     select.cur-sel { font-weight: 700; color: var(--primary); }
 
+    /* ── File upload ── */
+    .file-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 10px; border-radius: 6px; font-size: .78rem; font-weight: 600;
+      cursor: pointer; border: 1.5px dashed #b2dfbb; background: #f4faf5;
+      color: #1a6b2e; transition: background .15s; white-space: nowrap;
+      min-height: 32px;
+    }
+    .file-btn:hover { background: #eaf4ec; border-color: #1a6b2e; }
+    .file-btn input[type=file] { display: none; }
+    .file-attached { border-style: solid; background: #eaf4ec; color: #0d3d1a; }
+    /* Mobile file btn */
+    .file-btn-mobile {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      width: 100%; padding: 12px; border-radius: 8px; font-size: .9rem;
+      font-weight: 600; cursor: pointer; border: 2px dashed #b2dfbb;
+      background: #f4faf5; color: #1a6b2e; min-height: var(--touch);
+    }
+    .file-btn-mobile:hover { background: #eaf4ec; }
+    .file-btn-mobile input[type=file] { display: none; }
+
     /* ── Currency breakdown chips ── */
     .cur-chip {
       background: #fff; border: 1px solid #a5d6a7; border-radius: 10px;
@@ -334,10 +355,14 @@
     <div class="card">
       <div class="card-header">📋 1. Información Básica del Viaje</div>
       <div class="card-body">
-        <div class="grid-3" style="margin-bottom:14px;">
+        <!-- Empresa fija -->
+        <div style="background:#eaf4ec;border-left:4px solid #1a6b2e;border-radius:6px;padding:8px 14px;margin-bottom:14px;font-size:.85rem;color:#0d3d1a;font-weight:600;">
+          🏢 Empresa: <strong>Mays Zona Libre S.A.</strong>
+        </div>
+        <div class="grid-2" style="margin-bottom:14px;">
           <div class="field">
             <label>Nombre del Viajero</label>
-            <input type="text" id="travelerName" placeholder="Juan Pérez" oninput="refreshAll()" />
+            <input type="text" id="travelerName" placeholder="Tu nombre completo" oninput="refreshAll()" />
           </div>
           <div class="field">
             <label>Cargo / Rol</label>
@@ -348,33 +373,33 @@
               <option>Director Comercial</option>
             </select>
           </div>
-          <div class="field">
-            <label>Empresa / Departamento</label>
-            <input type="text" id="company" placeholder="Empresa S.A." />
-          </div>
         </div>
-        <div class="grid-4">
+        <div class="grid-2" style="margin-bottom:14px;">
           <div class="field">
             <label>País de Destino</label>
-            <input type="text" id="destCountry" placeholder="México" />
+            <select id="destCountry" onchange="refreshAll()">
+              <option value="">Seleccionar país…</option>
+            </select>
           </div>
           <div class="field">
             <label>Ciudad</label>
-            <input type="text" id="destCity" placeholder="Ciudad de México" />
+            <input type="text" id="destCity" placeholder="Ciudad de destino" />
           </div>
+        </div>
+        <div class="grid-2">
           <div class="field">
-            <label>Fecha Salida</label>
+            <label>Fecha de Salida</label>
             <input type="date" id="dateStart" onchange="refreshAll()" />
           </div>
           <div class="field">
-            <label>Fecha Regreso</label>
+            <label>Fecha de Regreso</label>
             <input type="date" id="dateEnd" onchange="refreshAll()" />
           </div>
         </div>
         <div style="margin-top:14px;">
           <div class="field">
             <label>Objetivo del Viaje</label>
-            <textarea id="tripPurpose" placeholder="Describe el propósito, metas comerciales, etc."></textarea>
+            <textarea id="tripPurpose" rows="2" placeholder="Ej: Visita a clientes en México, compras de temporada…"></textarea>
           </div>
         </div>
       </div>
@@ -458,7 +483,7 @@
               <tr>
                 <th>#</th><th>Fecha</th><th>Categoría</th><th>Descripción</th>
                 <th>Moneda</th><th>Monto</th><th>= Base (<span id="thBase">?</span>)</th>
-                <th>Comprobante</th><th class="no-print">🗑</th>
+                <th>Archivo / Recibo</th><th class="no-print">🗑</th>
               </tr>
             </thead>
             <tbody id="expensesBody"></tbody>
@@ -610,6 +635,46 @@
 // ═══════════════════════════════════════════════════
 //  DATA
 // ═══════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════
+//  COUNTRIES
+// ═══════════════════════════════════════════════════
+const ALL_COUNTRIES = [
+  'Afganistán','Albania','Alemania','Andorra','Angola','Antigua y Barbuda','Arabia Saudita',
+  'Argelia','Argentina','Armenia','Australia','Austria','Azerbaiyán','Bahamas','Bangladés',
+  'Barbados','Baréin','Bélgica','Belice','Benín','Bielorrusia','Bolivia','Bosnia y Herzegovina',
+  'Botsuana','Brasil','Brunéi','Bulgaria','Burkina Faso','Burundi','Bután','Cabo Verde',
+  'Camboya','Camerún','Canadá','Catar','Chad','Chile','China','Chipre','Colombia','Comoras',
+  'Corea del Norte','Corea del Sur','Costa de Marfil','Costa Rica','Croacia','Cuba','Dinamarca',
+  'Dominica','Ecuador','Egipto','El Salvador','Emiratos Árabes Unidos','Eritrea','Eslovaquia',
+  'Eslovenia','España','Estados Unidos','Estonia','Etiopía','Filipinas','Finlandia','Fiyi',
+  'Francia','Gabón','Gambia','Georgia','Ghana','Granada','Grecia','Guatemala','Guinea',
+  'Guinea Ecuatorial','Guinea-Bisáu','Guyana','Haití','Honduras','Hungría','India','Indonesia',
+  'Irak','Irán','Irlanda','Islandia','Islas Marshall','Islas Salomón','Israel','Italia',
+  'Jamaica','Japón','Jordania','Kazajistán','Kenia','Kirguistán','Kiribati','Kuwait','Laos',
+  'Lesoto','Letonia','Líbano','Liberia','Libia','Liechtenstein','Lituania','Luxemburgo',
+  'Macedonia del Norte','Madagascar','Malasia','Malaui','Maldivas','Malí','Malta','Marruecos',
+  'Mauricio','Mauritania','México','Micronesia','Moldavia','Mónaco','Mongolia','Montenegro',
+  'Mozambique','Namibia','Nauru','Nepal','Nicaragua','Níger','Nigeria','Noruega','Nueva Zelanda',
+  'Omán','Países Bajos','Pakistán','Palaos','Palestina','Panamá','Papúa Nueva Guinea','Paraguay',
+  'Perú','Polonia','Portugal','Reino Unido','República Centroafricana','República Checa',
+  'República del Congo','República Democrática del Congo','República Dominicana','Ruanda',
+  'Rumanía','Rusia','Samoa','San Cristóbal y Nieves','San Marino','San Vicente y las Granadinas',
+  'Santa Lucía','Santo Tomé y Príncipe','Senegal','Serbia','Seychelles','Sierra Leona',
+  'Singapur','Siria','Somalia','Sri Lanka','Sudáfrica','Sudán','Sudán del Sur','Suecia',
+  'Suiza','Surinam','Tailandia','Tanzania','Tayikistán','Timor Oriental','Togo','Tonga',
+  'Trinidad y Tobago','Túnez','Turkmenistán','Turquía','Tuvalu','Ucrania','Uganda','Uruguay',
+  'Uzbekistán','Vanuatu','Venezuela','Vietnam','Yemen','Yibuti','Zambia','Zimbabue',
+];
+
+function populateCountries() {
+  const sel = document.getElementById('destCountry');
+  ALL_COUNTRIES.forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c; opt.textContent = c;
+    sel.appendChild(opt);
+  });
+}
+
 const ALL_CURRENCIES = [
   ['USD','Dólar Americano'],['EUR','Euro'],['GBP','Libra Esterlina'],
   ['MXN','Peso Mexicano'],['COP','Peso Colombiano'],['ARS','Peso Argentino'],
@@ -723,12 +788,13 @@ function voucherOptions(sel) {
 function populateSelects() {
   document.getElementById('baseCurrency').innerHTML = curOptions('USD');
   document.getElementById('manualCur').innerHTML    = curShort('MXN');
+  populateCountries();
 }
 
 // ═══════════════════════════════════════════════════
 //  EXPENSE ROWS
 // ═══════════════════════════════════════════════════
-function addExpenseRow(date, cat, desc, cur, amt, voucher) {
+function addExpenseRow(date, cat, desc, cur, amt, fileName) {
   const id    = ++expRowId;
   const today = date || new Date().toISOString().slice(0,10);
   cur = cur || 'USD';
@@ -740,12 +806,17 @@ function addExpenseRow(date, cat, desc, cur, amt, voucher) {
   tr.innerHTML = `
     <td style="color:#aaa;font-size:.72rem;">${id}</td>
     <td><input type="date" value="${today}" onchange="syncExpense(${id})" style="min-width:120px;" /></td>
-    <td><select onchange="syncExpense(${id})" style="min-width:150px;"><option value="">—</option>${catOptions(cat)}</select></td>
-    <td><input type="text" value="${desc||''}" placeholder="Descripción…" oninput="syncExpense(${id})" style="min-width:120px;" /></td>
+    <td><select onchange="syncExpense(${id})" style="min-width:150px;"><option value="">— Categoría —</option>${catOptions(cat)}</select></td>
+    <td><input type="text" value="${desc||''}" placeholder="Descripción (opcional)" oninput="syncExpense(${id})" style="min-width:110px;" /></td>
     <td><select class="cur-sel" onchange="syncExpense(${id})">${curShort(cur)}</select></td>
     <td><input type="number" class="amt-inp" value="${amt||''}" min="0" step="any" placeholder="0.00" oninput="syncExpense(${id})" style="max-width:90px;" /></td>
     <td class="td-total base-col" style="white-space:nowrap;">—</td>
-    <td><select style="min-width:130px;">${voucherOptions(voucher)}</select></td>
+    <td>
+      <label class="file-btn" id="fb-${id}" title="Subir recibo, factura o foto">
+        <input type="file" accept="image/*,.pdf" onchange="onFileChange(${id},this)" />
+        📎 <span id="fl-${id}">${fileName||'Adjuntar'}</span>
+      </label>
+    </td>
     <td class="no-print"><button class="btn btn-danger btn-sm" onclick="removeExpense(${id})">✕</button></td>`;
   tbody.appendChild(tr);
 
@@ -757,7 +828,7 @@ function addExpenseRow(date, cat, desc, cur, amt, voucher) {
   mCard.innerHTML = `
     <div class="m-card-header">
       <span>Gasto #${id}</span>
-      <button class="btn btn-danger btn-del btn-sm no-print" onclick="removeExpense(${id})">✕ Eliminar</button>
+      <button class="btn btn-danger btn-del btn-sm no-print" onclick="removeExpense(${id})">✕</button>
     </div>
     <div class="m-card-body">
       <div class="m-row-2">
@@ -772,11 +843,7 @@ function addExpenseRow(date, cat, desc, cur, amt, voucher) {
       </div>
       <div class="m-field">
         <label>Categoría</label>
-        <select id="em-cat-${id}" onchange="syncFromMobile(${id})"><option value="">—</option>${catOptions(cat)}</select>
-      </div>
-      <div class="m-field">
-        <label>Descripción</label>
-        <input type="text" id="em-desc-${id}" value="${desc||''}" placeholder="Descripción del gasto…" oninput="syncFromMobile(${id})" />
+        <select id="em-cat-${id}" onchange="syncFromMobile(${id})"><option value="">— Categoría —</option>${catOptions(cat)}</select>
       </div>
       <div class="m-row-2">
         <div class="m-field">
@@ -784,47 +851,72 @@ function addExpenseRow(date, cat, desc, cur, amt, voucher) {
           <input type="number" id="em-amt-${id}" value="${amt||''}" min="0" step="any" placeholder="0.00" oninput="syncFromMobile(${id})" />
         </div>
         <div class="m-field">
-          <label>Comprobante</label>
-          <select id="em-vou-${id}">${voucherOptions(voucher)}</select>
+          <label>Descripción</label>
+          <input type="text" id="em-desc-${id}" value="${desc||''}" placeholder="Opcional…" oninput="syncFromMobile(${id})" />
         </div>
       </div>
+      <label class="file-btn-mobile" id="mfb-${id}">
+        <input type="file" accept="image/*,.pdf" onchange="onFileMobileChange(${id},this)" />
+        📎 <span id="mfl-${id}">${fileName||'Subir recibo / factura / foto'}</span>
+      </label>
       <div class="m-base-display" id="em-base-${id}">= —</div>
     </div>`;
   mDiv.appendChild(mCard);
   recalcAll();
 }
 
+function onFileChange(id, inp) {
+  const f = inp.files[0]; if (!f) return;
+  const name = f.name.length > 18 ? f.name.slice(0,15)+'…' : f.name;
+  const lbl = document.getElementById(`fl-${id}`);
+  const btn = document.getElementById(`fb-${id}`);
+  if (lbl) lbl.textContent = name;
+  if (btn) btn.classList.add('file-attached');
+  const ml = document.getElementById(`mfl-${id}`);
+  const mb = document.getElementById(`mfb-${id}`);
+  if (ml) ml.textContent = name;
+  if (mb) mb.classList.add('file-attached');
+}
+function onFileMobileChange(id, inp) {
+  const f = inp.files[0]; if (!f) return;
+  const name = f.name.length > 26 ? f.name.slice(0,23)+'…' : f.name;
+  const ml = document.getElementById(`mfl-${id}`);
+  const mb = document.getElementById(`mfb-${id}`);
+  if (ml) ml.textContent = name;
+  if (mb) mb.classList.add('file-attached');
+  const dl = document.getElementById(`fl-${id}`);
+  const db = document.getElementById(`fb-${id}`);
+  if (dl) dl.textContent = name;
+  if (db) db.classList.add('file-attached');
+}
+
 // Sync desktop → mobile
 function syncExpense(id) {
-  const dt = document.querySelector(`#edt-${id} input[type=date]`);
-  const cat = document.querySelector(`#edt-${id} select`);
-  const desc = document.querySelector(`#edt-${id} input[type=text]`);
+  const dt     = document.querySelector(`#edt-${id} input[type=date]`);
+  const cat    = document.querySelector(`#edt-${id} select`);
+  const desc   = document.querySelector(`#edt-${id} input[type=text]`);
   const curSel = document.querySelectorAll(`#edt-${id} select`)[1];
   const amtInp = document.querySelector(`#edt-${id} .amt-inp`);
   if (document.getElementById(`em-date-${id}`)) {
-    if (dt)      document.getElementById(`em-date-${id}`).value = dt.value;
-    if (cat)     document.getElementById(`em-cat-${id}`).value  = cat.value;
-    if (desc)    document.getElementById(`em-desc-${id}`).value = desc.value;
-    if (curSel)  document.getElementById(`em-cur-${id}`).value  = curSel.value;
-    if (amtInp)  document.getElementById(`em-amt-${id}`).value  = amtInp.value;
+    if (dt)     document.getElementById(`em-date-${id}`).value = dt.value;
+    if (cat)    document.getElementById(`em-cat-${id}`).value  = cat.value;
+    if (desc)   document.getElementById(`em-desc-${id}`).value = desc.value;
+    if (curSel) document.getElementById(`em-cur-${id}`).value  = curSel.value;
+    if (amtInp) document.getElementById(`em-amt-${id}`).value  = amtInp.value;
   }
   recalcAll();
 }
 
 // Sync mobile → desktop
 function syncFromMobile(id) {
-  const inputs   = document.querySelectorAll(`#edt-${id} input`);
-  const selects  = document.querySelectorAll(`#edt-${id} select`);
-  const emDate   = document.getElementById(`em-date-${id}`);
-  const emCat    = document.getElementById(`em-cat-${id}`);
-  const emDesc   = document.getElementById(`em-desc-${id}`);
-  const emCur    = document.getElementById(`em-cur-${id}`);
-  const emAmt    = document.getElementById(`em-amt-${id}`);
-  if (inputs[0] && emDate)  inputs[0].value   = emDate.value;
-  if (selects[0] && emCat)  selects[0].value  = emCat.value;
-  if (inputs[1] && emDesc)  inputs[1].value   = emDesc.value;
-  if (selects[1] && emCur)  selects[1].value  = emCur.value;
-  if (inputs[2] && emAmt)   inputs[2].value   = emAmt.value;
+  const inputs  = document.querySelectorAll(`#edt-${id} input`);
+  const selects = document.querySelectorAll(`#edt-${id} select`);
+  const get = elId => { const e = document.getElementById(elId); return e ? e.value : ''; };
+  if (inputs[0])  inputs[0].value  = get(`em-date-${id}`);
+  if (selects[0]) selects[0].value = get(`em-cat-${id}`);
+  if (inputs[1])  inputs[1].value  = get(`em-desc-${id}`);
+  if (selects[1]) selects[1].value = get(`em-cur-${id}`);
+  if (inputs[2])  inputs[2].value  = get(`em-amt-${id}`);
   recalcAll();
 }
 
@@ -836,9 +928,9 @@ function removeExpense(id) {
 function addDayTemplate() {
   const today = new Date().toISOString().slice(0,10);
   const base  = document.getElementById('baseCurrency').value;
-  addExpenseRow(today,'Hospedaje','Hotel',base,'','Sin comprobante');
-  addExpenseRow(today,'Alimentación','Desayuno / Almuerzo / Cena',base,'','Sin comprobante');
-  addExpenseRow(today,'Transporte Terrestre','Traslado',base,'','Sin comprobante');
+  addExpenseRow(today,'Hospedaje','Hotel',base,'');
+  addExpenseRow(today,'Alimentación','',base,'');
+  addExpenseRow(today,'Transporte Terrestre','',base,'');
 }
 
 // ═══════════════════════════════════════════════════
@@ -1128,9 +1220,11 @@ function saveData() {
   document.querySelectorAll('#expensesBody tr').forEach(tr => {
     const sel = tr.querySelectorAll('select');
     const inp = tr.querySelectorAll('input');
+    const fbl = tr.querySelector('[id^="fl-"]');
     if (inp.length < 3) return;
     expenses.push({ date:inp[0].value, cat:sel[0]?.value, desc:inp[1].value,
-                    cur:sel[1]?.value, amt:inp[2].value, voucher:sel[2]?.value });
+                    cur:sel[1]?.value, amt:inp[2].value,
+                    fileName: fbl && fbl.textContent !== 'Adjuntar' ? fbl.textContent : '' });
   });
   const clients = [];
   document.querySelectorAll('#clientsBody tr').forEach(tr => {
@@ -1144,7 +1238,6 @@ function saveData() {
   const d = {
     travelerName:document.getElementById('travelerName').value,
     travelerRole:document.getElementById('travelerRole').value,
-    company:document.getElementById('company').value,
     destCountry:document.getElementById('destCountry').value,
     destCity:document.getElementById('destCity').value,
     dateStart:document.getElementById('dateStart').value,
@@ -1163,7 +1256,7 @@ function loadData() {
   const raw = localStorage.getItem('travelReport_v3');
   if (!raw) { alert('No hay borrador guardado.'); return; }
   const d = JSON.parse(raw);
-  ['travelerName','company','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
+  ['travelerName','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
     .forEach(id => { document.getElementById(id).value = d[id]||''; });
   document.getElementById('travelerRole').value = d.travelerRole||'';
   document.getElementById('baseCurrency').value = d.baseCurrency||'USD';
@@ -1172,7 +1265,7 @@ function loadData() {
   document.getElementById('expensesBody').innerHTML = '';
   document.getElementById('expensesMobile').innerHTML = '';
   expRowId = 0;
-  (d.expenses||[]).forEach(e => addExpenseRow(e.date,e.cat,e.desc,e.cur,e.amt,e.voucher));
+  (d.expenses||[]).forEach(e => addExpenseRow(e.date,e.cat,e.desc,e.cur,e.amt,e.fileName||''));
   document.getElementById('clientsBody').innerHTML = '';
   document.getElementById('clientsMobile').innerHTML = '';
   cliRowId = 0;
@@ -1188,7 +1281,7 @@ function clearAll() {
   document.getElementById('clientsBody').innerHTML = '';
   document.getElementById('clientsMobile').innerHTML = '';
   expRowId = 0; cliRowId = 0;
-  ['travelerName','company','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
+  ['travelerName','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
     .forEach(id => { document.getElementById(id).value=''; });
   document.getElementById('advance').value = '0';
   recalcAll();

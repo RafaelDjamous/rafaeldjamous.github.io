@@ -680,6 +680,17 @@
 
 <script>
 // ═══════════════════════════════════════════════════
+//  CONFIGURACIÓN FIREBASE
+//  1. Ve a https://console.firebase.google.com
+//  2. Crea un proyecto → Realtime Database → Crear base de datos
+//  3. Reglas: { "rules": { ".read": true, ".write": true } }
+//  4. Copia la URL del DB (ej: https://mays-default-rtdb.firebaseio.com)
+//  5. Pégala abajo (sin "/" al final)
+// ═══════════════════════════════════════════════════
+const FIREBASE_URL = 'https://mays-zona-libre-default-rtdb.firebaseio.com';
+// Si FIREBASE_URL está vacío, se descarga el JSON (modo sin internet compartido)
+
+// ═══════════════════════════════════════════════════
 //  DATA
 // ═══════════════════════════════════════════════════
 const fileStore = new Map(); // key: expense row id, value: {name, type, data (base64)}
@@ -1371,7 +1382,7 @@ function printPDF() {
   window.print();
 }
 
-function finalizeReport() {
+async function finalizeReport() {
   const base = document.getElementById('baseCurrency').value;
   const sym  = SYMBOLS[base] || base;
 
@@ -1449,23 +1460,44 @@ function finalizeReport() {
     status: 'pendiente',
   };
 
-  // Save to localStorage mzl_reports array
-  let reports = [];
-  try { reports = JSON.parse(localStorage.getItem('mzl_reports') || '[]'); } catch(e){}
-  const idx = reports.findIndex(r => r.tripId === tripId);
-  if (idx >= 0) reports[idx] = report; else reports.push(report);
-  localStorage.setItem('mzl_reports', JSON.stringify(reports));
+  // Siempre guardar en localStorage (respaldo local)
+  let localReports = [];
+  try { localReports = JSON.parse(localStorage.getItem('mzl_reports') || '[]'); } catch(e){}
+  const idx = localReports.findIndex(r => r.tripId === tripId);
+  if (idx >= 0) localReports[idx] = report; else localReports.push(report);
+  localStorage.setItem('mzl_reports', JSON.stringify(localReports));
 
-  // Download JSON
-  const blob = new Blob([JSON.stringify(report, null, 2)], {type:'application/json'});
-  const url  = URL.createObjectURL(blob);
-  const a    = document.createElement('a');
-  a.href = url;
-  a.download = `reporte-${tripId}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-
-  alert('✅ Reporte enviado y descargado. Compártelo con gerencia.');
+  if (FIREBASE_URL) {
+    // ── Subir a Firebase para que gerencia lo vea automáticamente ──
+    const btn = document.querySelector('.btn-success');
+    if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando…'; }
+    try {
+      const res = await fetch(`${FIREBASE_URL}/reports/${encodeURIComponent(tripId)}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(report)
+      });
+      if (res.ok) {
+        alert(`✅ Reporte ${tripId} enviado al panel de gerencia.\nYa puede cerrarse este formulario.`);
+      } else {
+        alert(`⚠️ Error al enviar (${res.status}). Guardado localmente.`);
+      }
+    } catch (e) {
+      alert('⚠️ Sin conexión a internet. El reporte quedó guardado en este dispositivo.\nConéctese y vuelva a presionar "Enviar".');
+    } finally {
+      if (btn) { btn.disabled = false; btn.textContent = '📤 Enviar a Dashboard (JSON)'; }
+    }
+  } else {
+    // ── Sin Firebase: descargar JSON para importar manualmente ──
+    const blob = new Blob([JSON.stringify(report, null, 2)], {type:'application/json'});
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = `reporte-${tripId}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+    alert('✅ Reporte guardado y descargado. Compártelo con gerencia.');
+  }
 }
 
 // ═══════════════════════════════════════════════════

@@ -694,6 +694,11 @@
       .header-title { font-size: .9rem; }
     }
 
+    @keyframes pulse {
+      0%,100% { opacity:1; transform:scale(1); }
+      50%      { opacity:.4; transform:scale(1.3); }
+    }
+
     /* ── PRINT ───────────────────────────────────────────────── */
     @media print {
       .site-header,
@@ -800,8 +805,8 @@
 <!-- MAIN -->
 <main class="main">
 
-  <!-- IMPORT -->
-  <div class="import-section">
+  <!-- IMPORT (solo visible si no hay Firebase configurado) -->
+  <div class="import-section" id="importSection">
     <input type="file" id="fileInput" accept=".json" multiple style="display:none;" onchange="importJSON(this.files)" />
     <button class="btn-import" onclick="document.getElementById('fileInput').click()">
       📂 Importar Reporte (.json)
@@ -917,20 +922,52 @@
 </div>
 
 <script>
+  // ── Firebase (misma URL que en reporte-viaje.html) ──
+  const FIREBASE_URL = 'https://mays-zona-libre-default-rtdb.firebaseio.com';
+
   let reports = [];
   let filteredReports = [];
   let currentTripIdx = null;
 
-  function loadFromStorage() {
-    try {
-      reports = JSON.parse(localStorage.getItem('mzl_reports') || '[]');
-    } catch (e) {
-      reports = [];
+  async function loadFromStorage() {
+    if (FIREBASE_URL) {
+      try {
+        const res  = await fetch(`${FIREBASE_URL}/reports.json`);
+        const data = await res.json();
+        // Firebase devuelve un objeto { tripId: report } o null
+        const fromFirebase = data ? Object.values(data) : [];
+        // Mergear con localStorage (por si hay reportes offline)
+        let local = [];
+        try { local = JSON.parse(localStorage.getItem('mzl_reports') || '[]'); } catch(e){}
+        const merged = [...fromFirebase];
+        local.forEach(r => {
+          if (!merged.find(x => x.tripId === r.tripId)) merged.push(r);
+        });
+        reports = merged;
+        localStorage.setItem('mzl_reports', JSON.stringify(reports));
+      } catch (e) {
+        // Sin conexión: usar localStorage
+        try { reports = JSON.parse(localStorage.getItem('mzl_reports') || '[]'); } catch(e2) { reports = []; }
+      }
+    } else {
+      try { reports = JSON.parse(localStorage.getItem('mzl_reports') || '[]'); } catch(e) { reports = []; }
     }
   }
 
-  function saveToStorage() {
+  async function saveToStorage() {
     localStorage.setItem('mzl_reports', JSON.stringify(reports));
+    if (FIREBASE_URL) {
+      try {
+        const r = reports[currentTripIdx];
+        if (r) {
+          await fetch(`${FIREBASE_URL}/reports/${encodeURIComponent(r.tripId)}.json`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(r)
+          });
+        }
+      } catch(e) { /* sin conexión, guardado local */ }
+    }
   }
 
   function importJSON(files) {
@@ -1464,7 +1501,7 @@
     if (hash === stored) {
       sessionStorage.setItem(SESSION_KEY, '1');
       document.getElementById('loginOverlay').style.display = 'none';
-      loadFromStorage();
+      await loadFromStorage();
       renderAll();
     } else {
       const err = document.getElementById('loginError');
@@ -1521,8 +1558,24 @@
   window.addEventListener('DOMContentLoaded', async function () {
     if (sessionStorage.getItem(SESSION_KEY)) {
       document.getElementById('loginOverlay').style.display = 'none';
-      loadFromStorage();
+      if (FIREBASE_URL) {
+        // Ocultar botón de importar; mostrar indicador de sync en vivo
+        const imp = document.getElementById('importSection');
+        if (imp) imp.innerHTML =
+          '<div style="display:flex;align-items:center;gap:10px;padding:10px 0;">' +
+          '<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:#1a6b2e;animation:pulse 1.5s infinite;"></span>' +
+          '<span style="font-size:.82rem;color:#1a6b2e;font-weight:700;">Sincronizado con Firebase · Los reportes aparecen automáticamente</span>' +
+          '</div>';
+      }
+      await loadFromStorage();
       renderAll();
+      // Auto-refresh cada 30 s cuando Firebase está activo
+      if (FIREBASE_URL) {
+        setInterval(async () => {
+          await loadFromStorage();
+          renderAll();
+        }, 30000);
+      }
     } else {
       document.getElementById('loginPwd').focus();
     }

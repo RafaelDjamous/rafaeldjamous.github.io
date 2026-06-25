@@ -787,39 +787,56 @@ async function fetchRates() {
 
 async function _fetchFromAPI() {
   const el = document.getElementById('ratesStatus');
-  try {
-    // open.er-api.com cubre ~170 monedas incluyendo COP, ARS, CLP, PEN, PAB, etc.
-    const res  = await fetch('https://open.er-api.com/v6/latest/USD');
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    if (data.result !== 'success') throw new Error('API error');
-    rates = data.rates; // ya incluye USD:1
-    ratesLoaded = true;
-    localStorage.setItem(RATES_CACHE_KEY,
-      JSON.stringify({ ts: Date.now(), v: RATES_CACHE_VER, rates }));
-    el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
-    document.getElementById('ratesTime').textContent =
-      'Actualizado: ' + new Date().toLocaleString('es-MX');
-    renderRatesPanel();
-    recalcAll();
-  } catch(e) {
-    // Sin internet: usar caché aunque esté vencido
+
+  // Intentar primero open.er-api.com (~170 monedas, incluye todas latinas)
+  const APIS = [
+    {
+      url:   'https://open.er-api.com/v6/latest/USD',
+      parse: d => d.result === 'success' ? d.rates : null
+    },
+    // Respaldo: frankfurter.app (cubre EUR, GBP, MXN, BRL, CAD, JPY, etc.)
+    {
+      url:   'https://api.frankfurter.app/latest?from=USD',
+      parse: d => d.rates ? { USD: 1, ...d.rates } : null
+    }
+  ];
+
+  for (const api of APIS) {
     try {
-      const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
-      if (cached && cached.rates) {
-        rates = cached.rates;
-        ratesLoaded = true;
-        el.innerHTML = '<span class="status-dot dot-yellow"></span>Tasas anteriores (sin conexión)';
-        document.getElementById('ratesTime').textContent =
-          'Última actualización: ' + new Date(cached.ts).toLocaleString('es-MX');
-        renderRatesPanel();
-        recalcAll();
-        return;
-      }
-    } catch(e2) {}
-    el.innerHTML = '<span class="status-dot dot-red"></span>Sin conexión · Tasas no disponibles';
-    document.getElementById('ratesTime').textContent = '';
+      const res = await fetch(api.url);
+      if (!res.ok) continue;
+      const data = await res.json();
+      const parsed = api.parse(data);
+      if (!parsed || !parsed.USD) continue;
+      rates = parsed;
+      ratesLoaded = true;
+      localStorage.setItem(RATES_CACHE_KEY,
+        JSON.stringify({ ts: Date.now(), v: RATES_CACHE_VER, rates }));
+      el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
+      document.getElementById('ratesTime').textContent =
+        'Actualizado: ' + new Date().toLocaleString('es-MX');
+      renderRatesPanel();
+      recalcAll();
+      return; // éxito — salir del loop
+    } catch(e) { /* intentar siguiente API */ }
   }
+
+  // Ambas APIs fallaron — usar caché aunque esté vencido
+  try {
+    const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
+    if (cached && cached.rates && cached.rates.EUR) {
+      rates = cached.rates;
+      ratesLoaded = true;
+      el.innerHTML = '<span class="status-dot dot-yellow"></span>Tasas anteriores (sin conexión)';
+      document.getElementById('ratesTime').textContent =
+        'Última actualización: ' + new Date(cached.ts).toLocaleString('es-MX');
+      renderRatesPanel();
+      recalcAll();
+      return;
+    }
+  } catch(e2) {}
+  el.innerHTML = '<span class="status-dot dot-red"></span>Sin conexión · Tasas no disponibles';
+  document.getElementById('ratesTime').textContent = '';
 }
 
 function renderRatesPanel() {
@@ -1359,7 +1376,7 @@ function saveData() {
     baseCurrency:document.getElementById('baseCurrency').value,
     advance:document.getElementById('advance').value,
     mgmtNotes:document.getElementById('mgmtNotes').value,
-    rates, expenses, clients,
+    expenses, clients,
   };
   localStorage.setItem('travelReport_v3', JSON.stringify(d));
   alert('✅ Borrador guardado (incluye archivos adjuntos).');
@@ -1374,7 +1391,7 @@ function loadData() {
   document.getElementById('travelerRole').value = d.travelerRole||'';
   document.getElementById('baseCurrency').value = d.baseCurrency||'USD';
   document.getElementById('advance').value      = d.advance||'0';
-  if (d.rates) { rates = d.rates; ratesLoaded = true; renderRatesPanel(); }
+  // Las tasas siempre vienen de la API, nunca del borrador guardado
   document.getElementById('expensesBody').innerHTML = '';
   document.getElementById('expensesMobile').innerHTML = '';
   fileStore.clear();

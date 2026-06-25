@@ -1324,9 +1324,13 @@ function saveData() {
     const inp = tr.querySelectorAll('input');
     const fbl = tr.querySelector('[id^="fl-"]');
     if (inp.length < 3) return;
+    const rowId = parseInt(tr.id.replace('edt-',''));
+    const stored = fileStore.get(rowId);
     expenses.push({ date:inp[0].value, cat:sel[0]?.value, desc:inp[1].value,
                     cur:sel[1]?.value, amt:inp[2].value,
-                    fileName: fbl && fbl.textContent !== 'Adjuntar' ? fbl.textContent : '' });
+                    fileName: fbl && fbl.textContent !== 'Adjuntar' ? fbl.textContent : '',
+                    fileType: stored ? stored.type : '',
+                    fileData: stored ? stored.data : '' });
   });
   const clients = [];
   document.querySelectorAll('#clientsBody tr').forEach(tr => {
@@ -1351,7 +1355,7 @@ function saveData() {
     rates, expenses, clients,
   };
   localStorage.setItem('travelReport_v3', JSON.stringify(d));
-  alert('✅ Borrador guardado.');
+  alert('✅ Borrador guardado (incluye archivos adjuntos).');
 }
 
 function loadData() {
@@ -1366,8 +1370,17 @@ function loadData() {
   if (d.rates) { rates = d.rates; ratesLoaded = true; renderRatesPanel(); }
   document.getElementById('expensesBody').innerHTML = '';
   document.getElementById('expensesMobile').innerHTML = '';
+  fileStore.clear();
   expRowId = 0;
-  (d.expenses||[]).forEach(e => addExpenseRow(e.date,e.cat,e.desc,e.cur,e.amt,e.fileName||''));
+  (d.expenses||[]).forEach(e => {
+    addExpenseRow(e.date, e.cat, e.desc, e.cur, e.amt, e.fileName||'');
+    // Restaurar archivo adjunto si existe
+    if (e.fileData) {
+      fileStore.set(expRowId, { name: e.fileName, type: e.fileType, data: e.fileData });
+      const fb = document.getElementById(`fb-${expRowId}`);
+      if (fb) fb.classList.add('file-attached');
+    }
+  });
   document.getElementById('clientsBody').innerHTML = '';
   document.getElementById('clientsMobile').innerHTML = '';
   cliRowId = 0;

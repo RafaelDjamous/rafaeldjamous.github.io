@@ -757,36 +757,9 @@ function convert(amount, fromCur, baseCur) {
   return amount / rFrom * rBase;
 }
 
-const RATES_CACHE_KEY = 'mzl_rates_cache';
-const RATES_TTL_MS    = 24 * 60 * 60 * 1000; // 24 horas
-const RATES_CACHE_VER = 3; // incrementar si cambia la API para invalidar caché viejo
-
 async function fetchRates() {
   const el = document.getElementById('ratesStatus');
-
-  // ── 1. Usar caché si es válido y de la versión actual ──
-  try {
-    const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
-    const age    = cached ? Date.now() - cached.ts : Infinity;
-    if (cached && cached.v === RATES_CACHE_VER && age < RATES_TTL_MS) {
-      rates = cached.rates;
-      ratesLoaded = true;
-      el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
-      document.getElementById('ratesTime').textContent =
-        'Actualizado: ' + new Date(cached.ts).toLocaleString('es-MX');
-      renderRatesPanel();
-      recalcAll();
-      // Refrescar silenciosamente si el caché tiene más de 12 h
-      if (age > 12 * 60 * 60 * 1000) _fetchFromAPI();
-      return;
-    }
-  } catch(e) {}
-
-  _fetchFromAPI();
-}
-
-async function _fetchFromAPI() {
-  const el = document.getElementById('ratesStatus');
+  el.innerHTML = '<span class="status-dot dot-gray"></span>Consultando tasas…';
 
   // Intentar primero open.er-api.com (~170 monedas, incluye todas latinas)
   const APIS = [
@@ -794,7 +767,7 @@ async function _fetchFromAPI() {
       url:   'https://open.er-api.com/v6/latest/USD',
       parse: d => d.result === 'success' ? d.rates : null
     },
-    // Respaldo: frankfurter.app (cubre EUR, GBP, MXN, BRL, CAD, JPY, etc.)
+    // Respaldo: frankfurter.app
     {
       url:   'https://api.frankfurter.app/latest?from=USD',
       parse: d => d.rates ? { USD: 1, ...d.rates } : null
@@ -810,31 +783,16 @@ async function _fetchFromAPI() {
       if (!parsed || !parsed.USD) continue;
       rates = parsed;
       ratesLoaded = true;
-      localStorage.setItem(RATES_CACHE_KEY,
-        JSON.stringify({ ts: Date.now(), v: RATES_CACHE_VER, rates }));
       el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
       document.getElementById('ratesTime').textContent =
-        'Actualizado: ' + new Date().toLocaleString('es-MX');
-      renderRatesPanel();
-      recalcAll();
-      return; // éxito — salir del loop
-    } catch(e) { /* intentar siguiente API */ }
-  }
-
-  // Ambas APIs fallaron — usar caché aunque esté vencido
-  try {
-    const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
-    if (cached && cached.rates && cached.rates.EUR) {
-      rates = cached.rates;
-      ratesLoaded = true;
-      el.innerHTML = '<span class="status-dot dot-yellow"></span>Tasas anteriores (sin conexión)';
-      document.getElementById('ratesTime').textContent =
-        'Última actualización: ' + new Date(cached.ts).toLocaleString('es-MX');
+        'Actualizado: ' + new Date().toLocaleTimeString('es-MX');
       renderRatesPanel();
       recalcAll();
       return;
-    }
-  } catch(e2) {}
+    } catch(e) { /* intentar siguiente API */ }
+  }
+
+  // Ambas APIs fallaron
   el.innerHTML = '<span class="status-dot dot-red"></span>Sin conexión · Tasas no disponibles';
   document.getElementById('ratesTime').textContent = '';
 }

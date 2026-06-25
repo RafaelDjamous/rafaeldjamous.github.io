@@ -1245,9 +1245,8 @@
                           style="max-width:72px;max-height:54px;border-radius:4px;
                                  cursor:pointer;border:1px solid #c8e6c9;" title="Ver imagen" />`;
         } else if (e.fileType === 'application/pdf') {
-          fileCell = `<a href="data:application/pdf;base64,${e.fileData}"
-                         download="${escHtml(e.fileName || 'recibo.pdf')}"
-                         style="color:#1a6b2e;font-size:.8rem;font-weight:700;text-decoration:none;">📄 PDF</a>`;
+          fileCell = `<button onclick="_openAtt('${key}')"
+                         style="background:none;border:none;color:#1a6b2e;font-size:.8rem;font-weight:700;cursor:pointer;padding:0;">📄 Ver PDF</button>`;
         } else {
           fileCell = e.fileName ? `<span style="font-size:.75rem;color:#aaa;">${escHtml(e.fileName)}</span>` : '—';
         }
@@ -1449,22 +1448,21 @@
       } else if (e.fileType === 'application/pdf') {
         items += `
           <div style="display:flex;flex-direction:column;align-items:center;gap:8px;width:140px;">
-            <div style="width:140px;height:100px;border-radius:10px;border:2px solid #b2dfbb;
+            <div onclick="_openAtt('${key}')"
+                 style="width:140px;height:100px;border-radius:10px;border:2px solid #b2dfbb;
                         background:#f4faf5;display:flex;flex-direction:column;
-                        align-items:center;justify-content:center;">
+                        align-items:center;justify-content:center;cursor:pointer;">
               <span style="font-size:2.4rem;">📄</span>
               <span style="font-size:.72rem;font-weight:800;color:#0d3d1a;">PDF</span>
             </div>
             <span style="font-size:.72rem;color:#333;text-align:center;width:140px;
                          white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
                          font-weight:600;">${escHtml(label)}</span>
-            <a href="data:application/pdf;base64,${e.fileData}"
-               download="${escHtml(e.fileName || 'recibo.pdf')}"
-               style="font-size:.72rem;padding:4px 12px;border:1.5px solid #1a6b2e;
-                      border-radius:6px;background:#f4faf5;color:#1a6b2e;
-                      text-decoration:none;font-weight:700;">
-              ⬇ Descargar PDF
-            </a>
+            <button onclick="_openAtt('${key}')"
+                    style="font-size:.72rem;padding:4px 12px;border:1.5px solid #1a6b2e;
+                           border-radius:6px;background:#f4faf5;color:#1a6b2e;cursor:pointer;font-weight:700;">
+              👁 Ver PDF
+            </button>
           </div>`;
       }
     });
@@ -1481,15 +1479,7 @@
 
   function _openAtt(key) {
     const a = _attachCache[key];
-    if (!a) return;
-    if (a.type && a.type.startsWith('image/')) {
-      openLightbox(a.type, a.data, a.name);
-    } else if (a.type === 'application/pdf') {
-      const lnk = document.createElement('a');
-      lnk.href = 'data:application/pdf;base64,' + a.data;
-      lnk.download = a.name || 'recibo.pdf';
-      lnk.click();
-    }
+    if (a) openLightbox(a.type, a.data, a.name);
   }
 
   function closeModal() {
@@ -1676,14 +1666,38 @@
   }
 
   function openLightbox(type, b64, name) {
-    document.getElementById('lightboxImg').src = 'data:' + type + ';base64,' + b64;
+    const img = document.getElementById('lightboxImg');
+    const pdf = document.getElementById('lightboxPdf');
+    const dl  = document.getElementById('lightboxDownload');
     document.getElementById('lightboxLabel').textContent = name || '';
+    dl.download = name || 'archivo';
+    dl.href = 'data:' + type + ';base64,' + b64;
+    if (type && type.startsWith('image/')) {
+      img.src = 'data:' + type + ';base64,' + b64;
+      img.style.display = 'block';
+      pdf.style.display = 'none';
+      pdf.src = '';
+    } else if (type === 'application/pdf') {
+      img.style.display = 'none';
+      img.src = '';
+      const bytes = atob(b64);
+      const arr = new Uint8Array(bytes.length);
+      for (let i = 0; i < bytes.length; i++) arr[i] = bytes.charCodeAt(i);
+      const blob = new Blob([arr], { type: 'application/pdf' });
+      pdf.src = URL.createObjectURL(blob);
+      pdf.style.display = 'block';
+    }
     document.getElementById('imgLightbox').classList.add('open');
   }
 
   function closeLightbox() {
     document.getElementById('imgLightbox').classList.remove('open');
-    setTimeout(() => { document.getElementById('lightboxImg').src = ''; }, 300);
+    setTimeout(() => {
+      document.getElementById('lightboxImg').src = '';
+      const pdf = document.getElementById('lightboxPdf');
+      if (pdf.src && pdf.src.startsWith('blob:')) URL.revokeObjectURL(pdf.src);
+      pdf.src = '';
+    }, 300);
   }
 
   function switchModalTab(tab) {
@@ -1742,10 +1756,15 @@
   </div>
 </div>
 
-<!-- Lightbox de imágenes -->
+<!-- Lightbox de archivos (imágenes y PDFs) -->
 <div id="imgLightbox" onclick="if(event.target===this)closeLightbox()">
   <button id="lightboxClose" onclick="closeLightbox()" title="Cerrar">✕</button>
+  <a id="lightboxDownload" title="Descargar"
+     style="position:absolute;top:18px;right:76px;color:#fff;font-size:.82rem;font-weight:700;
+            text-decoration:none;background:rgba(255,255,255,.15);padding:6px 14px;
+            border-radius:6px;cursor:pointer;">⬇ Descargar</a>
   <img id="lightboxImg" src="" alt="Vista de archivo" />
+  <iframe id="lightboxPdf" src="" style="display:none;width:92vw;height:84vh;border:none;border-radius:8px;background:#fff;"></iframe>
   <div id="lightboxLabel"></div>
 </div>
 </body>

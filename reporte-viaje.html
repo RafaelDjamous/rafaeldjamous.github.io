@@ -648,7 +648,7 @@
         </div>
 
         <div class="btn-row no-print" style="margin-top:20px;">
-          <button class="btn btn-success" onclick="finalizeReport()" style="background:#0d6b2e;">📤 Enviar a Dashboard (JSON)</button>
+          <button class="btn btn-success" onclick="finalizeReport()" style="background:#0d6b2e;">📤 Enviar a Dashboard</button>
           <button class="btn btn-warn"    onclick="printPDF()">🖨️ Imprimir / Exportar PDF</button>
           <button class="btn btn-primary" onclick="saveData()">💾 Guardar</button>
           <button class="btn btn-outline" onclick="loadData()">📂 Cargar</button>
@@ -669,8 +669,7 @@
 //  4. Copia la URL del DB (ej: https://mays-default-rtdb.firebaseio.com)
 //  5. Pégala abajo (sin "/" al final)
 // ═══════════════════════════════════════════════════
-const FIREBASE_URL = 'https://mays-zona-libre-default-rtdb.firebaseio.com';
-// Si FIREBASE_URL está vacío, se descarga el JSON (modo sin internet compartido)
+const FIREBASE_URL = ''; // Dejar vacío hasta configurar Firebase
 
 // ═══════════════════════════════════════════════════
 //  DATA
@@ -1473,37 +1472,8 @@ async function finalizeReport() {
   if (idx >= 0) localReports[idx] = report; else localReports.push(report);
   localStorage.setItem('mzl_reports', JSON.stringify(localReports));
 
-  if (FIREBASE_URL) {
-    // ── Subir a Firebase para que gerencia lo vea automáticamente ──
-    const btn = document.querySelector('.btn-success');
-    if (btn) { btn.disabled = true; btn.textContent = '⏳ Enviando…'; }
-    try {
-      const res = await fetch(`${FIREBASE_URL}/reports/${encodeURIComponent(tripId)}.json`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(report)
-      });
-      if (res.ok) {
-        alert(`✅ Reporte ${tripId} enviado al panel de gerencia.\nYa puede cerrarse este formulario.`);
-      } else {
-        alert(`⚠️ Error al enviar (${res.status}). Guardado localmente.`);
-      }
-    } catch (e) {
-      alert('⚠️ Sin conexión a internet. El reporte quedó guardado en este dispositivo.\nConéctese y vuelva a presionar "Enviar".');
-    } finally {
-      if (btn) { btn.disabled = false; btn.textContent = '📤 Enviar a Dashboard (JSON)'; }
-    }
-  } else {
-    // ── Sin Firebase: descargar JSON para importar manualmente ──
-    const blob = new Blob([JSON.stringify(report, null, 2)], {type:'application/json'});
-    const url  = URL.createObjectURL(blob);
-    const a    = document.createElement('a');
-    a.href = url;
-    a.download = `reporte-${tripId}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-    alert('✅ Reporte guardado y descargado. Compártelo con gerencia.');
-  }
+  // Reporte guardado en este navegador — el Dashboard lo lee automáticamente
+  alert(`✅ Reporte ${tripId} enviado al Dashboard.\nAbre el Panel de Gerencia para verlo.`);
 }
 
 // ═══════════════════════════════════════════════════

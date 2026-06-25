@@ -173,6 +173,7 @@
     .dot-green  { background: #27ae60; }
     .dot-red    { background: #e74c3c; }
     .dot-gray   { background: #aaa; }
+    .dot-yellow { background: #f39c12; }
 
     /* ── Balance alert ── */
     .balance-box {
@@ -468,38 +469,19 @@
           </div>
         </div>
 
-        <!-- Rates status + button -->
-        <div style="margin-top:14px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+        <!-- Rates status -->
+        <div style="margin-top:14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
           <span id="ratesStatus" style="font-size:.85rem;">
-            <span class="status-dot dot-gray"></span>Sin cargar
+            <span class="status-dot dot-gray"></span>Cargando tasas…
           </span>
-          <button class="btn btn-teal no-print" onclick="fetchRates()" style="padding:10px 18px;">
-            🔄 Actualizar tasas en vivo
-          </button>
           <span id="ratesTime" style="font-size:.75rem;color:#888;"></span>
         </div>
 
         <!-- Live rates chips -->
         <div class="rates-panel" id="ratesPanel" style="display:none;">
-          <h4>🌍 Tasas en tiempo real (1 <span id="baseLabel">USD</span> equivale a…)</h4>
+          <h4>🌍 Tasas del día (1 <span id="baseLabel">USD</span> equivale a…)</h4>
           <div class="rates-grid" id="ratesGrid"></div>
-          <p style="font-size:.7rem;color:#888;margin-top:8px;">Fuente: frankfurter.app</p>
-        </div>
-
-        <!-- Manual rate -->
-        <div style="margin-top:14px;">
-          <p style="font-size:.8rem;font-weight:700;color:#555;margin-bottom:6px;">
-            🔧 Agregar / corregir tasa manual (ej. VES, otras):
-          </p>
-          <div class="manual-rate-row">
-            <select id="manualCur" style="max-width:200px;"></select>
-            <span style="font-size:.9rem;color:#555;white-space:nowrap;">
-              1 <span id="baseLabel2">USD</span> =
-            </span>
-            <input type="number" id="manualRate" placeholder="ej. 36.5" min="0" step="any" style="max-width:140px;" />
-            <button class="btn btn-outline no-print" onclick="applyManualRate()">Aplicar</button>
-            <span id="manualMsg" style="font-size:.8rem;color:var(--success);"></span>
-          </div>
+          <p style="font-size:.7rem;color:#888;margin-top:8px;">Fuente: frankfurter.app · Se actualiza automáticamente cada 24 horas</p>
         </div>
 
         <!-- Advance bar -->
@@ -775,22 +757,64 @@ function convert(amount, fromCur, baseCur) {
   return amount / rFrom * rBase;
 }
 
+const RATES_CACHE_KEY = 'mzl_rates_cache';
+const RATES_TTL_MS    = 24 * 60 * 60 * 1000; // 24 horas
+
 async function fetchRates() {
   const el = document.getElementById('ratesStatus');
-  el.innerHTML = '<span class="status-dot dot-gray"></span>Consultando…';
+
+  // ── 1. Intentar usar caché de localStorage (válido 24 h) ──
+  try {
+    const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
+    if (cached && (Date.now() - cached.ts) < RATES_TTL_MS) {
+      rates = cached.rates;
+      ratesLoaded = true;
+      el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
+      document.getElementById('ratesTime').textContent =
+        'Actualizado: ' + new Date(cached.ts).toLocaleString('es-MX');
+      renderRatesPanel();
+      recalcAll();
+      // Refrescar en segundo plano si el caché tiene más de 12 h
+      if ((Date.now() - cached.ts) > 12 * 60 * 60 * 1000) _fetchFromAPI();
+      return;
+    }
+  } catch(e) {}
+
+  // ── 2. Sin caché válido: fetch a la API ──
+  _fetchFromAPI();
+}
+
+async function _fetchFromAPI() {
+  const el = document.getElementById('ratesStatus');
   try {
     const res  = await fetch('https://api.frankfurter.app/latest?from=USD');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
     rates = { USD: 1, ...data.rates };
     ratesLoaded = true;
-    el.innerHTML = '<span class="status-dot dot-green"></span>En vivo';
+    // Guardar en caché
+    localStorage.setItem(RATES_CACHE_KEY, JSON.stringify({ ts: Date.now(), rates }));
+    el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
     document.getElementById('ratesTime').textContent =
       'Actualizado: ' + new Date().toLocaleString('es-MX');
     renderRatesPanel();
     recalcAll();
   } catch(e) {
-    el.innerHTML = '<span class="status-dot dot-red"></span>Sin conexión — tasas manuales';
+    // Sin internet: intentar caché aunque esté vencido
+    try {
+      const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
+      if (cached) {
+        rates = cached.rates;
+        ratesLoaded = true;
+        el.innerHTML = '<span class="status-dot dot-yellow"></span>Tasas anteriores (sin conexión)';
+        document.getElementById('ratesTime').textContent =
+          'Última actualización: ' + new Date(cached.ts).toLocaleString('es-MX');
+        renderRatesPanel();
+        recalcAll();
+        return;
+      }
+    } catch(e2) {}
+    el.innerHTML = '<span class="status-dot dot-red"></span>Sin conexión · Tasas no disponibles';
     document.getElementById('ratesTime').textContent = '';
   }
 }
@@ -798,8 +822,7 @@ async function fetchRates() {
 function renderRatesPanel() {
   const base = document.getElementById('baseCurrency').value;
   document.getElementById('ratesPanel').style.display = 'block';
-  document.getElementById('baseLabel').textContent  = base;
-  document.getElementById('baseLabel2').textContent = base;
+  document.getElementById('baseLabel').textContent = base;
   const priority = ['USD','EUR','GBP','MXN','COP','ARS','BRL','CLP','PEN','CAD','JPY','CHF','AUD','CNY'];
   const grid = document.getElementById('ratesGrid');
   grid.innerHTML = '';
@@ -812,17 +835,6 @@ function renderRatesPanel() {
     chip.innerHTML = `<span class="rc-code">${code}</span><span class="rc-val">${fmtRate(val)}</span>`;
     grid.appendChild(chip);
   });
-}
-
-function applyManualRate() {
-  const cur  = document.getElementById('manualCur').value;
-  const val  = parseFloat(document.getElementById('manualRate').value);
-  const base = document.getElementById('baseCurrency').value;
-  if (!cur || isNaN(val) || val <= 0) { alert('Ingresa moneda y tasa válida.'); return; }
-  rates[cur] = val * (rates[base] || 1);
-  document.getElementById('manualMsg').textContent = `✓ 1 ${base} = ${val} ${cur}`;
-  if (ratesLoaded) renderRatesPanel();
-  recalcAll();
 }
 
 // ═══════════════════════════════════════════════════
@@ -847,7 +859,6 @@ function voucherOptions(sel) {
 
 function populateSelects() {
   document.getElementById('baseCurrency').innerHTML = curOptions('USD');
-  document.getElementById('manualCur').innerHTML    = curShort('MXN');
   populateCountries();
 }
 

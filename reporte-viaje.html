@@ -1473,7 +1473,7 @@ async function finalizeReport() {
   localStorage.setItem('mzl_reports', JSON.stringify(localReports));
 
   // Reporte guardado en este navegador — el Dashboard lo lee automáticamente
-  alert(`✅ Reporte ${tripId} enviado al Dashboard.\nAbre el Panel de Gerencia para verlo.`);
+  showSuccessModal(tripId);
 }
 
 // ═══════════════════════════════════════════════════
@@ -1511,6 +1511,22 @@ window.addEventListener('DOMContentLoaded', () => {
   recalcAll();
   fetchRates();
 });
+
+function showSuccessModal(tripId) {
+  document.getElementById('successModalId').textContent = tripId;
+  document.getElementById('successModal').style.display = 'flex';
+}
 </script>
+
+<!-- Modal de confirmación -->
+<div id="successModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:40px 36px;max-width:400px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,0.25);">
+    <div style="font-size:56px;margin-bottom:12px;">✅</div>
+    <h2 style="margin:0 0 8px;color:#1a7a3c;font-size:1.3rem;">Reporte enviado</h2>
+    <p style="margin:0 0 6px;color:#333;font-size:1rem;">El reporte <strong id="successModalId"></strong> fue enviado al Dashboard.</p>
+    <p style="margin:0 0 28px;color:#666;font-size:0.9rem;">Abre el Panel de Gerencia para verlo.</p>
+    <button onclick="document.getElementById('successModal').style.display='none'" style="background:#1a7a3c;color:#fff;border:none;padding:12px 36px;border-radius:8px;font-size:1rem;cursor:pointer;font-weight:600;">Aceptar</button>
+  </div>
+</div>
 </body>
 </html>

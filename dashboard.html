@@ -1205,17 +1205,21 @@
   }
 
   function quickApprove(ri) {
-    reports[ri].status = 'aprobado';
-    saveToStorage();
-    renderAll();
-    showToast('✅ Reporte aprobado', 'success');
+    showConfirm('✅', '¿Aprobar este reporte?', '✅ Aprobar', '#1a7a3c', () => {
+      reports[ri].status = 'aprobado';
+      saveToStorage();
+      renderAll();
+      showToast('✅ Reporte aprobado', 'success');
+    });
   }
 
   function quickReject(ri) {
-    reports[ri].status = 'rechazado';
-    saveToStorage();
-    renderAll();
-    showToast('❌ Reporte rechazado', 'error');
+    showConfirm('❌', '¿Rechazar este reporte?', '❌ Rechazar', '#c0392b', () => {
+      reports[ri].status = 'rechazado';
+      saveToStorage();
+      renderAll();
+      showToast('❌ Reporte rechazado', 'error');
+    });
   }
 
   function openModal(ri) {
@@ -1557,11 +1561,13 @@
     URL.revokeObjectURL(a.href);
   }
 
-  // Keyboard: Escape closes lightbox first, then modal
+  // Keyboard: Escape closes layers in order
   document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape') {
       if (document.getElementById('imgLightbox').classList.contains('open')) {
         closeLightbox();
+      } else if (document.getElementById('confirmModal').style.display === 'flex') {
+        confirmCancel();
       } else if (document.getElementById('tripModal').style.display === 'flex') {
         closeModal();
       }
@@ -1642,6 +1648,25 @@
     }, 2000);
   }
 
+  let _confirmCb = null;
+  function showConfirm(icon, msg, okLabel, okColor, onOk) {
+    document.getElementById('confirmIcon').textContent = icon;
+    document.getElementById('confirmMsg').textContent = msg;
+    const okBtn = document.getElementById('confirmOkBtn');
+    okBtn.textContent = okLabel;
+    okBtn.style.background = okColor;
+    _confirmCb = onOk;
+    document.getElementById('confirmModal').style.display = 'flex';
+  }
+  function confirmCancel() {
+    document.getElementById('confirmModal').style.display = 'none';
+    _confirmCb = null;
+  }
+  function confirmOk() {
+    document.getElementById('confirmModal').style.display = 'none';
+    if (_confirmCb) { const cb = _confirmCb; _confirmCb = null; cb(); }
+  }
+
   function showToast(msg, type) {
     const t = document.createElement('div');
     t.className = 'mzl-toast ' + (type || 'success');
@@ -1697,6 +1722,25 @@
     }
   });
 </script>
+
+<!-- Modal de confirmación estilizado -->
+<div id="confirmModal" onclick="if(event.target===this)confirmCancel()"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9998;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:380px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.25);">
+    <div id="confirmIcon" style="font-size:48px;margin-bottom:12px;"></div>
+    <p id="confirmMsg" style="font-size:1rem;color:#333;margin:0 0 28px;line-height:1.55;font-weight:600;"></p>
+    <div style="display:flex;gap:12px;justify-content:center;">
+      <button onclick="confirmCancel()"
+              style="flex:1;padding:12px;border:1.5px solid #ccc;border-radius:8px;background:#f5f5f5;color:#333;font-size:.95rem;font-weight:700;cursor:pointer;">
+        Cancelar
+      </button>
+      <button id="confirmOkBtn" onclick="confirmOk()"
+              style="flex:1;padding:12px;border:none;border-radius:8px;color:#fff;font-size:.95rem;font-weight:700;cursor:pointer;">
+        Aceptar
+      </button>
+    </div>
+  </div>
+</div>
 
 <!-- Lightbox de imágenes -->
 <div id="imgLightbox" onclick="if(event.target===this)closeLightbox()">

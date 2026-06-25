@@ -759,14 +759,16 @@ function convert(amount, fromCur, baseCur) {
 
 const RATES_CACHE_KEY = 'mzl_rates_cache';
 const RATES_TTL_MS    = 24 * 60 * 60 * 1000; // 24 horas
+const RATES_CACHE_VER = 3; // incrementar si cambia la API para invalidar caché viejo
 
 async function fetchRates() {
   const el = document.getElementById('ratesStatus');
 
-  // ── 1. Intentar usar caché de localStorage (válido 24 h) ──
+  // ── 1. Usar caché si es válido y de la versión actual ──
   try {
     const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
-    if (cached && (Date.now() - cached.ts) < RATES_TTL_MS) {
+    const age    = cached ? Date.now() - cached.ts : Infinity;
+    if (cached && cached.v === RATES_CACHE_VER && age < RATES_TTL_MS) {
       rates = cached.rates;
       ratesLoaded = true;
       el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
@@ -774,36 +776,37 @@ async function fetchRates() {
         'Actualizado: ' + new Date(cached.ts).toLocaleString('es-MX');
       renderRatesPanel();
       recalcAll();
-      // Refrescar en segundo plano si el caché tiene más de 12 h
-      if ((Date.now() - cached.ts) > 12 * 60 * 60 * 1000) _fetchFromAPI();
+      // Refrescar silenciosamente si el caché tiene más de 12 h
+      if (age > 12 * 60 * 60 * 1000) _fetchFromAPI();
       return;
     }
   } catch(e) {}
 
-  // ── 2. Sin caché válido: fetch a la API ──
   _fetchFromAPI();
 }
 
 async function _fetchFromAPI() {
   const el = document.getElementById('ratesStatus');
   try {
-    const res  = await fetch('https://api.frankfurter.app/latest?from=USD');
+    // open.er-api.com cubre ~170 monedas incluyendo COP, ARS, CLP, PEN, PAB, etc.
+    const res  = await fetch('https://open.er-api.com/v6/latest/USD');
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const data = await res.json();
-    rates = { USD: 1, ...data.rates };
+    if (data.result !== 'success') throw new Error('API error');
+    rates = data.rates; // ya incluye USD:1
     ratesLoaded = true;
-    // Guardar en caché
-    localStorage.setItem(RATES_CACHE_KEY, JSON.stringify({ ts: Date.now(), rates }));
+    localStorage.setItem(RATES_CACHE_KEY,
+      JSON.stringify({ ts: Date.now(), v: RATES_CACHE_VER, rates }));
     el.innerHTML = '<span class="status-dot dot-green"></span>Tasas del día';
     document.getElementById('ratesTime').textContent =
       'Actualizado: ' + new Date().toLocaleString('es-MX');
     renderRatesPanel();
     recalcAll();
   } catch(e) {
-    // Sin internet: intentar caché aunque esté vencido
+    // Sin internet: usar caché aunque esté vencido
     try {
       const cached = JSON.parse(localStorage.getItem(RATES_CACHE_KEY) || 'null');
-      if (cached) {
+      if (cached && cached.rates) {
         rates = cached.rates;
         ratesLoaded = true;
         el.innerHTML = '<span class="status-dot dot-yellow"></span>Tasas anteriores (sin conexión)';
@@ -823,13 +826,17 @@ function renderRatesPanel() {
   const base = document.getElementById('baseCurrency').value;
   document.getElementById('ratesPanel').style.display = 'block';
   document.getElementById('baseLabel').textContent = base;
-  const priority = ['USD','EUR','GBP','MXN','COP','ARS','BRL','CLP','PEN','CAD','JPY','CHF','AUD','CNY'];
+  // Solo mostrar monedas que realmente están en el objeto rates
+  const priority = ['USD','EUR','GBP','MXN','COP','ARS','BRL','CLP','PEN',
+                    'CAD','JPY','CHF','AUD','CNY','PAB','VEF','GTQ','HNL',
+                    'NIO','CRC','DOP','BOB','PYG','UYU'];
   const grid = document.getElementById('ratesGrid');
   grid.innerHTML = '';
   priority.forEach(code => {
     if (code === base) return;
+    if (!rates[code]) return; // omitir monedas que la API no devolvió
     const val = convert(1, base, code);
-    if (!val) return;
+    if (!val || !isFinite(val)) return;
     const chip = document.createElement('div');
     chip.className = 'rate-chip';
     chip.innerHTML = `<span class="rc-code">${code}</span><span class="rc-val">${fmtRate(val)}</span>`;

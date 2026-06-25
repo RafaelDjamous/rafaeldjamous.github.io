@@ -714,6 +714,46 @@
       .main { padding: 0; }
       .table-wrap { box-shadow: none; border: 1px solid #ccc; }
     }
+
+    /* ── Toast ── */
+    .mzl-toast {
+      position: fixed; bottom: 28px; right: 28px; z-index: 99999;
+      padding: 14px 22px; border-radius: 10px; font-size: .92rem; font-weight: 700;
+      color: #fff; box-shadow: 0 4px 20px rgba(0,0,0,.25);
+      transition: opacity .4s; pointer-events: none;
+    }
+    .mzl-toast.success { background: #1a7a3c; }
+    .mzl-toast.error   { background: #c0392b; }
+    .mzl-toast.info    { background: #e65100; }
+
+    /* ── Lightbox ── */
+    #imgLightbox {
+      display: none; position: fixed; inset: 0; z-index: 99990;
+      background: rgba(0,0,0,.92); align-items: center; justify-content: center;
+      flex-direction: column;
+    }
+    #imgLightbox.open { display: flex; }
+    #lightboxImg { max-width: 95vw; max-height: 85vh; border-radius: 8px; object-fit: contain; }
+    #lightboxClose {
+      position: absolute; top: 18px; right: 24px;
+      background: none; border: none; color: #fff; font-size: 2.4rem;
+      cursor: pointer; line-height: 1; padding: 4px 10px; border-radius: 6px;
+    }
+    #lightboxClose:hover { background: rgba(255,255,255,.15); }
+    #lightboxLabel { color: rgba(255,255,255,.6); margin-top: 14px; font-size: .82rem; }
+
+    /* ── Modal tabs ── */
+    .modal-tabs {
+      display: flex; border-bottom: 2px solid #c8e6c9; margin-bottom: 16px; gap: 0;
+    }
+    .modal-tab-btn {
+      padding: 10px 22px; border: none; background: none; cursor: pointer;
+      font-size: .9rem; font-weight: 700; color: #888;
+      border-bottom: 3px solid transparent; margin-bottom: -2px; transition: color .15s;
+    }
+    .modal-tab-btn.active { color: #0d3d1a; border-bottom-color: #1a6b2e; }
+    .modal-tab-pane { display: none; }
+    .modal-tab-pane.active { display: block; }
   </style>
 </head>
 <body>
@@ -1165,17 +1205,17 @@
   }
 
   function quickApprove(ri) {
-    if (!confirm('¿Aprobar este reporte?')) return;
     reports[ri].status = 'aprobado';
     saveToStorage();
     renderAll();
+    showToast('✅ Reporte aprobado', 'success');
   }
 
   function quickReject(ri) {
-    if (!confirm('¿Rechazar este reporte?')) return;
     reports[ri].status = 'rechazado';
     saveToStorage();
     renderAll();
+    showToast('❌ Reporte rechazado', 'error');
   }
 
   function openModal(ri) {
@@ -1246,7 +1286,13 @@
         <p style="font-size:.9rem;line-height:1.6;color:#333;white-space:pre-wrap;">${escHtml(r.mgmtNotes)}</p>
       </div>` : '';
 
+    const _fileCount = (r.expenses || []).filter(e => e.fileData).length;
     document.getElementById('modalContent').innerHTML = `
+      <div class="modal-tabs">
+        <button class="modal-tab-btn active" onclick="switchModalTab('detail')">📋 Detalle</button>
+        <button class="modal-tab-btn" onclick="switchModalTab('files')">📎 Archivos${_fileCount ? ' (' + _fileCount + ')' : ''}</button>
+      </div>
+      <div id="modal-tab-detail" class="modal-tab-pane active">
       <div class="modal-trip-header">
         <div>
           <div style="font-size:1.1rem;font-weight:800;color:#0d3d1a;">${escHtml(r.tripId || '—')}</div>
@@ -1329,8 +1375,6 @@
         </div>
       </div>
 
-      ${buildAttachGallery(r.expenses || [])}
-
       ${mgmtNotesSection}
 
       <div class="modal-section">
@@ -1346,6 +1390,11 @@
           <button class="btn-modal btn-modal-reject"  onclick="setStatus('rechazado')">❌ Rechazar</button>
           <button class="btn-modal btn-modal-pending" onclick="setStatus('pendiente')">✏️ Pendiente</button>
         </div>
+      </div>
+      </div>
+
+      <div id="modal-tab-files" class="modal-tab-pane">
+        ${buildAttachGallery(r.expenses || [])}
       </div>
     `;
 
@@ -1428,7 +1477,15 @@
 
   function _openAtt(key) {
     const a = _attachCache[key];
-    if (a) openImgPreview(a.type, a.data);
+    if (!a) return;
+    if (a.type && a.type.startsWith('image/')) {
+      openLightbox(a.type, a.data, a.name);
+    } else if (a.type === 'application/pdf') {
+      const lnk = document.createElement('a');
+      lnk.href = 'data:application/pdf;base64,' + a.data;
+      lnk.download = a.name || 'recibo.pdf';
+      lnk.click();
+    }
   }
 
   function closeModal() {
@@ -1451,7 +1508,8 @@
     saveToStorage();
     closeModal();
     renderAll();
-    alert('Reporte marcado como: ' + status);
+    const _labels = { aprobado: '✅ Aprobado', rechazado: '❌ Rechazado', pendiente: '✏️ Pendiente' };
+    showToast(_labels[status] || status, status === 'aprobado' ? 'success' : status === 'rechazado' ? 'error' : 'info');
   }
 
   function openImgPreview(type, b64) {
@@ -1499,10 +1557,14 @@
     URL.revokeObjectURL(a.href);
   }
 
-  // Keyboard: close modal on Escape
+  // Keyboard: Escape closes lightbox first, then modal
   document.addEventListener('keydown', function (e) {
-    if (e.key === 'Escape' && document.getElementById('tripModal').style.display === 'flex') {
-      closeModal();
+    if (e.key === 'Escape') {
+      if (document.getElementById('imgLightbox').classList.contains('open')) {
+        closeLightbox();
+      } else if (document.getElementById('tripModal').style.display === 'flex') {
+        closeModal();
+      }
     }
   });
 
@@ -1580,6 +1642,35 @@
     }, 2000);
   }
 
+  function showToast(msg, type) {
+    const t = document.createElement('div');
+    t.className = 'mzl-toast ' + (type || 'success');
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2500);
+  }
+
+  function openLightbox(type, b64, name) {
+    document.getElementById('lightboxImg').src = 'data:' + type + ';base64,' + b64;
+    document.getElementById('lightboxLabel').textContent = name || '';
+    document.getElementById('imgLightbox').classList.add('open');
+  }
+
+  function closeLightbox() {
+    document.getElementById('imgLightbox').classList.remove('open');
+    setTimeout(() => { document.getElementById('lightboxImg').src = ''; }, 300);
+  }
+
+  function switchModalTab(tab) {
+    document.querySelectorAll('.modal-tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.modal-tab-pane').forEach(p => p.classList.remove('active'));
+    const btns = document.querySelectorAll('.modal-tab-btn');
+    if (tab === 'detail' && btns[0]) btns[0].classList.add('active');
+    if (tab === 'files'  && btns[1]) btns[1].classList.add('active');
+    const pane = document.getElementById('modal-tab-' + tab);
+    if (pane) pane.classList.add('active');
+  }
+
   window.addEventListener('DOMContentLoaded', async function () {
     if (sessionStorage.getItem(SESSION_KEY)) {
       document.getElementById('loginOverlay').style.display = 'none';
@@ -1606,5 +1697,12 @@
     }
   });
 </script>
+
+<!-- Lightbox de imágenes -->
+<div id="imgLightbox" onclick="if(event.target===this)closeLightbox()">
+  <button id="lightboxClose" onclick="closeLightbox()" title="Cerrar">✕</button>
+  <img id="lightboxImg" src="" alt="Vista de archivo" />
+  <div id="lightboxLabel"></div>
+</div>
 </body>
 </html>

@@ -896,6 +896,12 @@
       </select>
     </div>
     <div class="filter-group">
+      <label for="fPais">País</label>
+      <select id="fPais" onchange="renderAll()">
+        <option value="">Todos los países</option>
+      </select>
+    </div>
+    <div class="filter-group">
       <label for="fDesde">Desde</label>
       <input type="date" id="fDesde" onchange="renderAll()" />
     </div>
@@ -1047,12 +1053,14 @@
   function applyFilters() {
     const vendedor = document.getElementById('fVendedor').value;
     const estado   = document.getElementById('fEstado').value;
+    const pais     = document.getElementById('fPais').value;
     const desde    = document.getElementById('fDesde').value;
     const hasta    = document.getElementById('fHasta').value;
 
     filteredReports = reports.filter(r => {
       if (vendedor && r.travelerName !== vendedor) return false;
       if (estado   && r.status !== estado)         return false;
+      if (pais     && r.destCountry !== pais)      return false;
       if (desde    && r.dateEnd   && r.dateEnd   < desde) return false;
       if (hasta    && r.dateStart && r.dateStart > hasta) return false;
       return true;
@@ -1062,6 +1070,7 @@
   function clearFilters() {
     document.getElementById('fVendedor').value = '';
     document.getElementById('fEstado').value   = '';
+    document.getElementById('fPais').value     = '';
     document.getElementById('fDesde').value    = '';
     document.getElementById('fHasta').value    = '';
     renderAll();
@@ -1099,10 +1108,16 @@
 
   function updateFilters() {
     const sel = document.getElementById('fVendedor');
-    const cur = sel.value;
-    const names = [...new Set(reports.map(r => r.travelerName).filter(Boolean))];
+    const curV = sel.value;
+    const names = [...new Set(reports.map(r => r.travelerName).filter(Boolean))].sort();
     sel.innerHTML = '<option value="">Todos los vendedores</option>' +
-      names.map(n => `<option value="${escAttr(n)}"${n === cur ? ' selected' : ''}>${escHtml(n)}</option>`).join('');
+      names.map(n => `<option value="${escAttr(n)}"${n === curV ? ' selected' : ''}>${escHtml(n)}</option>`).join('');
+
+    const paisSel = document.getElementById('fPais');
+    const curP = paisSel.value;
+    const paises = [...new Set(reports.map(r => r.destCountry).filter(Boolean))].sort();
+    paisSel.innerHTML = '<option value="">Todos los países</option>' +
+      paises.map(p => `<option value="${escAttr(p)}"${p === curP ? ' selected' : ''}>${escHtml(p)}</option>`).join('');
   }
 
   function renderTable() {

@@ -1298,7 +1298,7 @@ function refreshAll() { recalcAll(); }
 // ═══════════════════════════════════════════════════
 //  SAVE / LOAD / CLEAR
 // ═══════════════════════════════════════════════════
-function saveData() {
+function collectDraftData() {
   const expenses = [];
   document.querySelectorAll('#expensesBody tr').forEach(tr => {
     const sel = tr.querySelectorAll('select');
@@ -1322,7 +1322,8 @@ function saveData() {
                    type:sel[0]?.value, cur:sel[1]?.value, amt:inp[3].value,
                    status:sel[2]?.value, notes:inp[4]?.value });
   });
-  const d = {
+  return {
+    tripId: document.getElementById('tripId').value.trim(),
     travelerName:document.getElementById('travelerName').value,
     travelerRole:document.getElementById('travelerRole').value,
     destCountry:document.getElementById('destCountry').value,
@@ -1335,27 +1336,42 @@ function saveData() {
     mgmtNotes:document.getElementById('mgmtNotes').value,
     expenses, clients,
   };
-  localStorage.setItem('travelReport_v3', JSON.stringify(d));
-  alert('✅ Borrador guardado (incluye archivos adjuntos).');
 }
 
-function loadData() {
-  const raw = localStorage.getItem('travelReport_v3');
-  if (!raw) { alert('No hay borrador guardado.'); return; }
-  const d = JSON.parse(raw);
+async function saveData() {
+  const d = collectDraftData();
+  const tripId = d.tripId;
+  if (!tripId) { showToastR('Ingresa un número de viaje primero.', 'error'); return; }
+  localStorage.setItem('travelReport_v3', JSON.stringify(d));
+  if (FIREBASE_URL) {
+    try {
+      await fetch(`${FIREBASE_URL}/drafts/${tripId}.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(d),
+      });
+      showSaveModal(tripId);
+    } catch(e) {
+      showToastR('Guardado localmente. Sin conexión a Firebase.', 'warn');
+    }
+  } else {
+    showSaveModal(tripId);
+  }
+}
+
+function populateDraft(d) {
+  if (d.tripId) document.getElementById('tripId').value = d.tripId;
   ['travelerName','destCountry','destCity','dateStart','dateEnd','tripPurpose','mgmtNotes']
     .forEach(id => { document.getElementById(id).value = d[id]||''; });
   document.getElementById('travelerRole').value = d.travelerRole||'';
   document.getElementById('baseCurrency').value = d.baseCurrency||'USD';
   document.getElementById('advance').value      = d.advance||'0';
-  // Las tasas siempre vienen de la API, nunca del borrador guardado
   document.getElementById('expensesBody').innerHTML = '';
   document.getElementById('expensesMobile').innerHTML = '';
   fileStore.clear();
   expRowId = 0;
   (d.expenses||[]).forEach(e => {
     addExpenseRow(e.date, e.cat, e.desc, e.cur, e.amt, e.fileName||'');
-    // Restaurar archivo adjunto si existe
     if (e.fileData) {
       fileStore.set(expRowId, { name: e.fileName, type: e.fileType, data: e.fileData });
       const fb = document.getElementById(`fb-${expRowId}`);
@@ -1367,7 +1383,35 @@ function loadData() {
   cliRowId = 0;
   (d.clients||[]).forEach(c => addClientRow(c.name,c.city,c.contact,c.type,c.cur,c.amt,c.status,c.notes));
   recalcAll();
-  alert('✅ Borrador cargado.');
+}
+
+function loadData() {
+  document.getElementById('loadCodeModal').style.display = 'flex';
+  setTimeout(() => document.getElementById('loadCodeInput').focus(), 100);
+}
+
+async function loadByCode() {
+  const code = document.getElementById('loadCodeInput').value.trim().toUpperCase();
+  if (!code) return;
+  document.getElementById('loadCodeModal').style.display = 'none';
+  document.getElementById('loadCodeInput').value = '';
+
+  if (FIREBASE_URL) {
+    try {
+      const resp = await fetch(`${FIREBASE_URL}/drafts/${encodeURIComponent(code)}.json`);
+      const d = await resp.json();
+      if (!d || typeof d !== 'object') {
+        showToastR(`No se encontró el reporte "${code}".`, 'error'); return;
+      }
+      populateDraft(d);
+      showToastR(`✅ Reporte ${code} cargado correctamente.`, 'success');
+      return;
+    } catch(e) { /* caer a localStorage */ }
+  }
+  const raw = localStorage.getItem('travelReport_v3');
+  if (!raw) { showToastR('No hay borrador guardado en este dispositivo.', 'error'); return; }
+  populateDraft(JSON.parse(raw));
+  showToastR('✅ Borrador local cargado.', 'success');
 }
 
 function clearAll() {
@@ -1516,7 +1560,73 @@ function showSuccessModal(tripId) {
   document.getElementById('successModalId').textContent = tripId;
   document.getElementById('successModal').style.display = 'flex';
 }
+
+function showSaveModal(tripId) {
+  document.getElementById('saveModalCode').textContent = tripId;
+  document.getElementById('saveModal').style.display = 'flex';
+}
+
+function showToastR(msg, type) {
+  const t = document.createElement('div');
+  const bg = type === 'error' ? '#c0392b' : type === 'warn' ? '#e65100' : '#1a7a3c';
+  t.style.cssText = `position:fixed;bottom:28px;right:28px;z-index:99999;
+    background:${bg};color:#fff;padding:14px 22px;border-radius:10px;
+    font-size:.92rem;font-weight:700;box-shadow:0 4px 20px rgba(0,0,0,.25);
+    transition:opacity .4s;pointer-events:none;`;
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 400); }, 2800);
+}
 </script>
+
+<!-- Modal: Cargar reporte por código -->
+<div id="loadCodeModal" onclick="if(event.target===this)this.style.display='none'"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:420px;width:90%;box-shadow:0 8px 40px rgba(0,0,0,.25);">
+    <div style="font-size:40px;text-align:center;margin-bottom:10px;">📂</div>
+    <h2 style="margin:0 0 8px;color:#0d3d1a;font-size:1.15rem;text-align:center;">Abrir Reporte Guardado</h2>
+    <p style="margin:0 0 20px;color:#666;font-size:.88rem;text-align:center;">Ingresa el código de tu reporte para cargarlo desde cualquier dispositivo.</p>
+    <input type="text" id="loadCodeInput" placeholder="Ej: MZL-2026-017"
+           style="width:100%;padding:13px 14px;border:1.5px solid #b2dfbb;border-radius:8px;
+                  font-size:1.05rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;
+                  color:#0d3d1a;box-sizing:border-box;margin-bottom:18px;"
+           oninput="this.value=this.value.toUpperCase()"
+           onkeydown="if(event.key==='Enter')loadByCode()" />
+    <div style="display:flex;gap:10px;">
+      <button onclick="loadByCode()"
+              style="flex:1;padding:13px;background:#0d3d1a;color:#fff;border:none;
+                     border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;">
+        Cargar Reporte
+      </button>
+      <button onclick="document.getElementById('loadCodeModal').style.display='none'"
+              style="flex:1;padding:13px;background:#f5f5f5;color:#333;border:1.5px solid #ccc;
+                     border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;">
+        Cancelar
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Borrador guardado con código -->
+<div id="saveModal" onclick="if(event.target===this)this.style.display='none'"
+     style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;align-items:center;justify-content:center;">
+  <div style="background:#fff;border-radius:16px;padding:36px 32px;max-width:420px;width:90%;text-align:center;box-shadow:0 8px 40px rgba(0,0,0,.25);">
+    <div style="font-size:48px;margin-bottom:10px;">💾</div>
+    <h2 style="margin:0 0 6px;color:#0d3d1a;font-size:1.15rem;">Borrador guardado</h2>
+    <p style="margin:0 0 14px;color:#555;font-size:.88rem;">Tu código de reporte es:</p>
+    <div id="saveModalCode"
+         style="font-size:1.7rem;font-weight:900;color:#0d3d1a;background:#e8f5e9;
+                border-radius:10px;padding:16px;margin:0 0 14px;letter-spacing:2px;"></div>
+    <p style="margin:0 0 26px;color:#888;font-size:.82rem;">
+      Guarda este código. Desde cualquier dispositivo presiona <strong>📂 Cargar</strong> e ingrésalo para continuar.
+    </p>
+    <button onclick="document.getElementById('saveModal').style.display='none'"
+            style="background:#0d3d1a;color:#fff;border:none;padding:12px 40px;
+                   border-radius:8px;font-size:1rem;cursor:pointer;font-weight:700;">
+      Entendido
+    </button>
+  </div>
+</div>
 
 <!-- Modal de confirmación -->
 <div id="successModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;">

@@ -152,6 +152,13 @@
 
   /* Recurring */
   .recurring-check { margin-bottom: 14px; }
+  .recurring-interval-row {
+    display: flex; align-items: center; gap: 10px; margin: -4px 0 14px; font-size: .84rem; color: var(--text-dim);
+  }
+  .recurring-interval-row select {
+    flex: 1; background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 9px 10px; font-size: .85rem;
+  }
   .recurring-toggle {
     width: 100%; display: flex; align-items: center; justify-content: center; gap: 9px;
     padding: 13px; border-radius: 8px; border: 1.5px dashed var(--border);
@@ -521,8 +528,19 @@
           <div class="recurring-check" id="recurringCheckRow">
             <button type="button" id="txRecurringBtn" class="recurring-toggle" aria-pressed="false">
               <span class="recurring-toggle-icon">&#128257;</span>
-              <span>Repetir este gasto cada mes</span>
+              <span>Repetir este gasto</span>
             </button>
+          </div>
+          <div class="recurring-interval-row" id="recurringIntervalRow" style="display:none;">
+            <label for="txRecurringInterval">Repetir cada</label>
+            <select id="txRecurringInterval">
+              <option value="1">Mes</option>
+              <option value="2">2 meses</option>
+              <option value="3">3 meses (trimestral)</option>
+              <option value="4">4 meses (ej. décimo)</option>
+              <option value="6">6 meses (semestral)</option>
+              <option value="12">12 meses (anual)</option>
+            </select>
           </div>
           <button type="submit" class="btn" id="submitBtn">Agregar Movimiento</button>
           <button type="button" class="btn btn-secondary" id="cancelEdit" style="display:none;">Cancelar Edición</button>
@@ -857,30 +875,40 @@
 
   function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
 
+  function monthsSince(startKey, y, m) {
+    const [sy, smRaw] = startKey.split('-').map(Number);
+    return (y - sy) * 12 + (m - (smRaw - 1));
+  }
+
   function generateRecurringTransactions() {
     const realKey = monthKey(now.getFullYear(), now.getMonth());
     let changed = false;
     const newlyGenerated = [];
 
     recurring.forEach(r => {
-      let [y, m] = (r.lastGeneratedMonth || realKey).split('-').map(Number);
+      const interval = r.interval || 1;
+      const startKey = r.startMonth || r.lastGeneratedMonth || realKey;
+      let [y, m] = (r.lastGeneratedMonth || startKey).split('-').map(Number);
       m -= 1;
       let guard = 0;
       while ((y < now.getFullYear() || (y === now.getFullYear() && m < now.getMonth())) && guard < 36) {
         m++; if (m > 11) { m = 0; y++; }
         guard++;
         const key = monthKey(y, m);
-        const alreadyExists = transactions.some(t => t.recurringId === r.id && t.date.startsWith(key));
-        if (!alreadyExists) {
-          const day = Math.min(r.day, daysInMonth(y, m));
-          const tx = {
-            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
-            date: `${key}-${String(day).padStart(2, '0')}`,
-            amount: r.amount, category: r.category, note: r.note, type: r.type, recurringId: r.id
-          };
-          transactions.push(tx);
-          newlyGenerated.push(tx);
-          changed = true;
+        const due = monthsSince(startKey, y, m) % interval === 0;
+        if (due) {
+          const alreadyExists = transactions.some(t => t.recurringId === r.id && t.date.startsWith(key));
+          if (!alreadyExists) {
+            const day = Math.min(r.day, daysInMonth(y, m));
+            const tx = {
+              id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+              date: `${key}-${String(day).padStart(2, '0')}`,
+              amount: r.amount, category: r.category, note: r.note, type: r.type, recurringId: r.id
+            };
+            transactions.push(tx);
+            newlyGenerated.push(tx);
+            changed = true;
+          }
         }
         r.lastGeneratedMonth = key;
       }
@@ -922,12 +950,14 @@
       return;
     }
     recurring.forEach(r => {
+      const interval = r.interval || 1;
+      const freqText = interval > 1 ? `cada ${interval} meses` : 'cada mes';
       const row = document.createElement('div');
       row.className = 'recurring-row';
       row.innerHTML = `
         <div class="recurring-info">
           <span class="cat">${r.category}</span>
-          <span class="meta">${r.note ? escapeHtml(r.note) + ' · ' : ''}día ${r.day} de cada mes</span>
+          <span class="meta">${r.note ? escapeHtml(r.note) + ' · ' : ''}día ${r.day}, ${freqText}</span>
         </div>
         <span class="recurring-amt ${r.type}">${r.type === 'expense' ? '-' : '+'}${fmt(r.amount)}</span>
         <div class="row-actions">
@@ -1255,6 +1285,7 @@
     $('submitBtn').textContent = 'Guardar Cambios';
     $('cancelEdit').style.display = 'block';
     $('recurringCheckRow').style.display = 'none';
+    $('recurringIntervalRow').style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1273,6 +1304,8 @@
     $('submitBtn').textContent = 'Guardar Cambios Recurrentes';
     $('cancelEdit').style.display = 'block';
     $('recurringCheckRow').style.display = 'none';
+    $('recurringIntervalRow').style.display = 'flex';
+    $('txRecurringInterval').value = String(r.interval || 1);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -1285,6 +1318,8 @@
     $('recurringCheckRow').style.display = 'block';
     $('txRecurringBtn').classList.remove('active');
     $('txRecurringBtn').setAttribute('aria-pressed', 'false');
+    $('recurringIntervalRow').style.display = 'none';
+    $('txRecurringInterval').value = '1';
     setType('expense');
     $('txDate').value = todayIso();
   }
@@ -1326,7 +1361,8 @@
       const r = recurring.find(x => x.id === editingRecurringId);
       if (r) {
         const [, , rd] = date.split('-').map(Number);
-        Object.assign(r, { type: currentType, category, amount, note, day: rd });
+        const interval = parseInt($('txRecurringInterval').value, 10) || 1;
+        Object.assign(r, { type: currentType, category, amount, note, day: rd, interval });
       }
       save();
       cancelEdit();
@@ -1349,8 +1385,10 @@
       if (isRecurring) {
         const [ry, rm, rd] = date.split('-').map(Number);
         const recId = 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+        const interval = parseInt($('txRecurringInterval').value, 10) || 1;
+        const startMonth = monthKey(ry, rm - 1);
         newTx.recurringId = recId;
-        recurring.push({ id: recId, type: currentType, category, amount, note, day: rd, lastGeneratedMonth: monthKey(ry, rm - 1) });
+        recurring.push({ id: recId, type: currentType, category, amount, note, day: rd, interval, startMonth, lastGeneratedMonth: startMonth });
       }
 
       transactions.push(newTx);
@@ -1370,6 +1408,7 @@
     const btn = $('txRecurringBtn');
     const isActive = btn.classList.toggle('active');
     btn.setAttribute('aria-pressed', String(isActive));
+    $('recurringIntervalRow').style.display = isActive ? 'flex' : 'none';
   });
 
   $('limitAddBtn').addEventListener('click', () => {

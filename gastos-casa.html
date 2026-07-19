@@ -520,6 +520,7 @@
   let recurring = [];
   let currentType = 'expense';
   let editingId = null;
+  let editingRecurringId = null;
 
   function expenseCategories() { return [...BASE_EXPENSE_CATEGORIES, ...customCategories.expense, 'Otros']; }
   function incomeCategories() { return [...BASE_INCOME_CATEGORIES, ...customCategories.income, 'Otros']; }
@@ -804,8 +805,14 @@
           <span class="meta">${r.note ? escapeHtml(r.note) + ' · ' : ''}día ${r.day} de cada mes</span>
         </div>
         <span class="recurring-amt ${r.type}">${r.type === 'expense' ? '-' : '+'}${fmt(r.amount)}</span>
-        <button type="button" class="icon-btn recurring-del" data-id="${r.id}" title="Cancelar recurrencia">&times;</button>`;
+        <div class="row-actions">
+          <button type="button" class="icon-btn recurring-edit" data-id="${r.id}" title="Editar">&#9998;</button>
+          <button type="button" class="icon-btn recurring-del" data-id="${r.id}" title="Cancelar recurrencia">&times;</button>
+        </div>`;
       list.appendChild(row);
+    });
+    list.querySelectorAll('.recurring-edit').forEach(btn => {
+      btn.addEventListener('click', () => startEditRecurring(btn.dataset.id));
     });
     list.querySelectorAll('.recurring-del').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1057,6 +1064,7 @@
   function startEdit(id) {
     const t = transactions.find(t => t.id === id);
     if (!t) return;
+    editingRecurringId = null;
     editingId = id;
     setType(t.type);
     $('txDate').value = t.date;
@@ -1070,8 +1078,27 @@
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
+  function startEditRecurring(id) {
+    const r = recurring.find(x => x.id === id);
+    if (!r) return;
+    editingId = null;
+    editingRecurringId = id;
+    setType(r.type);
+    $('txAmount').value = r.amount;
+    $('txCategory').value = r.category;
+    toggleNewCategoryField();
+    $('txNote').value = r.note || '';
+    const day = Math.min(r.day, daysInMonth(now.getFullYear(), now.getMonth()));
+    $('txDate').value = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    $('submitBtn').textContent = 'Guardar Cambios Recurrentes';
+    $('cancelEdit').style.display = 'block';
+    $('recurringCheckRow').style.display = 'none';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
   function cancelEdit() {
     editingId = null;
+    editingRecurringId = null;
     $('txForm').reset();
     $('submitBtn').textContent = 'Agregar Movimiento';
     $('cancelEdit').style.display = 'none';
@@ -1114,6 +1141,19 @@
     }
 
     if (!date || !(amount > 0) || !category) return;
+
+    if (editingRecurringId) {
+      const r = recurring.find(x => x.id === editingRecurringId);
+      if (r) {
+        const [, , rd] = date.split('-').map(Number);
+        Object.assign(r, { type: currentType, category, amount, note, day: rd });
+      }
+      save();
+      cancelEdit();
+      renderAll();
+      showToast('Gasto recurrente actualizado');
+      return;
+    }
 
     if (editingId) {
       const t = transactions.find(t => t.id === editingId);

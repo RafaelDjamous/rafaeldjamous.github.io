@@ -83,7 +83,8 @@
 
   /* Layout */
   .layout { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
-  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+  .layout > * { min-width: 0; }
+  @media (max-width: 980px) { .layout { grid-template-columns: minmax(0, 1fr); } }
 
   .panel {
     background: var(--panel); border: 1px solid var(--border);
@@ -94,7 +95,7 @@
 
   /* Form */
   .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
-  .field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .field { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 5px; }
   .field label { font-size: .72rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
   .field input, .field select {
     background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
@@ -223,6 +224,7 @@
     border-radius: 8px; padding: 9px 12px; font-size: .85rem;
   }
   .table-toolbar input[type="text"] { flex: 1; min-width: 140px; }
+  .table-scroll { overflow-x: auto; }
   table { width: 100%; border-collapse: collapse; font-size: .86rem; }
   thead th {
     text-align: left; color: var(--text-dim); font-size: .72rem; text-transform: uppercase;
@@ -236,12 +238,36 @@
   }
   .amt-cell.income { color: var(--income); font-weight: 700; }
   .amt-cell.expense { color: var(--expense); font-weight: 700; }
-  .row-actions { display: flex; gap: 6px; }
+  .row-actions { display: flex; gap: 6px; justify-content: flex-end; }
   .icon-btn {
     background: none; border: 1px solid var(--border); color: var(--text-dim);
     width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: .8rem;
   }
   .icon-btn:hover { color: var(--text); border-color: var(--primary); }
+
+  /* Mobile: transactions become stacked cards instead of a table, and touch targets grow */
+  @media (max-width: 640px) {
+    body { padding: 14px; }
+    .icon-btn { width: 40px; height: 40px; font-size: 1rem; }
+    table, thead, tbody, tr, td { display: block; width: 100%; }
+    table { border: none; }
+    thead { display: none; }
+    tbody tr {
+      border: 1px solid var(--border); border-radius: 10px; background: var(--panel-2);
+      padding: 10px 12px; margin-bottom: 10px;
+    }
+    tbody tr:hover { background: var(--panel-2); }
+    tbody td {
+      display: flex; justify-content: space-between; align-items: center; gap: 10px;
+      padding: 7px 0; border-bottom: 1px dashed var(--border);
+    }
+    tbody td:last-child { border-bottom: none; padding-top: 10px; }
+    tbody td::before {
+      content: attr(data-label); font-size: .7rem; font-weight: 700; color: var(--text-dim);
+      text-transform: uppercase; letter-spacing: .3px; flex-shrink: 0;
+    }
+    tbody td[data-label=""]::before { display: none; }
+  }
 
   .table-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px; }
   .export-btns { display: flex; gap: 8px; }
@@ -291,7 +317,7 @@
     padding: 8px 12px; font-size: .82rem; font-weight: 600; margin-bottom: 10px; display: none;
   }
   .login-footer { font-size: .72rem; color: var(--text-dim); margin-top: 18px; }
-  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
   .topbar-actions .icon-btn { width: 34px; height: 34px; border-radius: 50%; font-size: .9rem; }
 
   /* Profile picker */
@@ -549,12 +575,14 @@
             <option value="all">Todas las categorías</option>
           </select>
         </div>
-        <table>
-          <thead>
-            <tr><th>Fecha</th><th>Categoría</th><th>Nota</th><th>Monto</th><th></th></tr>
-          </thead>
-          <tbody id="txTableBody"></tbody>
-        </table>
+        <div class="table-scroll">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Categoría</th><th>Nota</th><th>Monto</th><th></th></tr>
+            </thead>
+            <tbody id="txTableBody"></tbody>
+          </table>
+        </div>
         <div class="table-footer">
           <span class="empty-state" id="tableEmpty" style="display:none;">No se encontraron movimientos.</span>
           <div class="export-btns">
@@ -1190,11 +1218,11 @@
     monthTx.forEach(t => {
       const tr = document.createElement('tr');
       tr.innerHTML = `
-        <td>${t.date}</td>
-        <td><span class="cat-pill">${t.category}</span></td>
-        <td>${t.note ? escapeHtml(t.note) : '<span style="color:var(--text-dim)">—</span>'}</td>
-        <td class="amt-cell ${t.type}">${t.type === 'expense' ? '-' : '+'}${fmt(t.amount)}</td>
-        <td>
+        <td data-label="Fecha">${t.date}</td>
+        <td data-label="Categoría"><span class="cat-pill">${t.category}</span></td>
+        <td data-label="Nota">${t.note ? escapeHtml(t.note) : '<span style="color:var(--text-dim)">—</span>'}</td>
+        <td data-label="Monto" class="amt-cell ${t.type}">${t.type === 'expense' ? '-' : '+'}${fmt(t.amount)}</td>
+        <td data-label="">
           <div class="row-actions">
             <button class="icon-btn edit-btn" data-id="${t.id}" title="Editar">&#9998;</button>
             <button class="icon-btn del-btn" data-id="${t.id}" title="Eliminar">&#128465;</button>

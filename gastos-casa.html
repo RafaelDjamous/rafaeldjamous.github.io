@@ -199,6 +199,17 @@
   .legend-item .amt { color: var(--text-dim); }
   .empty-state { color: var(--text-dim); font-size: .88rem; text-align: center; padding: 20px 0; }
 
+  /* Trend */
+  .trend-wrap { display: flex; align-items: flex-end; gap: 12px; height: 160px; padding: 10px 4px 0; }
+  .trend-month { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+  .trend-bars { display: flex; align-items: flex-end; gap: 4px; height: 100%; width: 100%; justify-content: center; }
+  .trend-bar { width: 12px; border-radius: 3px 3px 0 0; min-height: 2px; transition: height .3s; }
+  .trend-bar.income { background: var(--income); }
+  .trend-bar.expense { background: var(--expense); }
+  .trend-label { font-size: .68rem; color: var(--text-dim); margin-top: 8px; text-transform: capitalize; }
+  .trend-legend { display: flex; gap: 18px; justify-content: center; margin-top: 14px; font-size: .78rem; color: var(--text-dim); }
+  .trend-legend .swatch { margin-right: 6px; vertical-align: middle; }
+
   /* Table */
   .table-toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
   .table-toolbar input, .table-toolbar select {
@@ -508,6 +519,15 @@
       <div class="panel">
         <h2><span class="dot"></span>Gastos por Categoría</h2>
         <div class="donut-wrap" id="donutWrap"></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="dot"></span>Tendencia (Últimos 6 Meses)</h2>
+        <div class="trend-wrap" id="trendWrap"></div>
+        <div class="trend-legend">
+          <span><span class="swatch" style="background:var(--income)"></span>Ingresos</span>
+          <span><span class="swatch" style="background:var(--expense)"></span>Gastos</span>
+        </div>
       </div>
 
       <div class="panel">
@@ -1030,6 +1050,43 @@
     wrap.appendChild(legend);
   }
 
+  function renderTrend() {
+    const wrap = $('trendWrap');
+    wrap.innerHTML = '';
+
+    const months = [];
+    for (let i = 5; i >= 0; i--) {
+      let y = viewYear, m = viewMonth - i;
+      while (m < 0) { m += 12; y--; }
+      months.push({ y, m });
+    }
+
+    const data = months.map(({ y, m }) => {
+      const key = monthKey(y, m);
+      const monthTx = transactions.filter(t => t.date.startsWith(key));
+      const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      return { y, m, income, expense };
+    });
+
+    const max = Math.max(1, ...data.map(d => Math.max(d.income, d.expense)));
+
+    data.forEach(d => {
+      const incomePct = (d.income / max) * 100;
+      const expensePct = (d.expense / max) * 100;
+      const label = new Date(d.y, d.m, 1).toLocaleString('es-ES', { month: 'short' }).replace('.', '');
+      const col = document.createElement('div');
+      col.className = 'trend-month';
+      col.innerHTML = `
+        <div class="trend-bars">
+          <div class="trend-bar income" style="height:${incomePct}%" title="Ingresos ${label}: ${fmt(d.income)}"></div>
+          <div class="trend-bar expense" style="height:${expensePct}%" title="Gastos ${label}: ${fmt(d.expense)}"></div>
+        </div>
+        <div class="trend-label">${label}</div>`;
+      wrap.appendChild(col);
+    });
+  }
+
   function renderLimits() {
     const totals = categoryTotalsForMonth();
     const list = $('limitsList');
@@ -1338,6 +1395,7 @@
     populateFilterCategory();
     renderSummary();
     renderDonut();
+    renderTrend();
     renderLimits();
     renderRecurringList();
     renderTable();

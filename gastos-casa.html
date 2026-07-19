@@ -1420,24 +1420,49 @@
   });
 
   $('exportExcelBtn').addEventListener('click', () => {
-    const monthTx = transactionsForMonth().slice().sort((a, b) => a.date.localeCompare(b.date));
-    if (monthTx.length === 0) { showToast('Nada para exportar'); return; }
     if (typeof XLSX === 'undefined') { showToast('No se pudo cargar Excel, revisa tu conexión'); return; }
+    if (transactions.length === 0 && recurring.length === 0 && Object.values(limits).every(v => !(v > 0))) {
+      showToast('Nada para exportar'); return;
+    }
 
-    const header = ['Fecha', 'Tipo', 'Categoría', 'Nota', 'Monto'];
-    const rows = monthTx.map(t => [t.date, t.type === 'income' ? 'Ingreso' : 'Gasto', t.category, t.note || '', t.amount]);
-    const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
-    const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
-    rows.push([]);
-    rows.push(['', '', '', 'Ingresos', income]);
-    rows.push(['', '', '', 'Gastos', expense]);
-    rows.push(['', '', '', 'Balance', income - expense]);
-
-    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
-    ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 18 }, { wch: 28 }, { wch: 12 }];
     const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, monthLabelText().slice(0, 31));
-    XLSX.writeFile(wb, `gastos_${monthKey(viewYear, viewMonth)}.xlsx`);
+    const allTx = transactions.slice().sort((a, b) => a.date.localeCompare(b.date));
+
+    // Hoja 1: todos los movimientos, de todos los meses
+    const txHeader = ['Fecha', 'Tipo', 'Categoría', 'Nota', 'Monto', 'Recurrente'];
+    const txRows = allTx.map(t => [t.date, t.type === 'income' ? 'Ingreso' : 'Gasto', t.category, t.note || '', t.amount, t.recurringId ? 'Sí' : 'No']);
+    const wsTx = XLSX.utils.aoa_to_sheet([txHeader, ...txRows]);
+    wsTx['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 18 }, { wch: 30 }, { wch: 12 }, { wch: 11 }];
+    XLSX.utils.book_append_sheet(wb, wsTx, 'Movimientos');
+
+    // Hoja 2: resumen por mes
+    const months = [...new Set(allTx.map(t => t.date.slice(0, 7)))].sort();
+    const resumenHeader = ['Mes', 'Ingresos', 'Gastos', 'Balance'];
+    const resumenRows = months.map(mk => {
+      const monthTx = allTx.filter(t => t.date.startsWith(mk));
+      const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+      const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+      return [mk, income, expense, income - expense];
+    });
+    const wsResumen = XLSX.utils.aoa_to_sheet([resumenHeader, ...resumenRows]);
+    wsResumen['!cols'] = [{ wch: 10 }, { wch: 13 }, { wch: 13 }, { wch: 13 }];
+    XLSX.utils.book_append_sheet(wb, wsResumen, 'Resumen Mensual');
+
+    // Hoja 3: gastos/ingresos recurrentes activos
+    const recHeader = ['Tipo', 'Categoría', 'Monto', 'Día del Mes', 'Nota'];
+    const recRows = recurring.map(r => [r.type === 'income' ? 'Ingreso' : 'Gasto', r.category, r.amount, r.day, r.note || '']);
+    const wsRec = XLSX.utils.aoa_to_sheet([recHeader, ...recRows]);
+    wsRec['!cols'] = [{ wch: 10 }, { wch: 18 }, { wch: 12 }, { wch: 13 }, { wch: 30 }];
+    XLSX.utils.book_append_sheet(wb, wsRec, 'Recurrentes');
+
+    // Hoja 4: límites de presupuesto
+    const limHeader = ['Categoría', 'Límite Mensual'];
+    const limRows = Object.entries(limits).filter(([, v]) => v > 0).map(([cat, val]) => [cat, val]);
+    const wsLim = XLSX.utils.aoa_to_sheet([limHeader, ...limRows]);
+    wsLim['!cols'] = [{ wch: 18 }, { wch: 15 }];
+    XLSX.utils.book_append_sheet(wb, wsLim, 'Límites');
+
+    XLSX.writeFile(wb, `gastos_completo_${todayIso()}.xlsx`);
   });
 
   function renderAll() {

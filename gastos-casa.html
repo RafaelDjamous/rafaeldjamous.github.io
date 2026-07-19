@@ -133,6 +133,12 @@
   .limit-input-row { display: flex; gap: 8px; align-items: center; }
   .limit-input-row input { width: 90px; }
   .no-limits { color: var(--text-dim); font-size: .84rem; }
+  .limits-summary {
+    background: rgba(124,92,255,.08); border: 1px solid var(--border); border-radius: 10px;
+    padding: 12px 14px; margin-bottom: 18px;
+  }
+  .limits-summary-head { display: flex; justify-content: space-between; font-size: .86rem; font-weight: 700; margin-bottom: 8px; }
+  .limits-summary-head .over { color: var(--expense); }
   .limit-add-row {
     display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border);
   }
@@ -1097,6 +1103,22 @@
     if (activeCats.length === 0) {
       list.innerHTML = '<div class="empty-state">No tienes límites de presupuesto. Agrega uno abajo.</div>';
     } else {
+      const totalLimit = activeCats.reduce((s, cat) => s + limits[cat], 0);
+      const totalSpent = activeCats.reduce((s, cat) => s + (totals[cat] || 0), 0);
+      const remaining = totalLimit - totalSpent;
+      const totalPct = Math.min(100, (totalSpent / totalLimit) * 100);
+      const totalColor = totalPct >= 100 ? 'var(--expense)' : totalPct >= 80 ? 'var(--warn)' : 'var(--income)';
+
+      const summary = document.createElement('div');
+      summary.className = 'limits-summary';
+      summary.innerHTML = `
+        <div class="limits-summary-head">
+          <span>Presupuesto total: ${fmt(totalLimit)}</span>
+          <span class="${remaining < 0 ? 'over' : ''}">${remaining < 0 ? 'Excedido por ' + fmt(Math.abs(remaining)) : 'Te queda ' + fmt(remaining)}</span>
+        </div>
+        <div class="limit-bar-track"><div class="limit-bar-fill" style="width:${totalPct}%;background:${totalColor}"></div></div>`;
+      list.appendChild(summary);
+
       activeCats.forEach(cat => {
         const limit = limits[cat];
         const spent = totals[cat] || 0;

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+<title>Budget Platform</title>
+<style>
+  :root {
+    --bg: #0b0f19;
+    --panel: #131a2a;
+    --panel-2: #182238;
+    --border: #263049;
+    --text: #e7ecf7;
+    --text-dim: #8b95ac;
+    --primary: #7c5cff;
+    --primary-2: #a78bfa;
+    --income: #22c98a;
+    --expense: #ff6b81;
+    --warn: #ffb84d;
+    --radius: 14px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', system-ui, Arial, sans-serif;
+    background: radial-gradient(1200px 600px at 10% -10%, #1c1440 0%, transparent 60%),
+                radial-gradient(1000px 500px at 100% 0%, #0d2b3a 0%, transparent 55%),
+                var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 24px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; }
+
+  /* Header */
+  .topbar {
+    display: flex; justify-content: space-between; align-items: center;
+    flex-wrap: wrap; gap: 16px; margin-bottom: 24px;
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .brand-mark {
+    width: 40px; height: 40px; border-radius: 12px;
+    background: linear-gradient(135deg, var(--primary), #4dd0e1);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.1rem; color: #0b0f19;
+  }
+  .brand h1 { font-size: 1.25rem; font-weight: 800; letter-spacing: .2px; }
+  .brand p { font-size: .78rem; color: var(--text-dim); }
+
+  .month-nav {
+    display: flex; align-items: center; gap: 10px;
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: 999px; padding: 6px 8px;
+  }
+  .month-nav button {
+    width: 32px; height: 32px; border-radius: 50%; border: none;
+    background: var(--panel-2); color: var(--text); font-size: 1rem;
+    cursor: pointer; transition: background .15s;
+  }
+  .month-nav button:hover { background: var(--primary); }
+  .month-nav .month-label { font-weight: 700; min-width: 140px; text-align: center; font-size: .92rem; }
+  .month-nav .today-btn {
+    width: auto; padding: 0 12px; border-radius: 999px; font-size: .72rem;
+    font-weight: 700; text-transform: uppercase; letter-spacing: .3px;
+  }
+
+  /* Summary cards */
+  .summary-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px;
+  }
+  @media (max-width: 860px) { .summary-grid { grid-template-columns: repeat(2, 1fr); } }
+  .card {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px;
+  }
+  .card .label { font-size: .74rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: .5px; font-weight: 700; }
+  .card .value { font-size: 1.5rem; font-weight: 800; margin-top: 8px; }
+  .card.income .value { color: var(--income); }
+  .card.expense .value { color: var(--expense); }
+  .card.balance .value.neg { color: var(--expense); }
+  .card.balance .value.pos { color: var(--income); }
+  .card .sub { font-size: .74rem; color: var(--text-dim); margin-top: 4px; }
+
+  /* Layout */
+  .layout { display: grid; grid-template-columns: 380px 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 980px) { .layout { grid-template-columns: 1fr; } }
+
+  .panel {
+    background: var(--panel); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 20px; margin-bottom: 18px;
+  }
+  .panel h2 { font-size: 1rem; font-weight: 800; margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
+  .panel h2 .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--primary); }
+
+  /* Form */
+  .form-row { display: flex; gap: 10px; margin-bottom: 12px; }
+  .field { flex: 1; display: flex; flex-direction: column; gap: 5px; }
+  .field label { font-size: .72rem; color: var(--text-dim); font-weight: 700; text-transform: uppercase; letter-spacing: .3px; }
+  .field input, .field select {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 10px 12px; font-size: .92rem; width: 100%;
+  }
+  .field input:focus, .field select:focus { outline: none; border-color: var(--primary); }
+
+  .type-toggle { display: flex; gap: 8px; margin-bottom: 12px; }
+  .type-toggle button {
+    flex: 1; padding: 10px; border-radius: 8px; border: 1px solid var(--border);
+    background: var(--panel-2); color: var(--text-dim); font-weight: 700; cursor: pointer;
+    font-size: .85rem; transition: all .15s;
+  }
+  .type-toggle button.active[data-type="expense"] { background: rgba(255,107,129,.15); border-color: var(--expense); color: var(--expense); }
+  .type-toggle button.active[data-type="income"] { background: rgba(34,201,138,.15); border-color: var(--income); color: var(--income); }
+
+  .btn {
+    width: 100%; padding: 12px; border: none; border-radius: 8px;
+    background: var(--primary); color: #fff; font-weight: 700; font-size: .92rem;
+    cursor: pointer; transition: background .15s;
+  }
+  .btn:hover { background: var(--primary-2); }
+  .btn-secondary {
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    margin-top: 8px;
+  }
+  .btn-secondary:hover { background: var(--panel-2); color: var(--text); }
+
+  /* Budget limits */
+  .limit-row { margin-bottom: 14px; }
+  .limit-head { display: flex; justify-content: space-between; font-size: .82rem; margin-bottom: 6px; }
+  .limit-head .cat { font-weight: 700; }
+  .limit-head .amt { color: var(--text-dim); }
+  .limit-bar-track { height: 8px; border-radius: 999px; background: var(--panel-2); overflow: hidden; }
+  .limit-bar-fill { height: 100%; border-radius: 999px; transition: width .3s; }
+  .limit-input-row { display: flex; gap: 8px; align-items: center; }
+  .limit-input-row input { width: 90px; }
+  .no-limits { color: var(--text-dim); font-size: .84rem; }
+
+  /* Donut */
+  .donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; justify-content: center; }
+  .legend { display: flex; flex-direction: column; gap: 8px; font-size: .82rem; flex: 1; min-width: 160px; }
+  .legend-item { display: flex; justify-content: space-between; gap: 10px; }
+  .legend-item .swatch-name { display: flex; align-items: center; gap: 8px; }
+  .swatch { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+  .legend-item .amt { color: var(--text-dim); }
+  .empty-state { color: var(--text-dim); font-size: .88rem; text-align: center; padding: 20px 0; }
+
+  /* Table */
+  .table-toolbar { display: flex; gap: 10px; margin-bottom: 14px; flex-wrap: wrap; }
+  .table-toolbar input, .table-toolbar select {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 9px 12px; font-size: .85rem;
+  }
+  .table-toolbar input[type="text"] { flex: 1; min-width: 140px; }
+  table { width: 100%; border-collapse: collapse; font-size: .86rem; }
+  thead th {
+    text-align: left; color: var(--text-dim); font-size: .72rem; text-transform: uppercase;
+    letter-spacing: .4px; padding: 8px 10px; border-bottom: 1px solid var(--border);
+  }
+  tbody td { padding: 10px; border-bottom: 1px solid var(--border); }
+  tbody tr:hover { background: var(--panel-2); }
+  .cat-pill {
+    display: inline-block; padding: 3px 10px; border-radius: 999px;
+    font-size: .74rem; font-weight: 700; background: var(--panel-2); border: 1px solid var(--border);
+  }
+  .amt-cell.income { color: var(--income); font-weight: 700; }
+  .amt-cell.expense { color: var(--expense); font-weight: 700; }
+  .row-actions { display: flex; gap: 6px; }
+  .icon-btn {
+    background: none; border: 1px solid var(--border); color: var(--text-dim);
+    width: 28px; height: 28px; border-radius: 6px; cursor: pointer; font-size: .8rem;
+  }
+  .icon-btn:hover { color: var(--text); border-color: var(--primary); }
+
+  .table-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .export-btn {
+    background: transparent; border: 1px solid var(--border); color: var(--text-dim);
+    padding: 8px 14px; border-radius: 8px; font-size: .8rem; font-weight: 700; cursor: pointer;
+  }
+  .export-btn:hover { color: var(--text); border-color: var(--primary); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    padding: 12px 20px; border-radius: 10px; font-size: .86rem; font-weight: 600;
+    opacity: 0; pointer-events: none; transition: all .25s; z-index: 999;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topbar">
+    <div class="brand">
+      <div class="brand-mark">$</div>
+      <div>
+        <h1>Budget Platform</h1>
+        <p>Personal income &amp; expense tracker</p>
+      </div>
+    </div>
+    <div class="month-nav">
+      <button id="prevMonth">&#8249;</button>
+      <div class="month-label" id="monthLabel">July 2026</div>
+      <button id="nextMonth">&#8250;</button>
+      <button class="today-btn" id="todayBtn">Today</button>
+    </div>
+  </div>
+
+  <div class="summary-grid">
+    <div class="card income">
+      <div class="label">Income</div>
+      <div class="value" id="sumIncome">$0.00</div>
+      <div class="sub">this month</div>
+    </div>
+    <div class="card expense">
+      <div class="label">Expenses</div>
+      <div class="value" id="sumExpense">$0.00</div>
+      <div class="sub">this month</div>
+    </div>
+    <div class="card balance">
+      <div class="label">Balance</div>
+      <div class="value" id="sumBalance">$0.00</div>
+      <div class="sub">income minus expenses</div>
+    </div>
+    <div class="card">
+      <div class="label">Savings Rate</div>
+      <div class="value" id="sumSavingsRate">0%</div>
+      <div class="sub">of income saved</div>
+    </div>
+  </div>
+
+  <div class="layout">
+    <div class="col-left">
+
+      <div class="panel">
+        <h2><span class="dot"></span>Add Transaction</h2>
+        <form id="txForm">
+          <div class="type-toggle">
+            <button type="button" data-type="expense" class="active">Expense</button>
+            <button type="button" data-type="income">Income</button>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Date</label>
+              <input type="date" id="txDate" required />
+            </div>
+            <div class="field">
+              <label>Amount</label>
+              <input type="number" id="txAmount" min="0" step="0.01" placeholder="0.00" required />
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Category</label>
+              <select id="txCategory"></select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="field">
+              <label>Note (optional)</label>
+              <input type="text" id="txNote" placeholder="e.g. Groceries at Whole Foods" />
+            </div>
+          </div>
+          <button type="submit" class="btn" id="submitBtn">Add Transaction</button>
+          <button type="button" class="btn btn-secondary" id="cancelEdit" style="display:none;">Cancel Edit</button>
+        </form>
+      </div>
+
+      <div class="panel">
+        <h2><span class="dot"></span>Monthly Budget Limits</h2>
+        <div id="limitsList"></div>
+      </div>
+
+    </div>
+
+    <div class="col-right">
+
+      <div class="panel">
+        <h2><span class="dot"></span>Spending by Category</h2>
+        <div class="donut-wrap" id="donutWrap"></div>
+      </div>
+
+      <div class="panel">
+        <h2><span class="dot"></span>Transactions</h2>
+        <div class="table-toolbar">
+          <input type="text" id="searchBox" placeholder="Search notes..." />
+          <select id="filterType">
+            <option value="all">All types</option>
+            <option value="income">Income</option>
+            <option value="expense">Expense</option>
+          </select>
+          <select id="filterCategory">
+            <option value="all">All categories</option>
+          </select>
+        </div>
+        <table>
+          <thead>
+            <tr><th>Date</th><th>Category</th><th>Note</th><th>Amount</th><th></th></tr>
+          </thead>
+          <tbody id="txTableBody"></tbody>
+        </table>
+        <div class="table-footer">
+          <span class="empty-state" id="tableEmpty" style="display:none;">No transactions found.</span>
+          <button class="export-btn" id="exportBtn">Export CSV</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function () {
+  const STORAGE_TX = 'budgetPlatform_transactions_v1';
+  const STORAGE_LIMITS = 'budgetPlatform_limits_v1';
+
+  const EXPENSE_CATEGORIES = ['Housing','Food','Transport','Utilities','Health','Entertainment','Shopping','Debt Payment','Savings','Other'];
+  const INCOME_CATEGORIES = ['Salary','Freelance','Gifts','Investments','Other'];
+
+  const PALETTE = ['#7c5cff','#22c98a','#ffb84d','#ff6b81','#4dd0e1','#a78bfa','#f472b6','#facc15','#38bdf8','#94a3b8'];
+
+  let transactions = JSON.parse(localStorage.getItem(STORAGE_TX) || '[]');
+  let limits = JSON.parse(localStorage.getItem(STORAGE_LIMITS) || '{}');
+  let currentType = 'expense';
+  let editingId = null;
+
+  const now = new Date();
+  let viewYear = now.getFullYear();
+  let viewMonth = now.getMonth(); // 0-indexed
+
+  const $ = (id) => document.getElementById(id);
+  const fmt = (n) => '$' + (Math.round(n * 100) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const monthKey = (y, m) => `${y}-${String(m + 1).padStart(2, '0')}`;
+
+  function save() {
+    localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
+    localStorage.setItem(STORAGE_LIMITS, JSON.stringify(limits));
+  }
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+
+  function populateCategorySelect() {
+    const sel = $('txCategory');
+    sel.innerHTML = '';
+    const list = currentType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+    list.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+  }
+
+  function populateFilterCategory() {
+    const sel = $('filterCategory');
+    const current = sel.value;
+    sel.innerHTML = '<option value="all">All categories</option>';
+    const all = [...new Set([...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES])];
+    all.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c; opt.textContent = c;
+      sel.appendChild(opt);
+    });
+    sel.value = current || 'all';
+  }
+
+  function setType(type) {
+    currentType = type;
+    document.querySelectorAll('.type-toggle button').forEach(b => {
+      b.classList.toggle('active', b.dataset.type === type);
+    });
+    populateCategorySelect();
+  }
+
+  document.querySelectorAll('.type-toggle button').forEach(b => {
+    b.addEventListener('click', () => setType(b.dataset.type));
+  });
+
+  function monthLabelText() {
+    const d = new Date(viewYear, viewMonth, 1);
+    return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  }
+
+  function transactionsForMonth() {
+    const key = monthKey(viewYear, viewMonth);
+    return transactions.filter(t => t.date.startsWith(key));
+  }
+
+  function renderSummary() {
+    const monthTx = transactionsForMonth();
+    const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    const balance = income - expense;
+    const savingsRate = income > 0 ? Math.max(0, (balance / income) * 100) : 0;
+
+    $('sumIncome').textContent = fmt(income);
+    $('sumExpense').textContent = fmt(expense);
+    $('sumBalance').textContent = fmt(balance);
+    $('sumBalance').classList.toggle('neg', balance < 0);
+    $('sumBalance').classList.toggle('pos', balance >= 0);
+    $('sumSavingsRate').textContent = Math.round(savingsRate) + '%';
+  }
+
+  function categoryTotalsForMonth() {
+    const monthTx = transactionsForMonth().filter(t => t.type === 'expense');
+    const totals = {};
+    monthTx.forEach(t => { totals[t.category] = (totals[t.category] || 0) + t.amount; });
+    return totals;
+  }
+
+  function renderDonut() {
+    const totals = categoryTotalsForMonth();
+    const entries = Object.entries(totals).sort((a, b) => b[1] - a[1]);
+    const wrap = $('donutWrap');
+    wrap.innerHTML = '';
+
+    if (entries.length === 0) {
+      wrap.innerHTML = '<div class="empty-state">No expenses recorded this month yet.</div>';
+      return;
+    }
+
+    const total = entries.reduce((s, [, v]) => s + v, 0);
+    const size = 180, r = 70, cx = size / 2, cy = size / 2;
+    const circumference = 2 * Math.PI * r;
+    let offset = 0;
+
+    const svgParts = [`<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`,
+      `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#182238" stroke-width="26"></circle>`];
+
+    entries.forEach(([cat, amt], i) => {
+      const frac = amt / total;
+      const dash = frac * circumference;
+      const color = PALETTE[i % PALETTE.length];
+      svgParts.push(`<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${color}" stroke-width="26"
+        stroke-dasharray="${dash} ${circumference - dash}" stroke-dashoffset="${-offset}"
+        transform="rotate(-90 ${cx} ${cy})" stroke-linecap="butt"></circle>`);
+      offset += dash;
+    });
+    svgParts.push(`<text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#e7ecf7" font-size="15" font-weight="800">${fmt(total)}</text>`);
+    svgParts.push(`<text x="${cx}" y="${cy + 16}" text-anchor="middle" fill="#8b95ac" font-size="10">total spent</text>`);
+    svgParts.push('</svg>');
+
+    const legend = document.createElement('div');
+    legend.className = 'legend';
+    entries.forEach(([cat, amt], i) => {
+      const pct = Math.round((amt / total) * 100);
+      const row = document.createElement('div');
+      row.className = 'legend-item';
+      row.innerHTML = `<span class="swatch-name"><span class="swatch" style="background:${PALETTE[i % PALETTE.length]}"></span>${cat}</span><span class="amt">${fmt(amt)} (${pct}%)</span>`;
+      legend.appendChild(row);
+    });
+
+    const svgHolder = document.createElement('div');
+    svgHolder.innerHTML = svgParts.join('');
+    wrap.appendChild(svgHolder.firstChild);
+    wrap.appendChild(legend);
+  }
+
+  function renderLimits() {
+    const totals = categoryTotalsForMonth();
+    const list = $('limitsList');
+    list.innerHTML = '';
+
+    EXPENSE_CATEGORIES.forEach(cat => {
+      const limit = limits[cat];
+      const spent = totals[cat] || 0;
+
+      const row = document.createElement('div');
+      row.className = 'limit-row';
+
+      if (limit && limit > 0) {
+        const pct = Math.min(100, (spent / limit) * 100);
+        const color = pct >= 100 ? 'var(--expense)' : pct >= 80 ? 'var(--warn)' : 'var(--income)';
+        row.innerHTML = `
+          <div class="limit-head"><span class="cat">${cat}</span><span class="amt">${fmt(spent)} / ${fmt(limit)}</span></div>
+          <div class="limit-bar-track"><div class="limit-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+          <div class="limit-input-row" style="margin-top:8px;">
+            <input type="number" min="0" step="1" value="${limit}" data-cat="${cat}" class="limit-edit-input" />
+            <button type="button" class="icon-btn limit-clear" data-cat="${cat}" title="Remove limit">&times;</button>
+          </div>`;
+      } else {
+        row.innerHTML = `
+          <div class="limit-head"><span class="cat">${cat}</span><span class="amt">no limit set</span></div>
+          <div class="limit-input-row">
+            <input type="number" min="0" step="1" placeholder="Set limit" data-cat="${cat}" class="limit-set-input" />
+            <button type="button" class="icon-btn limit-save" data-cat="${cat}" title="Save limit">&check;</button>
+          </div>`;
+      }
+      list.appendChild(row);
+    });
+
+    list.querySelectorAll('.limit-save').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const cat = btn.dataset.cat;
+        const input = list.querySelector(`.limit-set-input[data-cat="${cat}"]`);
+        const val = parseFloat(input.value);
+        if (val > 0) {
+          limits[cat] = val;
+          save();
+          renderAll();
+        }
+      });
+    });
+    list.querySelectorAll('.limit-edit-input').forEach(input => {
+      input.addEventListener('change', () => {
+        const cat = input.dataset.cat;
+        const val = parseFloat(input.value);
+        if (val > 0) { limits[cat] = val; save(); renderAll(); }
+      });
+    });
+    list.querySelectorAll('.limit-clear').forEach(btn => {
+      btn.addEventListener('click', () => {
+        delete limits[btn.dataset.cat];
+        save();
+        renderAll();
+      });
+    });
+  }
+
+  function renderTable() {
+    const search = $('searchBox').value.trim().toLowerCase();
+    const typeFilter = $('filterType').value;
+    const catFilter = $('filterCategory').value;
+
+    let monthTx = transactionsForMonth().slice().sort((a, b) => b.date.localeCompare(a.date));
+
+    if (typeFilter !== 'all') monthTx = monthTx.filter(t => t.type === typeFilter);
+    if (catFilter !== 'all') monthTx = monthTx.filter(t => t.category === catFilter);
+    if (search) monthTx = monthTx.filter(t => (t.note || '').toLowerCase().includes(search) || t.category.toLowerCase().includes(search));
+
+    const tbody = $('txTableBody');
+    tbody.innerHTML = '';
+    $('tableEmpty').style.display = monthTx.length === 0 ? 'block' : 'none';
+
+    monthTx.forEach(t => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${t.date}</td>
+        <td><span class="cat-pill">${t.category}</span></td>
+        <td>${t.note ? escapeHtml(t.note) : '<span style="color:var(--text-dim)">—</span>'}</td>
+        <td class="amt-cell ${t.type}">${t.type === 'expense' ? '-' : '+'}${fmt(t.amount)}</td>
+        <td>
+          <div class="row-actions">
+            <button class="icon-btn edit-btn" data-id="${t.id}" title="Edit">&#9998;</button>
+            <button class="icon-btn del-btn" data-id="${t.id}" title="Delete">&#128465;</button>
+          </div>
+        </td>`;
+      tbody.appendChild(tr);
+    });
+
+    tbody.querySelectorAll('.edit-btn').forEach(b => b.addEventListener('click', () => startEdit(b.dataset.id)));
+    tbody.querySelectorAll('.del-btn').forEach(b => b.addEventListener('click', () => deleteTx(b.dataset.id)));
+  }
+
+  function escapeHtml(str) {
+    const div = document.createElement('div');
+    div.textContent = str;
+    return div.innerHTML;
+  }
+
+  function startEdit(id) {
+    const t = transactions.find(t => t.id === id);
+    if (!t) return;
+    editingId = id;
+    setType(t.type);
+    $('txDate').value = t.date;
+    $('txAmount').value = t.amount;
+    $('txCategory').value = t.category;
+    $('txNote').value = t.note || '';
+    $('submitBtn').textContent = 'Save Changes';
+    $('cancelEdit').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function cancelEdit() {
+    editingId = null;
+    $('txForm').reset();
+    $('submitBtn').textContent = 'Add Transaction';
+    $('cancelEdit').style.display = 'none';
+    setType('expense');
+    $('txDate').value = todayIso();
+  }
+
+  function deleteTx(id) {
+    transactions = transactions.filter(t => t.id !== id);
+    save();
+    renderAll();
+    showToast('Transaction deleted');
+  }
+
+  function todayIso() {
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+  }
+
+  $('txForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    const date = $('txDate').value;
+    const amount = parseFloat($('txAmount').value);
+    const category = $('txCategory').value;
+    const note = $('txNote').value.trim();
+
+    if (!date || !(amount > 0) || !category) return;
+
+    if (editingId) {
+      const t = transactions.find(t => t.id === editingId);
+      Object.assign(t, { date, amount, category, note, type: currentType });
+      showToast('Transaction updated');
+    } else {
+      transactions.push({
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+        date, amount, category, note, type: currentType
+      });
+      showToast('Transaction added');
+    }
+
+    save();
+    const [y, m] = date.split('-').map(Number);
+    viewYear = y; viewMonth = m - 1;
+    cancelEdit();
+    renderAll();
+  });
+
+  $('cancelEdit').addEventListener('click', cancelEdit);
+
+  $('prevMonth').addEventListener('click', () => {
+    viewMonth--;
+    if (viewMonth < 0) { viewMonth = 11; viewYear--; }
+    renderAll();
+  });
+  $('nextMonth').addEventListener('click', () => {
+    viewMonth++;
+    if (viewMonth > 11) { viewMonth = 0; viewYear++; }
+    renderAll();
+  });
+  $('todayBtn').addEventListener('click', () => {
+    viewYear = now.getFullYear();
+    viewMonth = now.getMonth();
+    renderAll();
+  });
+
+  $('searchBox').addEventListener('input', renderTable);
+  $('filterType').addEventListener('change', renderTable);
+  $('filterCategory').addEventListener('change', renderTable);
+
+  $('exportBtn').addEventListener('click', () => {
+    const monthTx = transactionsForMonth().slice().sort((a, b) => a.date.localeCompare(b.date));
+    if (monthTx.length === 0) { showToast('Nothing to export'); return; }
+    const header = ['Date', 'Type', 'Category', 'Note', 'Amount'];
+    const rows = monthTx.map(t => [t.date, t.type, t.category, (t.note || '').replace(/"/g, '""'), t.amount]);
+    const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `budget_${monthKey(viewYear, viewMonth)}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  function renderAll() {
+    $('monthLabel').textContent = monthLabelText();
+    populateFilterCategory();
+    renderSummary();
+    renderDonut();
+    renderLimits();
+    renderTable();
+  }
+
+  // init
+  populateCategorySelect();
+  $('txDate').value = todayIso();
+  renderAll();
+})();
+</script>
+</body>
+</html>

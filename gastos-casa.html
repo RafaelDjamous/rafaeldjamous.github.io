@@ -133,6 +133,25 @@
   .limit-input-row input { width: 90px; }
   .no-limits { color: var(--text-dim); font-size: .84rem; }
 
+  /* Recurring */
+  .recurring-check { margin-bottom: 14px; }
+  .recurring-check label {
+    display: flex; align-items: center; gap: 8px; font-size: .84rem; color: var(--text-dim);
+    cursor: pointer; user-select: none;
+  }
+  .recurring-check input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+  .recurring-row {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px;
+  }
+  .recurring-row:last-child { border-bottom: none; }
+  .recurring-info { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .recurring-info .cat { font-weight: 700; font-size: .86rem; }
+  .recurring-info .meta { font-size: .74rem; color: var(--text-dim); }
+  .recurring-amt { font-weight: 700; font-size: .86rem; white-space: nowrap; }
+  .recurring-amt.income { color: var(--income); }
+  .recurring-amt.expense { color: var(--expense); }
+
   /* Donut */
   .donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; justify-content: center; }
   .legend { display: flex; flex-direction: column; gap: 8px; font-size: .82rem; flex: 1; min-width: 160px; }
@@ -363,9 +382,20 @@
               <input type="text" id="txNote" placeholder="ej. Supermercado del sábado" />
             </div>
           </div>
+          <div class="recurring-check" id="recurringCheckRow">
+            <label>
+              <input type="checkbox" id="txRecurring" />
+              <span>&#128257; Repetir cada mes (mismo día)</span>
+            </label>
+          </div>
           <button type="submit" class="btn" id="submitBtn">Agregar Movimiento</button>
           <button type="button" class="btn btn-secondary" id="cancelEdit" style="display:none;">Cancelar Edición</button>
         </form>
+      </div>
+
+      <div class="panel">
+        <h2><span class="dot"></span>Gastos Recurrentes</h2>
+        <div id="recurringList"></div>
       </div>
 
       <div class="panel">
@@ -418,6 +448,7 @@
   const STORAGE_TX = 'gastosCasa_transactions_v1';
   const STORAGE_LIMITS = 'gastosCasa_limits_v1';
   const STORAGE_CUSTOM_CATS = 'gastosCasa_customCategories_v1';
+  const STORAGE_RECURRING = 'gastosCasa_recurring_v1';
 
   const BASE_EXPENSE_CATEGORIES = ['Renta/Hipoteca','Comida','Transporte','Servicios','Salud','Entretenimiento','Compras','Deudas','Ahorros'];
   const BASE_INCOME_CATEGORIES = ['Salario','Freelance','Regalos','Inversiones'];
@@ -427,6 +458,7 @@
   let transactions = JSON.parse(localStorage.getItem(STORAGE_TX) || '[]');
   let limits = JSON.parse(localStorage.getItem(STORAGE_LIMITS) || '{}');
   const customCategories = Object.assign({ expense: [], income: [] }, JSON.parse(localStorage.getItem(STORAGE_CUSTOM_CATS) || '{}'));
+  let recurring = JSON.parse(localStorage.getItem(STORAGE_RECURRING) || '[]');
   let currentType = 'expense';
   let editingId = null;
 
@@ -508,7 +540,7 @@
       await fetch(`${FIREBASE_URL}/gastosCasa.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ transactions, limits, customCategories })
+        body: JSON.stringify({ transactions, limits, customCategories, recurring })
       });
     } catch (e) { /* sin conexión: queda guardado local */ }
   }
@@ -525,9 +557,11 @@
           customCategories.expense = data.customCategories.expense || [];
           customCategories.income = data.customCategories.income || [];
         }
+        if (Array.isArray(data.recurring)) recurring = data.recurring;
         localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
         localStorage.setItem(STORAGE_LIMITS, JSON.stringify(limits));
         localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories));
+        localStorage.setItem(STORAGE_RECURRING, JSON.stringify(recurring));
       }
     } catch (e) { /* sin conexión: se usa lo que haya en localStorage */ }
   }
@@ -544,7 +578,68 @@
     localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
     localStorage.setItem(STORAGE_LIMITS, JSON.stringify(limits));
     localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories));
+    localStorage.setItem(STORAGE_RECURRING, JSON.stringify(recurring));
     syncToFirebase();
+  }
+
+  function daysInMonth(y, m) { return new Date(y, m + 1, 0).getDate(); }
+
+  function generateRecurringTransactions() {
+    const realKey = monthKey(now.getFullYear(), now.getMonth());
+    let changed = false;
+
+    recurring.forEach(r => {
+      let [y, m] = (r.lastGeneratedMonth || realKey).split('-').map(Number);
+      m -= 1;
+      let guard = 0;
+      while ((y < now.getFullYear() || (y === now.getFullYear() && m < now.getMonth())) && guard < 36) {
+        m++; if (m > 11) { m = 0; y++; }
+        guard++;
+        const key = monthKey(y, m);
+        const alreadyExists = transactions.some(t => t.recurringId === r.id && t.date.startsWith(key));
+        if (!alreadyExists) {
+          const day = Math.min(r.day, daysInMonth(y, m));
+          transactions.push({
+            id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
+            date: `${key}-${String(day).padStart(2, '0')}`,
+            amount: r.amount, category: r.category, note: r.note, type: r.type, recurringId: r.id
+          });
+          changed = true;
+        }
+        r.lastGeneratedMonth = key;
+      }
+    });
+
+    if (changed) { localStorage.setItem(STORAGE_TX, JSON.stringify(transactions)); localStorage.setItem(STORAGE_RECURRING, JSON.stringify(recurring)); syncToFirebase(); }
+  }
+
+  function renderRecurringList() {
+    const list = $('recurringList');
+    list.innerHTML = '';
+    if (recurring.length === 0) {
+      list.innerHTML = '<div class="empty-state">No tienes gastos recurrentes todavía. Marca la casilla al agregar un movimiento.</div>';
+      return;
+    }
+    recurring.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'recurring-row';
+      row.innerHTML = `
+        <div class="recurring-info">
+          <span class="cat">${r.category}</span>
+          <span class="meta">${r.note ? escapeHtml(r.note) + ' · ' : ''}día ${r.day} de cada mes</span>
+        </div>
+        <span class="recurring-amt ${r.type}">${r.type === 'expense' ? '-' : '+'}${fmt(r.amount)}</span>
+        <button type="button" class="icon-btn recurring-del" data-id="${r.id}" title="Cancelar recurrencia">&times;</button>`;
+      list.appendChild(row);
+    });
+    list.querySelectorAll('.recurring-del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        recurring = recurring.filter(r => r.id !== btn.dataset.id);
+        save();
+        renderRecurringList();
+        showToast('Recurrencia cancelada');
+      });
+    });
   }
 
   function showToast(msg) {
@@ -796,6 +891,7 @@
     $('txNote').value = t.note || '';
     $('submitBtn').textContent = 'Guardar Cambios';
     $('cancelEdit').style.display = 'block';
+    $('recurringCheckRow').style.display = 'none';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
@@ -804,6 +900,7 @@
     $('txForm').reset();
     $('submitBtn').textContent = 'Agregar Movimiento';
     $('cancelEdit').style.display = 'none';
+    $('recurringCheckRow').style.display = 'block';
     setType('expense');
     $('txDate').value = todayIso();
   }
@@ -835,7 +932,6 @@
         const known = currentType === 'expense' ? expenseCategories() : incomeCategories();
         if (!known.includes(newCatName)) {
           list.push(newCatName);
-          saveCustomCategories();
         }
       }
     }
@@ -847,11 +943,21 @@
       Object.assign(t, { date, amount, category, note, type: currentType });
       showToast('Movimiento actualizado');
     } else {
-      transactions.push({
+      const isRecurring = $('txRecurring').checked;
+      const newTx = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         date, amount, category, note, type: currentType
-      });
-      showToast('Movimiento agregado');
+      };
+
+      if (isRecurring) {
+        const [ry, rm, rd] = date.split('-').map(Number);
+        const recId = 'r' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+        newTx.recurringId = recId;
+        recurring.push({ id: recId, type: currentType, category, amount, note, day: rd, lastGeneratedMonth: monthKey(ry, rm - 1) });
+      }
+
+      transactions.push(newTx);
+      showToast(isRecurring ? 'Movimiento agregado y marcado como recurrente' : 'Movimiento agregado');
     }
 
     save();
@@ -904,12 +1010,14 @@
     renderSummary();
     renderDonut();
     renderLimits();
+    renderRecurringList();
     renderTable();
   }
 
   function initApp() {
     populateCategorySelect();
     $('txDate').value = todayIso();
+    generateRecurringTransactions();
     renderAll();
   }
 

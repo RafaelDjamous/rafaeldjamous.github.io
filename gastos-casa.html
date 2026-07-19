@@ -132,6 +132,15 @@
   .limit-input-row { display: flex; gap: 8px; align-items: center; }
   .limit-input-row input { width: 90px; }
   .no-limits { color: var(--text-dim); font-size: .84rem; }
+  .limit-add-row {
+    display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border);
+  }
+  .limit-add-row select { flex: 1.4; min-width: 0; }
+  .limit-add-row input { flex: 1; min-width: 0; width: auto; }
+  .limit-add-row select, .limit-add-row input {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 9px 10px; font-size: .85rem;
+  }
 
   /* Recurring */
   .recurring-check { margin-bottom: 14px; }
@@ -459,6 +468,11 @@
       <div class="panel">
         <h2><span class="dot"></span>Límites Mensuales de Presupuesto</h2>
         <div id="limitsList"></div>
+        <div class="limit-add-row" id="limitAddRow">
+          <select id="limitAddCategory"></select>
+          <input type="number" id="limitAddAmount" min="0" step="1" placeholder="Monto" />
+          <button type="button" class="icon-btn" id="limitAddBtn" title="Agregar límite">&#10003;</button>
+        </div>
       </div>
 
     </div>
@@ -964,60 +978,62 @@
     const list = $('limitsList');
     list.innerHTML = '';
 
-    expenseCategories().forEach(cat => {
-      const limit = limits[cat];
-      const spent = totals[cat] || 0;
+    const activeCats = expenseCategories().filter(cat => limits[cat] > 0);
 
-      const row = document.createElement('div');
-      row.className = 'limit-row';
-
-      if (limit && limit > 0) {
+    if (activeCats.length === 0) {
+      list.innerHTML = '<div class="empty-state">No tienes límites de presupuesto. Agrega uno abajo.</div>';
+    } else {
+      activeCats.forEach(cat => {
+        const limit = limits[cat];
+        const spent = totals[cat] || 0;
         const pct = Math.min(100, (spent / limit) * 100);
         const color = pct >= 100 ? 'var(--expense)' : pct >= 80 ? 'var(--warn)' : 'var(--income)';
+
+        const row = document.createElement('div');
+        row.className = 'limit-row';
         row.innerHTML = `
           <div class="limit-head"><span class="cat">${cat}</span><span class="amt">${fmt(spent)} / ${fmt(limit)}</span></div>
           <div class="limit-bar-track"><div class="limit-bar-fill" style="width:${pct}%;background:${color}"></div></div>
           <div class="limit-input-row" style="margin-top:8px;">
             <input type="number" min="0" step="1" value="${limit}" data-cat="${cat}" class="limit-edit-input" />
-            <button type="button" class="icon-btn limit-clear" data-cat="${cat}" title="Quitar límite">&times;</button>
+            <button type="button" class="icon-btn limit-clear" data-cat="${cat}" title="Borrar límite">&#128465;</button>
           </div>`;
-      } else {
-        row.innerHTML = `
-          <div class="limit-head"><span class="cat">${cat}</span><span class="amt">sin límite</span></div>
-          <div class="limit-input-row">
-            <input type="number" min="0" step="1" placeholder="Definir límite" data-cat="${cat}" class="limit-set-input" />
-            <button type="button" class="icon-btn limit-save" data-cat="${cat}" title="Guardar límite">&check;</button>
-          </div>`;
-      }
-      list.appendChild(row);
-    });
+        list.appendChild(row);
+      });
 
-    list.querySelectorAll('.limit-save').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const cat = btn.dataset.cat;
-        const input = list.querySelector(`.limit-set-input[data-cat="${cat}"]`);
-        const val = parseFloat(input.value);
-        if (val > 0) {
-          limits[cat] = val;
+      list.querySelectorAll('.limit-edit-input').forEach(input => {
+        input.addEventListener('change', () => {
+          const cat = input.dataset.cat;
+          const val = parseFloat(input.value);
+          if (val > 0) { limits[cat] = val; save(); renderAll(); }
+        });
+      });
+      list.querySelectorAll('.limit-clear').forEach(btn => {
+        btn.addEventListener('click', () => {
+          delete limits[btn.dataset.cat];
           save();
           renderAll();
-        }
+          showToast('Límite borrado');
+        });
       });
-    });
-    list.querySelectorAll('.limit-edit-input').forEach(input => {
-      input.addEventListener('change', () => {
-        const cat = input.dataset.cat;
-        const val = parseFloat(input.value);
-        if (val > 0) { limits[cat] = val; save(); renderAll(); }
+    }
+
+    const available = expenseCategories().filter(cat => !(limits[cat] > 0));
+    const addRow = $('limitAddRow');
+    if (available.length === 0) {
+      addRow.style.display = 'none';
+    } else {
+      addRow.style.display = 'flex';
+      const sel = $('limitAddCategory');
+      const current = sel.value;
+      sel.innerHTML = '';
+      available.forEach(cat => {
+        const opt = document.createElement('option');
+        opt.value = cat; opt.textContent = cat;
+        sel.appendChild(opt);
       });
-    });
-    list.querySelectorAll('.limit-clear').forEach(btn => {
-      btn.addEventListener('click', () => {
-        delete limits[btn.dataset.cat];
-        save();
-        renderAll();
-      });
-    });
+      if (available.includes(current)) sel.value = current;
+    }
   }
 
   function renderTable() {
@@ -1190,6 +1206,18 @@
     const btn = $('txRecurringBtn');
     const isActive = btn.classList.toggle('active');
     btn.setAttribute('aria-pressed', String(isActive));
+  });
+
+  $('limitAddBtn').addEventListener('click', () => {
+    const cat = $('limitAddCategory').value;
+    const val = parseFloat($('limitAddAmount').value);
+    if (cat && val > 0) {
+      limits[cat] = val;
+      save();
+      $('limitAddAmount').value = '';
+      renderAll();
+      showToast('Límite agregado');
+    }
   });
 
   $('prevMonth').addEventListener('click', () => {

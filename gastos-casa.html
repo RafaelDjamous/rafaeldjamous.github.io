@@ -244,6 +244,26 @@
   .topbar-actions { display: flex; align-items: center; gap: 8px; }
   .topbar-actions .icon-btn { width: 34px; height: 34px; border-radius: 50%; font-size: .9rem; }
 
+  /* Profile picker */
+  #profileList { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; text-align: left; }
+  .profile-btn {
+    width: 100%; padding: 13px 16px; border-radius: 10px; border: 1.5px solid var(--border);
+    background: var(--panel-2); color: var(--text); font-weight: 700; font-size: .94rem;
+    cursor: pointer; text-align: left; transition: all .15s;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .profile-btn:hover { border-color: var(--primary); background: rgba(124,92,255,.1); }
+  .profile-avatar {
+    width: 30px; height: 30px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), #4dd0e1);
+    display: flex; align-items: center; justify-content: center; font-weight: 800; color: #0b0f19; font-size: .85rem;
+    flex-shrink: 0;
+  }
+  .login-back {
+    background: none; border: none; color: var(--text-dim); font-size: .82rem; font-weight: 700;
+    cursor: pointer; margin-top: 14px; padding: 6px;
+  }
+  .login-back:hover { color: var(--text); }
+
   /* Change password modal */
   #changePwdModal {
     position: fixed; inset: 0; z-index: 8000; background: rgba(0,0,0,.6);
@@ -267,19 +287,51 @@
 <body>
 
 <div id="loginOverlay">
-  <div class="login-box">
+
+  <div class="login-box" id="profileSelectBox">
     <div class="login-mark">$</div>
     <div class="login-title">Gastos de Casa</div>
-    <div class="login-sub">Acceso privado &middot; solo familia</div>
+    <div class="login-sub">¿Quién eres?</div>
+    <div id="profileList"></div>
+    <button type="button" class="btn" onclick="showNewProfileForm()">+ Agregar Persona</button>
+    <div class="login-footer">Cada persona tiene su propio acceso y sus propios gastos, privados.</div>
+  </div>
+
+  <div class="login-box" id="profileLoginBox" style="display:none;">
+    <div class="login-mark" id="profileLoginAvatar">$</div>
+    <div class="login-title" id="profileLoginName">Nombre</div>
+    <div class="login-sub">Ingresa tu contraseña</div>
     <div id="loginError" class="login-error">Clave incorrecta. Intenta de nuevo.</div>
     <div class="login-field">
       <label for="loginPwd">Contraseña</label>
-      <input type="password" id="loginPwd" placeholder="Ingresa la clave"
+      <input type="password" id="loginPwd" placeholder="Ingresa tu clave"
              onkeydown="if(event.key==='Enter') checkLogin()" autocomplete="current-password" />
     </div>
     <button type="button" class="btn" onclick="checkLogin()">Ingresar</button>
-    <div class="login-footer">Los datos se guardan en la nube para verlos desde cualquier dispositivo.</div>
+    <button type="button" class="login-back" onclick="showProfileSelect()">&larr; No soy yo, cambiar de persona</button>
   </div>
+
+  <div class="login-box" id="newProfileBox" style="display:none;">
+    <div class="login-mark">$</div>
+    <div class="login-title">Nueva Persona</div>
+    <div class="login-sub">Crea tu acceso privado</div>
+    <div id="newProfileError" class="login-error"></div>
+    <div class="login-field">
+      <label for="npName">Tu nombre</label>
+      <input type="text" id="npName" placeholder="ej. Rafael" />
+    </div>
+    <div class="login-field">
+      <label for="npPwd">Contraseña</label>
+      <input type="password" id="npPwd" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+    </div>
+    <div class="login-field">
+      <label for="npPwdConfirm">Confirmar contraseña</label>
+      <input type="password" id="npPwdConfirm" placeholder="Repite la clave" autocomplete="new-password" />
+    </div>
+    <button type="button" class="btn" onclick="createProfile()">Crear e Ingresar</button>
+    <button type="button" class="login-back" onclick="showProfileSelect()">&larr; Cancelar</button>
+  </div>
+
 </div>
 
 <div id="changePwdModal">
@@ -323,7 +375,7 @@
         <button class="today-btn" id="todayBtn">Hoy</button>
       </div>
       <button type="button" class="icon-btn" title="Cambiar contraseña" onclick="document.getElementById('changePwdModal').classList.add('open')">&#128274;</button>
-      <button type="button" class="icon-btn" title="Cerrar sesión" onclick="logout()">&#8618;</button>
+      <button type="button" class="icon-btn" title="Cambiar de persona / cerrar sesión" onclick="logout()">&#8618;</button>
     </div>
   </div>
 
@@ -451,20 +503,21 @@
 
 <script>
 (function () {
-  const STORAGE_TX = 'gastosCasa_transactions_v1';
-  const STORAGE_LIMITS = 'gastosCasa_limits_v1';
-  const STORAGE_CUSTOM_CATS = 'gastosCasa_customCategories_v1';
-  const STORAGE_RECURRING = 'gastosCasa_recurring_v1';
+  const STORAGE_PROFILES = 'gastosCasa_profiles_v1';
+  const txKey = (id) => `gastosCasa_${id}_transactions_v1`;
+  const limitsKey = (id) => `gastosCasa_${id}_limits_v1`;
+  const customCatsKey = (id) => `gastosCasa_${id}_customCategories_v1`;
+  const recurringKey = (id) => `gastosCasa_${id}_recurring_v1`;
 
   const BASE_EXPENSE_CATEGORIES = ['Renta/Hipoteca','Comida','Transporte','Servicios','Salud','Entretenimiento','Compras','Deudas','Ahorros'];
   const BASE_INCOME_CATEGORIES = ['Salario','Freelance','Regalos','Inversiones'];
 
   const PALETTE = ['#7c5cff','#22c98a','#ffb84d','#ff6b81','#4dd0e1','#a78bfa','#f472b6','#facc15','#38bdf8','#94a3b8'];
 
-  let transactions = JSON.parse(localStorage.getItem(STORAGE_TX) || '[]');
-  let limits = JSON.parse(localStorage.getItem(STORAGE_LIMITS) || '{}');
-  const customCategories = Object.assign({ expense: [], income: [] }, JSON.parse(localStorage.getItem(STORAGE_CUSTOM_CATS) || '{}'));
-  let recurring = JSON.parse(localStorage.getItem(STORAGE_RECURRING) || '[]');
+  let transactions = [];
+  let limits = {};
+  let customCategories = { expense: [], income: [] };
+  let recurring = [];
   let currentType = 'expense';
   let editingId = null;
 
@@ -475,25 +528,110 @@
   // Pega aquí la URL de tu base de datos, ej: 'https://gastos-casa-default-rtdb.firebaseio.com'
   const FIREBASE_URL = 'https://budget-mensual-default-rtdb.firebaseio.com';
 
-  const AUTH_KEY = 'gastosCasa_pwd_hash';
-  const SESSION_KEY = 'gastosCasa_auth';
-  const DEFAULT_PWD = 'Casa2026';
+  const SESSION_KEY = 'gastosCasa_activeProfile';
+
+  let profiles = JSON.parse(localStorage.getItem(STORAGE_PROFILES) || '[]');
+  let activeProfileId = null;
+  let pendingProfileId = null;
 
   async function hashPassword(pwd) {
     const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(pwd));
     return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
   }
 
+  function slugify(name) {
+    const stripAccents = name.toLowerCase().normalize('NFD').split('').filter(ch => ch.charCodeAt(0) < 0x0300 || ch.charCodeAt(0) > 0x036f).join('');
+    return stripAccents.replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '') || 'persona';
+  }
+
+  function saveProfilesLocal() { localStorage.setItem(STORAGE_PROFILES, JSON.stringify(profiles)); }
+
+  async function syncProfilesToFirebase() {
+    if (!FIREBASE_URL) return;
+    try {
+      await fetch(`${FIREBASE_URL}/gastosCasa/_profiles.json`, {
+        method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(profiles)
+      });
+    } catch (e) { /* sin conexión: queda guardado local */ }
+  }
+
+  async function loadProfilesFromFirebase() {
+    if (!FIREBASE_URL) return;
+    try {
+      const res = await fetch(`${FIREBASE_URL}/gastosCasa/_profiles.json`);
+      const data = await res.json();
+      if (Array.isArray(data)) { profiles = data; saveProfilesLocal(); }
+    } catch (e) { /* sin conexión: se usa lo que haya en localStorage */ }
+  }
+
+  function renderProfileList() {
+    const list = $('profileList');
+    list.innerHTML = '';
+    if (profiles.length === 0) {
+      list.innerHTML = '<div class="empty-state">Todavía no hay nadie registrado. Agrega a la primera persona.</div>';
+      return;
+    }
+    profiles.forEach(p => {
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'profile-btn';
+      btn.innerHTML = `<span class="profile-avatar">${escapeHtml(p.name.charAt(0).toUpperCase())}</span><span>${escapeHtml(p.name)}</span>`;
+      btn.addEventListener('click', () => showProfileLogin(p.id));
+      list.appendChild(btn);
+    });
+  }
+
+  function showProfileSelect() {
+    pendingProfileId = null;
+    $('profileLoginBox').style.display = 'none';
+    $('newProfileBox').style.display = 'none';
+    $('profileSelectBox').style.display = 'block';
+    renderProfileList();
+  }
+
+  function showProfileLogin(id) {
+    const p = profiles.find(x => x.id === id);
+    if (!p) return;
+    pendingProfileId = id;
+    $('profileLoginName').textContent = p.name;
+    $('profileLoginAvatar').textContent = p.name.charAt(0).toUpperCase();
+    $('profileSelectBox').style.display = 'none';
+    $('newProfileBox').style.display = 'none';
+    $('profileLoginBox').style.display = 'block';
+    $('loginError').style.display = 'none';
+    $('loginPwd').value = '';
+    $('loginPwd').focus();
+  }
+
+  function showNewProfileForm() {
+    $('profileSelectBox').style.display = 'none';
+    $('profileLoginBox').style.display = 'none';
+    $('newProfileBox').style.display = 'block';
+    $('npName').value = ''; $('npPwd').value = ''; $('npPwdConfirm').value = '';
+    $('newProfileError').style.display = 'none';
+    $('npName').focus();
+  }
+
+  function loadLocalDataForProfile(id) {
+    transactions = JSON.parse(localStorage.getItem(txKey(id)) || '[]');
+    limits = JSON.parse(localStorage.getItem(limitsKey(id)) || '{}');
+    customCategories = Object.assign({ expense: [], income: [] }, JSON.parse(localStorage.getItem(customCatsKey(id)) || '{}'));
+    recurring = JSON.parse(localStorage.getItem(recurringKey(id)) || '[]');
+  }
+
   async function checkLogin() {
     const pwd = $('loginPwd').value;
-    if (!pwd) return;
+    if (!pwd || !pendingProfileId) return;
+    const p = profiles.find(x => x.id === pendingProfileId);
+    if (!p) return;
     const hash = await hashPassword(pwd);
-    const stored = localStorage.getItem(AUTH_KEY) || await hashPassword(DEFAULT_PWD);
-    if (hash === stored) {
-      sessionStorage.setItem(SESSION_KEY, '1');
+    if (hash === p.pwdHash) {
+      activeProfileId = p.id;
+      sessionStorage.setItem(SESSION_KEY, p.id);
       $('loginOverlay').style.display = 'none';
-      await loadFromFirebase();
+      loadLocalDataForProfile(activeProfileId);
       initApp();
+      loadFromFirebase().then(() => { generateRecurringTransactions(); renderAll(); });
     } else {
       const err = $('loginError');
       err.style.display = 'block';
@@ -501,6 +639,33 @@
       $('loginPwd').focus();
       setTimeout(() => { err.style.display = 'none'; }, 3500);
     }
+  }
+
+  async function createProfile() {
+    const name = $('npName').value.trim();
+    const pwd = $('npPwd').value;
+    const conf = $('npPwdConfirm').value;
+    const err = $('newProfileError');
+    err.style.display = 'none';
+
+    if (!name) { err.textContent = 'Escribe tu nombre.'; err.style.display = 'block'; return; }
+    if (profiles.some(p => p.name.toLowerCase() === name.toLowerCase())) {
+      err.textContent = 'Ya existe alguien con ese nombre.'; err.style.display = 'block'; return;
+    }
+    if (pwd.length < 6) { err.textContent = 'La clave debe tener al menos 6 caracteres.'; err.style.display = 'block'; return; }
+    if (pwd !== conf) { err.textContent = 'Las claves no coinciden.'; err.style.display = 'block'; return; }
+
+    const id = slugify(name) + '-' + Math.random().toString(36).slice(2, 6);
+    const pwdHash = await hashPassword(pwd);
+    profiles.push({ id, name, pwdHash });
+    saveProfilesLocal();
+    syncProfilesToFirebase();
+
+    activeProfileId = id;
+    sessionStorage.setItem(SESSION_KEY, id);
+    $('loginOverlay').style.display = 'none';
+    loadLocalDataForProfile(id);
+    initApp();
   }
 
   function logout() {
@@ -514,6 +679,8 @@
     const conf = $('cpConfirm').value;
     const msg = $('chpwdMsg');
     msg.style.display = 'none';
+    const p = profiles.find(x => x.id === activeProfileId);
+    if (!p) return;
 
     if (!cur || !nw || !conf) {
       msg.textContent = 'Completa todos los campos.';
@@ -528,12 +695,13 @@
       msg.style.color = 'var(--expense)'; msg.style.display = 'block'; return;
     }
     const curHash = await hashPassword(cur);
-    const storedHash = localStorage.getItem(AUTH_KEY) || await hashPassword(DEFAULT_PWD);
-    if (curHash !== storedHash) {
+    if (curHash !== p.pwdHash) {
       msg.textContent = 'La contraseña actual es incorrecta.';
       msg.style.color = 'var(--expense)'; msg.style.display = 'block'; return;
     }
-    localStorage.setItem(AUTH_KEY, await hashPassword(nw));
+    p.pwdHash = await hashPassword(nw);
+    saveProfilesLocal();
+    syncProfilesToFirebase();
     msg.textContent = 'Contraseña actualizada correctamente.';
     msg.style.color = 'var(--income)'; msg.style.display = 'block';
     $('cpCurrent').value = ''; $('cpNew').value = ''; $('cpConfirm').value = '';
@@ -541,9 +709,9 @@
   }
 
   async function syncToFirebase() {
-    if (!FIREBASE_URL) return;
+    if (!FIREBASE_URL || !activeProfileId) return;
     try {
-      await fetch(`${FIREBASE_URL}/gastosCasa.json`, {
+      await fetch(`${FIREBASE_URL}/gastosCasa/${encodeURIComponent(activeProfileId)}.json`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ transactions, limits, customCategories, recurring })
@@ -552,9 +720,9 @@
   }
 
   async function loadFromFirebase() {
-    if (!FIREBASE_URL) return;
+    if (!FIREBASE_URL || !activeProfileId) return;
     try {
-      const res = await fetch(`${FIREBASE_URL}/gastosCasa.json`);
+      const res = await fetch(`${FIREBASE_URL}/gastosCasa/${encodeURIComponent(activeProfileId)}.json`);
       const data = await res.json();
       if (data) {
         if (Array.isArray(data.transactions)) transactions = data.transactions;
@@ -564,10 +732,10 @@
           customCategories.income = data.customCategories.income || [];
         }
         if (Array.isArray(data.recurring)) recurring = data.recurring;
-        localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
-        localStorage.setItem(STORAGE_LIMITS, JSON.stringify(limits));
-        localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories));
-        localStorage.setItem(STORAGE_RECURRING, JSON.stringify(recurring));
+        localStorage.setItem(txKey(activeProfileId), JSON.stringify(transactions));
+        localStorage.setItem(limitsKey(activeProfileId), JSON.stringify(limits));
+        localStorage.setItem(customCatsKey(activeProfileId), JSON.stringify(customCategories));
+        localStorage.setItem(recurringKey(activeProfileId), JSON.stringify(recurring));
       }
     } catch (e) { /* sin conexión: se usa lo que haya en localStorage */ }
   }
@@ -581,10 +749,11 @@
   const monthKey = (y, m) => `${y}-${String(m + 1).padStart(2, '0')}`;
 
   function save() {
-    localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
-    localStorage.setItem(STORAGE_LIMITS, JSON.stringify(limits));
-    localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories));
-    localStorage.setItem(STORAGE_RECURRING, JSON.stringify(recurring));
+    if (!activeProfileId) return;
+    localStorage.setItem(txKey(activeProfileId), JSON.stringify(transactions));
+    localStorage.setItem(limitsKey(activeProfileId), JSON.stringify(limits));
+    localStorage.setItem(customCatsKey(activeProfileId), JSON.stringify(customCategories));
+    localStorage.setItem(recurringKey(activeProfileId), JSON.stringify(recurring));
     syncToFirebase();
   }
 
@@ -616,7 +785,7 @@
       }
     });
 
-    if (changed) { localStorage.setItem(STORAGE_TX, JSON.stringify(transactions)); localStorage.setItem(STORAGE_RECURRING, JSON.stringify(recurring)); syncToFirebase(); }
+    if (changed) { localStorage.setItem(txKey(activeProfileId), JSON.stringify(transactions)); localStorage.setItem(recurringKey(activeProfileId), JSON.stringify(recurring)); syncToFirebase(); }
   }
 
   function renderRecurringList() {
@@ -1035,17 +1204,29 @@
     renderAll();
   }
 
-  // ── Arranque: solo entra si ya hay sesión iniciada en este navegador ──
-  if (sessionStorage.getItem(SESSION_KEY) === '1') {
-    $('loginOverlay').style.display = 'none';
-    loadFromFirebase().then(initApp);
-  } else {
-    $('loginPwd').focus();
+  // ── Arranque: muestra de inmediato lo que haya en este dispositivo, y sincroniza con la nube después ──
+  function boot() {
+    const sessionProfileId = sessionStorage.getItem(SESSION_KEY);
+    const p = sessionProfileId && profiles.find(x => x.id === sessionProfileId);
+    if (p) {
+      activeProfileId = p.id;
+      $('loginOverlay').style.display = 'none';
+      loadLocalDataForProfile(activeProfileId);
+      initApp();
+      loadFromFirebase().then(() => { generateRecurringTransactions(); renderAll(); });
+    } else {
+      renderProfileList();
+      loadProfilesFromFirebase().then(renderProfileList);
+    }
   }
+  boot();
 
   window.checkLogin = checkLogin;
   window.logout = logout;
   window.changePassword = changePassword;
+  window.showProfileSelect = showProfileSelect;
+  window.showNewProfileForm = showNewProfileForm;
+  window.createProfile = createProfile;
 })();
 </script>
 </body>

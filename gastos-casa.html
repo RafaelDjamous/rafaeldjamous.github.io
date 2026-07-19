@@ -4,6 +4,7 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
 <title>Gastos de Casa</title>
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 <style>
   :root {
     --bg: #0b0f19;
@@ -225,7 +226,8 @@
   }
   .icon-btn:hover { color: var(--text); border-color: var(--primary); }
 
-  .table-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+  .table-footer { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; flex-wrap: wrap; gap: 10px; }
+  .export-btns { display: flex; gap: 8px; }
   .export-btn {
     background: transparent; border: 1px solid var(--border); color: var(--text-dim);
     padding: 8px 14px; border-radius: 8px; font-size: .8rem; font-weight: 700; cursor: pointer;
@@ -529,7 +531,10 @@
         </table>
         <div class="table-footer">
           <span class="empty-state" id="tableEmpty" style="display:none;">No se encontraron movimientos.</span>
-          <button class="export-btn" id="exportBtn">Exportar CSV</button>
+          <div class="export-btns">
+            <button class="export-btn" id="exportBtn">Exportar CSV</button>
+            <button class="export-btn" id="exportExcelBtn">Exportar Excel</button>
+          </div>
         </div>
       </div>
 
@@ -1298,13 +1303,34 @@
     const header = ['Fecha', 'Tipo', 'Categoría', 'Nota', 'Monto'];
     const rows = monthTx.map(t => [t.date, t.type === 'income' ? 'Ingreso' : 'Gasto', t.category, (t.note || '').replace(/"/g, '""'), t.amount]);
     const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
-    const blob = new Blob([csv], { type: 'text/csv' });
+    const blob = new Blob(['﻿' + csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = `gastos_${monthKey(viewYear, viewMonth)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
+  });
+
+  $('exportExcelBtn').addEventListener('click', () => {
+    const monthTx = transactionsForMonth().slice().sort((a, b) => a.date.localeCompare(b.date));
+    if (monthTx.length === 0) { showToast('Nada para exportar'); return; }
+    if (typeof XLSX === 'undefined') { showToast('No se pudo cargar Excel, revisa tu conexión'); return; }
+
+    const header = ['Fecha', 'Tipo', 'Categoría', 'Nota', 'Monto'];
+    const rows = monthTx.map(t => [t.date, t.type === 'income' ? 'Ingreso' : 'Gasto', t.category, t.note || '', t.amount]);
+    const income = monthTx.filter(t => t.type === 'income').reduce((s, t) => s + t.amount, 0);
+    const expense = monthTx.filter(t => t.type === 'expense').reduce((s, t) => s + t.amount, 0);
+    rows.push([]);
+    rows.push(['', '', '', 'Ingresos', income]);
+    rows.push(['', '', '', 'Gastos', expense]);
+    rows.push(['', '', '', 'Balance', income - expense]);
+
+    const ws = XLSX.utils.aoa_to_sheet([header, ...rows]);
+    ws['!cols'] = [{ wch: 12 }, { wch: 10 }, { wch: 18 }, { wch: 28 }, { wch: 12 }];
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, monthLabelText().slice(0, 31));
+    XLSX.writeFile(wb, `gastos_${monthKey(viewYear, viewMonth)}.xlsx`);
   });
 
   function renderAll() {

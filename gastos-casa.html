@@ -183,9 +183,103 @@
     opacity: 0; pointer-events: none; transition: all .25s; z-index: 999;
   }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Login overlay */
+  #loginOverlay {
+    position: fixed; inset: 0; z-index: 9999;
+    background: radial-gradient(1200px 600px at 10% -10%, #1c1440 0%, transparent 60%),
+                radial-gradient(1000px 500px at 100% 0%, #0d2b3a 0%, transparent 55%), var(--bg);
+    display: flex; align-items: center; justify-content: center; padding: 20px;
+  }
+  .login-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+    padding: 36px 32px 28px; width: 100%; max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45); text-align: center;
+  }
+  .login-mark {
+    width: 52px; height: 52px; border-radius: 14px; margin: 0 auto 18px;
+    background: linear-gradient(135deg, var(--primary), #4dd0e1);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.3rem; color: #0b0f19;
+  }
+  .login-title { font-size: 1.1rem; font-weight: 800; margin-bottom: 4px; }
+  .login-sub { font-size: .8rem; color: var(--text-dim); margin-bottom: 22px; }
+  .login-field { display: flex; flex-direction: column; text-align: left; gap: 5px; margin-bottom: 14px; }
+  .login-field label { font-size: .72rem; font-weight: 700; text-transform: uppercase; color: var(--text-dim); letter-spacing: .4px; }
+  .login-field input {
+    background: var(--panel-2); border: 1px solid var(--border); color: var(--text);
+    border-radius: 8px; padding: 11px 14px; font-size: 1rem; width: 100%;
+  }
+  .login-field input:focus { outline: none; border-color: var(--primary); }
+  .login-error {
+    background: rgba(255,107,129,.12); color: var(--expense); border-radius: 6px;
+    padding: 8px 12px; font-size: .82rem; font-weight: 600; margin-bottom: 10px; display: none;
+  }
+  .login-footer { font-size: .72rem; color: var(--text-dim); margin-top: 18px; }
+  .topbar-actions { display: flex; align-items: center; gap: 8px; }
+  .topbar-actions .icon-btn { width: 34px; height: 34px; border-radius: 50%; font-size: .9rem; }
+
+  /* Change password modal */
+  #changePwdModal {
+    position: fixed; inset: 0; z-index: 8000; background: rgba(0,0,0,.6);
+    display: none; align-items: center; justify-content: center; padding: 20px;
+  }
+  #changePwdModal.open { display: flex; }
+  .chpwd-box {
+    background: var(--panel); border: 1px solid var(--border); border-radius: 16px;
+    padding: 26px 26px 22px; width: 100%; max-width: 360px;
+  }
+  .chpwd-box h3 { font-size: 1rem; margin-bottom: 18px; }
+  .chpwd-msg { font-size: .82rem; font-weight: 600; margin-bottom: 10px; display: none; }
+  .chpwd-row { display: flex; gap: 10px; margin-top: 6px; }
+  .chpwd-row button { flex: 1; padding: 11px; border-radius: 8px; font-weight: 700; font-size: .88rem; cursor: pointer; border: none; }
+  .chpwd-save { background: var(--primary); color: #fff; }
+  .chpwd-save:hover { background: var(--primary-2); }
+  .chpwd-cancel { background: transparent; border: 1px solid var(--border) !important; color: var(--text-dim); }
+  .chpwd-cancel:hover { color: var(--text); }
 </style>
 </head>
 <body>
+
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-mark">$</div>
+    <div class="login-title">Gastos de Casa</div>
+    <div class="login-sub">Acceso privado &middot; solo familia</div>
+    <div id="loginError" class="login-error">Clave incorrecta. Intenta de nuevo.</div>
+    <div class="login-field">
+      <label for="loginPwd">Contraseña</label>
+      <input type="password" id="loginPwd" placeholder="Ingresa la clave"
+             onkeydown="if(event.key==='Enter') checkLogin()" autocomplete="current-password" />
+    </div>
+    <button type="button" class="btn" onclick="checkLogin()">Ingresar</button>
+    <div class="login-footer">Los datos se guardan en la nube para verlos desde cualquier dispositivo.</div>
+  </div>
+</div>
+
+<div id="changePwdModal">
+  <div class="chpwd-box">
+    <h3>Cambiar Contraseña</h3>
+    <div class="login-field">
+      <label for="cpCurrent">Contraseña actual</label>
+      <input type="password" id="cpCurrent" placeholder="Clave actual" autocomplete="current-password" />
+    </div>
+    <div class="login-field">
+      <label for="cpNew">Nueva contraseña</label>
+      <input type="password" id="cpNew" placeholder="Mínimo 6 caracteres" autocomplete="new-password" />
+    </div>
+    <div class="login-field">
+      <label for="cpConfirm">Confirmar nueva contraseña</label>
+      <input type="password" id="cpConfirm" placeholder="Repite la nueva clave" autocomplete="new-password" />
+    </div>
+    <div id="chpwdMsg" class="chpwd-msg"></div>
+    <div class="chpwd-row">
+      <button type="button" class="chpwd-save" onclick="changePassword()">Guardar</button>
+      <button type="button" class="chpwd-cancel" onclick="document.getElementById('changePwdModal').classList.remove('open')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <div class="wrap">
 
   <div class="topbar">
@@ -196,11 +290,15 @@
         <p>Control mensual de ingresos y gastos del hogar</p>
       </div>
     </div>
-    <div class="month-nav">
-      <button id="prevMonth">&#8249;</button>
-      <div class="month-label" id="monthLabel">Julio 2026</div>
-      <button id="nextMonth">&#8250;</button>
-      <button class="today-btn" id="todayBtn">Hoy</button>
+    <div class="topbar-actions">
+      <div class="month-nav">
+        <button id="prevMonth">&#8249;</button>
+        <div class="month-label" id="monthLabel">Julio 2026</div>
+        <button id="nextMonth">&#8250;</button>
+        <button class="today-btn" id="todayBtn">Hoy</button>
+      </div>
+      <button type="button" class="icon-btn" title="Cambiar contraseña" onclick="document.getElementById('changePwdModal').classList.add('open')">&#128274;</button>
+      <button type="button" class="icon-btn" title="Cerrar sesión" onclick="logout()">&#8618;</button>
     </div>
   </div>
 
@@ -334,7 +432,105 @@
 
   function expenseCategories() { return [...BASE_EXPENSE_CATEGORIES, ...customCategories.expense, 'Otros']; }
   function incomeCategories() { return [...BASE_INCOME_CATEGORIES, ...customCategories.income, 'Otros']; }
-  function saveCustomCategories() { localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories)); }
+
+  // ── Nube (Firebase Realtime Database) ──
+  // Pega aquí la URL de tu base de datos, ej: 'https://gastos-casa-default-rtdb.firebaseio.com'
+  const FIREBASE_URL = '';
+
+  const AUTH_KEY = 'gastosCasa_pwd_hash';
+  const SESSION_KEY = 'gastosCasa_auth';
+  const DEFAULT_PWD = 'Casa2026';
+
+  async function hashPassword(pwd) {
+    const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(pwd));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+
+  async function checkLogin() {
+    const pwd = $('loginPwd').value;
+    if (!pwd) return;
+    const hash = await hashPassword(pwd);
+    const stored = localStorage.getItem(AUTH_KEY) || await hashPassword(DEFAULT_PWD);
+    if (hash === stored) {
+      sessionStorage.setItem(SESSION_KEY, '1');
+      $('loginOverlay').style.display = 'none';
+      await loadFromFirebase();
+      initApp();
+    } else {
+      const err = $('loginError');
+      err.style.display = 'block';
+      $('loginPwd').value = '';
+      $('loginPwd').focus();
+      setTimeout(() => { err.style.display = 'none'; }, 3500);
+    }
+  }
+
+  function logout() {
+    sessionStorage.removeItem(SESSION_KEY);
+    location.reload();
+  }
+
+  async function changePassword() {
+    const cur = $('cpCurrent').value;
+    const nw = $('cpNew').value;
+    const conf = $('cpConfirm').value;
+    const msg = $('chpwdMsg');
+    msg.style.display = 'none';
+
+    if (!cur || !nw || !conf) {
+      msg.textContent = 'Completa todos los campos.';
+      msg.style.color = 'var(--expense)'; msg.style.display = 'block'; return;
+    }
+    if (nw.length < 6) {
+      msg.textContent = 'La nueva clave debe tener al menos 6 caracteres.';
+      msg.style.color = 'var(--expense)'; msg.style.display = 'block'; return;
+    }
+    if (nw !== conf) {
+      msg.textContent = 'Las claves nuevas no coinciden.';
+      msg.style.color = 'var(--expense)'; msg.style.display = 'block'; return;
+    }
+    const curHash = await hashPassword(cur);
+    const storedHash = localStorage.getItem(AUTH_KEY) || await hashPassword(DEFAULT_PWD);
+    if (curHash !== storedHash) {
+      msg.textContent = 'La contraseña actual es incorrecta.';
+      msg.style.color = 'var(--expense)'; msg.style.display = 'block'; return;
+    }
+    localStorage.setItem(AUTH_KEY, await hashPassword(nw));
+    msg.textContent = 'Contraseña actualizada correctamente.';
+    msg.style.color = 'var(--income)'; msg.style.display = 'block';
+    $('cpCurrent').value = ''; $('cpNew').value = ''; $('cpConfirm').value = '';
+    setTimeout(() => { $('changePwdModal').classList.remove('open'); msg.style.display = 'none'; }, 2000);
+  }
+
+  async function syncToFirebase() {
+    if (!FIREBASE_URL) return;
+    try {
+      await fetch(`${FIREBASE_URL}/gastosCasa.json`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactions, limits, customCategories })
+      });
+    } catch (e) { /* sin conexión: queda guardado local */ }
+  }
+
+  async function loadFromFirebase() {
+    if (!FIREBASE_URL) return;
+    try {
+      const res = await fetch(`${FIREBASE_URL}/gastosCasa.json`);
+      const data = await res.json();
+      if (data) {
+        if (Array.isArray(data.transactions)) transactions = data.transactions;
+        if (data.limits) limits = data.limits;
+        if (data.customCategories) {
+          customCategories.expense = data.customCategories.expense || [];
+          customCategories.income = data.customCategories.income || [];
+        }
+        localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
+        localStorage.setItem(STORAGE_LIMITS, JSON.stringify(limits));
+        localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories));
+      }
+    } catch (e) { /* sin conexión: se usa lo que haya en localStorage */ }
+  }
 
   const now = new Date();
   let viewYear = now.getFullYear();
@@ -347,6 +543,8 @@
   function save() {
     localStorage.setItem(STORAGE_TX, JSON.stringify(transactions));
     localStorage.setItem(STORAGE_LIMITS, JSON.stringify(limits));
+    localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories));
+    syncToFirebase();
   }
 
   function showToast(msg) {
@@ -709,10 +907,23 @@
     renderTable();
   }
 
-  // init
-  populateCategorySelect();
-  $('txDate').value = todayIso();
-  renderAll();
+  function initApp() {
+    populateCategorySelect();
+    $('txDate').value = todayIso();
+    renderAll();
+  }
+
+  // ── Arranque: solo entra si ya hay sesión iniciada en este navegador ──
+  if (sessionStorage.getItem(SESSION_KEY) === '1') {
+    $('loginOverlay').style.display = 'none';
+    loadFromFirebase().then(initApp);
+  } else {
+    $('loginPwd').focus();
+  }
+
+  window.checkLogin = checkLogin;
+  window.logout = logout;
+  window.changePassword = changePassword;
 })();
 </script>
 </body>

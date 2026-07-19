@@ -167,6 +167,28 @@
   .recurring-amt.income { color: var(--income); }
   .recurring-amt.expense { color: var(--expense); }
 
+  /* Recurring reminder banner */
+  .reminder-banner {
+    background: rgba(255,184,77,.08); border: 1.5px solid var(--warn);
+    border-radius: var(--radius); padding: 16px 18px; margin-bottom: 20px;
+  }
+  .reminder-head {
+    display: flex; justify-content: space-between; align-items: center;
+    font-weight: 800; font-size: .92rem; margin-bottom: 4px;
+  }
+  .reminder-item {
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
+    padding: 10px 0; border-top: 1px solid rgba(255,184,77,.25); flex-wrap: wrap;
+  }
+  .reminder-item-info { font-size: .86rem; font-weight: 600; }
+  .reminder-item-info .meta { display: block; font-size: .74rem; color: var(--text-dim); font-weight: 500; }
+  .whatsapp-btn {
+    background: #25d366; color: #06210f; font-weight: 700; font-size: .8rem; text-decoration: none;
+    padding: 9px 14px; border-radius: 8px; white-space: nowrap; display: inline-flex; align-items: center; gap: 6px;
+    transition: background .15s;
+  }
+  .whatsapp-btn:hover { background: #1ebe5a; }
+
   /* Donut */
   .donut-wrap { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; justify-content: center; }
   .legend { display: flex; flex-direction: column; gap: 8px; font-size: .82rem; flex: 1; min-width: 160px; }
@@ -387,6 +409,8 @@
       <button type="button" class="icon-btn" title="Cambiar de persona / cerrar sesión" onclick="logout()">&#8618;</button>
     </div>
   </div>
+
+  <div class="reminder-banner" id="recurringReminderBanner" style="display:none;"></div>
 
   <div class="summary-grid">
     <div class="card income">
@@ -646,7 +670,7 @@
       $('loginOverlay').style.display = 'none';
       loadLocalDataForProfile(activeProfileId);
       initApp();
-      loadFromFirebase().then(() => { generateRecurringTransactions(); renderAll(); });
+      loadFromFirebase().then(() => { const ng = generateRecurringTransactions(); renderAll(); if (ng.length > 0) showRecurringReminders(ng); });
     } else {
       const err = $('loginError');
       err.style.display = 'block';
@@ -777,6 +801,7 @@
   function generateRecurringTransactions() {
     const realKey = monthKey(now.getFullYear(), now.getMonth());
     let changed = false;
+    const newlyGenerated = [];
 
     recurring.forEach(r => {
       let [y, m] = (r.lastGeneratedMonth || realKey).split('-').map(Number);
@@ -789,11 +814,13 @@
         const alreadyExists = transactions.some(t => t.recurringId === r.id && t.date.startsWith(key));
         if (!alreadyExists) {
           const day = Math.min(r.day, daysInMonth(y, m));
-          transactions.push({
+          const tx = {
             id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
             date: `${key}-${String(day).padStart(2, '0')}`,
             amount: r.amount, category: r.category, note: r.note, type: r.type, recurringId: r.id
-          });
+          };
+          transactions.push(tx);
+          newlyGenerated.push(tx);
           changed = true;
         }
         r.lastGeneratedMonth = key;
@@ -801,6 +828,31 @@
     });
 
     if (changed) { localStorage.setItem(txKey(activeProfileId), JSON.stringify(transactions)); localStorage.setItem(recurringKey(activeProfileId), JSON.stringify(recurring)); syncToFirebase(); }
+    return newlyGenerated;
+  }
+
+  function showRecurringReminders(items) {
+    const banner = $('recurringReminderBanner');
+    const plural = items.length > 1;
+    banner.innerHTML = `
+      <div class="reminder-head">
+        <span>&#128276; Se gener${plural ? 'aron' : 'ó'} ${items.length} gasto${plural ? 's' : ''} recurrente${plural ? 's' : ''} este mes</span>
+        <button type="button" class="icon-btn" id="reminderCloseBtn" title="Cerrar">&times;</button>
+      </div>
+      <div id="reminderItems"></div>`;
+    const itemsWrap = banner.querySelector('#reminderItems');
+    items.forEach(tx => {
+      const msg = `Confirmo el gasto recurrente: ${tx.category} - ${fmt(tx.amount)} (${tx.date})${tx.note ? ' — ' + tx.note : ''}`;
+      const waUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+      const row = document.createElement('div');
+      row.className = 'reminder-item';
+      row.innerHTML = `
+        <span class="reminder-item-info">${escapeHtml(tx.category)}<span class="meta">${tx.date} · ${fmt(tx.amount)}</span></span>
+        <a class="whatsapp-btn" href="${waUrl}" target="_blank" rel="noopener">&#128172; Confirmar por WhatsApp</a>`;
+      itemsWrap.appendChild(row);
+    });
+    banner.style.display = 'block';
+    banner.querySelector('#reminderCloseBtn').addEventListener('click', () => { banner.style.display = 'none'; });
   }
 
   function renderRecurringList() {
@@ -1268,8 +1320,9 @@
   function initApp() {
     populateCategorySelect();
     $('txDate').value = todayIso();
-    generateRecurringTransactions();
+    const newlyGenerated = generateRecurringTransactions();
     renderAll();
+    if (newlyGenerated.length > 0) showRecurringReminders(newlyGenerated);
   }
 
   // ── Arranque: muestra de inmediato lo que haya en este dispositivo, y sincroniza con la nube después ──
@@ -1281,7 +1334,7 @@
       $('loginOverlay').style.display = 'none';
       loadLocalDataForProfile(activeProfileId);
       initApp();
-      loadFromFirebase().then(() => { generateRecurringTransactions(); renderAll(); });
+      loadFromFirebase().then(() => { const ng = generateRecurringTransactions(); renderAll(); if (ng.length > 0) showRecurringReminders(ng); });
     } else {
       renderProfileList();
       loadProfilesFromFirebase().then(renderProfileList);

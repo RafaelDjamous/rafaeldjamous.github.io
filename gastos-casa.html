@@ -135,11 +135,17 @@
 
   /* Recurring */
   .recurring-check { margin-bottom: 14px; }
-  .recurring-check label {
-    display: flex; align-items: center; gap: 8px; font-size: .84rem; color: var(--text-dim);
-    cursor: pointer; user-select: none;
+  .recurring-toggle {
+    width: 100%; display: flex; align-items: center; justify-content: center; gap: 9px;
+    padding: 13px; border-radius: 8px; border: 1.5px dashed var(--border);
+    background: var(--panel-2); color: var(--text-dim); font-weight: 700; font-size: .88rem;
+    cursor: pointer; transition: all .15s;
   }
-  .recurring-check input { width: 16px; height: 16px; accent-color: var(--primary); cursor: pointer; }
+  .recurring-toggle-icon { font-size: 1.05rem; }
+  .recurring-toggle:hover { border-color: var(--primary-2); color: var(--text); }
+  .recurring-toggle.active {
+    border: 1.5px solid var(--primary); background: rgba(124,92,255,.18); color: var(--primary-2);
+  }
   .recurring-row {
     display: flex; justify-content: space-between; align-items: center;
     padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px;
@@ -383,10 +389,10 @@
             </div>
           </div>
           <div class="recurring-check" id="recurringCheckRow">
-            <label>
-              <input type="checkbox" id="txRecurring" />
-              <span>&#128257; Repetir cada mes (mismo día)</span>
-            </label>
+            <button type="button" id="txRecurringBtn" class="recurring-toggle" aria-pressed="false">
+              <span class="recurring-toggle-icon">&#128257;</span>
+              <span>Repetir este gasto cada mes</span>
+            </button>
           </div>
           <button type="submit" class="btn" id="submitBtn">Agregar Movimiento</button>
           <button type="button" class="btn btn-secondary" id="cancelEdit" style="display:none;">Cancelar Edición</button>
@@ -901,6 +907,8 @@
     $('submitBtn').textContent = 'Agregar Movimiento';
     $('cancelEdit').style.display = 'none';
     $('recurringCheckRow').style.display = 'block';
+    $('txRecurringBtn').classList.remove('active');
+    $('txRecurringBtn').setAttribute('aria-pressed', 'false');
     setType('expense');
     $('txDate').value = todayIso();
   }
@@ -943,7 +951,7 @@
       Object.assign(t, { date, amount, category, note, type: currentType });
       showToast('Movimiento actualizado');
     } else {
-      const isRecurring = $('txRecurring').checked;
+      const isRecurring = $('txRecurringBtn').classList.contains('active');
       const newTx = {
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         date, amount, category, note, type: currentType
@@ -968,6 +976,12 @@
   });
 
   $('cancelEdit').addEventListener('click', cancelEdit);
+
+  $('txRecurringBtn').addEventListener('click', () => {
+    const btn = $('txRecurringBtn');
+    const isActive = btn.classList.toggle('active');
+    btn.setAttribute('aria-pressed', String(isActive));
+  });
 
   $('prevMonth').addEventListener('click', () => {
     viewMonth--;

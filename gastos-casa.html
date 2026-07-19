@@ -253,6 +253,12 @@
               <select id="txCategory"></select>
             </div>
           </div>
+          <div class="form-row" id="newCategoryRow" style="display:none;">
+            <div class="field">
+              <label>Nombre de la nueva categoría</label>
+              <input type="text" id="txNewCategory" placeholder="ej. Mascotas" />
+            </div>
+          </div>
           <div class="form-row">
             <div class="field">
               <label>Nota (opcional)</label>
@@ -313,16 +319,22 @@
 (function () {
   const STORAGE_TX = 'gastosCasa_transactions_v1';
   const STORAGE_LIMITS = 'gastosCasa_limits_v1';
+  const STORAGE_CUSTOM_CATS = 'gastosCasa_customCategories_v1';
 
-  const EXPENSE_CATEGORIES = ['Renta/Hipoteca','Comida','Transporte','Servicios','Salud','Entretenimiento','Compras','Deudas','Ahorros','Otros'];
-  const INCOME_CATEGORIES = ['Salario','Freelance','Regalos','Inversiones','Otros'];
+  const BASE_EXPENSE_CATEGORIES = ['Renta/Hipoteca','Comida','Transporte','Servicios','Salud','Entretenimiento','Compras','Deudas','Ahorros'];
+  const BASE_INCOME_CATEGORIES = ['Salario','Freelance','Regalos','Inversiones'];
 
   const PALETTE = ['#7c5cff','#22c98a','#ffb84d','#ff6b81','#4dd0e1','#a78bfa','#f472b6','#facc15','#38bdf8','#94a3b8'];
 
   let transactions = JSON.parse(localStorage.getItem(STORAGE_TX) || '[]');
   let limits = JSON.parse(localStorage.getItem(STORAGE_LIMITS) || '{}');
+  const customCategories = Object.assign({ expense: [], income: [] }, JSON.parse(localStorage.getItem(STORAGE_CUSTOM_CATS) || '{}'));
   let currentType = 'expense';
   let editingId = null;
+
+  function expenseCategories() { return [...BASE_EXPENSE_CATEGORIES, ...customCategories.expense, 'Otros']; }
+  function incomeCategories() { return [...BASE_INCOME_CATEGORIES, ...customCategories.income, 'Otros']; }
+  function saveCustomCategories() { localStorage.setItem(STORAGE_CUSTOM_CATS, JSON.stringify(customCategories)); }
 
   const now = new Date();
   let viewYear = now.getFullYear();
@@ -346,20 +358,29 @@
 
   function populateCategorySelect() {
     const sel = $('txCategory');
+    const current = sel.value;
     sel.innerHTML = '';
-    const list = currentType === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
+    const list = currentType === 'expense' ? expenseCategories() : incomeCategories();
     list.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c; opt.textContent = c;
       sel.appendChild(opt);
     });
+    if (list.includes(current)) sel.value = current;
+    toggleNewCategoryField();
+  }
+
+  function toggleNewCategoryField() {
+    const isOther = $('txCategory').value === 'Otros';
+    $('newCategoryRow').style.display = isOther ? 'flex' : 'none';
+    if (!isOther) $('txNewCategory').value = '';
   }
 
   function populateFilterCategory() {
     const sel = $('filterCategory');
     const current = sel.value;
     sel.innerHTML = '<option value="all">Todas las categorías</option>';
-    const all = [...new Set([...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES])];
+    const all = [...new Set([...expenseCategories(), ...incomeCategories()])];
     all.forEach(c => {
       const opt = document.createElement('option');
       opt.value = c; opt.textContent = c;
@@ -375,6 +396,8 @@
     });
     populateCategorySelect();
   }
+
+  $('txCategory').addEventListener('change', toggleNewCategoryField);
 
   document.querySelectorAll('.type-toggle button').forEach(b => {
     b.addEventListener('click', () => setType(b.dataset.type));
@@ -466,7 +489,7 @@
     const list = $('limitsList');
     list.innerHTML = '';
 
-    EXPENSE_CATEGORIES.forEach(cat => {
+    expenseCategories().forEach(cat => {
       const limit = limits[cat];
       const spent = totals[cat] || 0;
 
@@ -571,6 +594,7 @@
     $('txDate').value = t.date;
     $('txAmount').value = t.amount;
     $('txCategory').value = t.category;
+    toggleNewCategoryField();
     $('txNote').value = t.note || '';
     $('submitBtn').textContent = 'Guardar Cambios';
     $('cancelEdit').style.display = 'block';
@@ -602,8 +626,21 @@
     e.preventDefault();
     const date = $('txDate').value;
     const amount = parseFloat($('txAmount').value);
-    const category = $('txCategory').value;
+    let category = $('txCategory').value;
     const note = $('txNote').value.trim();
+
+    if (category === 'Otros') {
+      const newCatName = $('txNewCategory').value.trim();
+      if (newCatName) {
+        category = newCatName;
+        const list = currentType === 'expense' ? customCategories.expense : customCategories.income;
+        const known = currentType === 'expense' ? expenseCategories() : incomeCategories();
+        if (!known.includes(newCatName)) {
+          list.push(newCatName);
+          saveCustomCategories();
+        }
+      }
+    }
 
     if (!date || !(amount > 0) || !category) return;
 

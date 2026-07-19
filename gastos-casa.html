@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
-<title>Budget Platform</title>
+<title>Gastos de Casa</title>
 <style>
   :root {
     --bg: #0b0f19;
@@ -192,38 +192,38 @@
     <div class="brand">
       <div class="brand-mark">$</div>
       <div>
-        <h1>Budget Platform</h1>
-        <p>Personal income &amp; expense tracker</p>
+        <h1>Gastos de Casa</h1>
+        <p>Control mensual de ingresos y gastos del hogar</p>
       </div>
     </div>
     <div class="month-nav">
       <button id="prevMonth">&#8249;</button>
-      <div class="month-label" id="monthLabel">July 2026</div>
+      <div class="month-label" id="monthLabel">Julio 2026</div>
       <button id="nextMonth">&#8250;</button>
-      <button class="today-btn" id="todayBtn">Today</button>
+      <button class="today-btn" id="todayBtn">Hoy</button>
     </div>
   </div>
 
   <div class="summary-grid">
     <div class="card income">
-      <div class="label">Income</div>
+      <div class="label">Ingresos</div>
       <div class="value" id="sumIncome">$0.00</div>
-      <div class="sub">this month</div>
+      <div class="sub">este mes</div>
     </div>
     <div class="card expense">
-      <div class="label">Expenses</div>
+      <div class="label">Gastos</div>
       <div class="value" id="sumExpense">$0.00</div>
-      <div class="sub">this month</div>
+      <div class="sub">este mes</div>
     </div>
     <div class="card balance">
       <div class="label">Balance</div>
       <div class="value" id="sumBalance">$0.00</div>
-      <div class="sub">income minus expenses</div>
+      <div class="sub">ingresos menos gastos</div>
     </div>
     <div class="card">
-      <div class="label">Savings Rate</div>
+      <div class="label">Tasa de Ahorro</div>
       <div class="value" id="sumSavingsRate">0%</div>
-      <div class="sub">of income saved</div>
+      <div class="sub">del ingreso ahorrado</div>
     </div>
   </div>
 
@@ -231,41 +231,41 @@
     <div class="col-left">
 
       <div class="panel">
-        <h2><span class="dot"></span>Add Transaction</h2>
+        <h2><span class="dot"></span>Agregar Movimiento</h2>
         <form id="txForm">
           <div class="type-toggle">
-            <button type="button" data-type="expense" class="active">Expense</button>
-            <button type="button" data-type="income">Income</button>
+            <button type="button" data-type="expense" class="active">Gasto</button>
+            <button type="button" data-type="income">Ingreso</button>
           </div>
           <div class="form-row">
             <div class="field">
-              <label>Date</label>
+              <label>Fecha</label>
               <input type="date" id="txDate" required />
             </div>
             <div class="field">
-              <label>Amount</label>
+              <label>Monto</label>
               <input type="number" id="txAmount" min="0" step="0.01" placeholder="0.00" required />
             </div>
           </div>
           <div class="form-row">
             <div class="field">
-              <label>Category</label>
+              <label>Categoría</label>
               <select id="txCategory"></select>
             </div>
           </div>
           <div class="form-row">
             <div class="field">
-              <label>Note (optional)</label>
-              <input type="text" id="txNote" placeholder="e.g. Groceries at Whole Foods" />
+              <label>Nota (opcional)</label>
+              <input type="text" id="txNote" placeholder="ej. Supermercado del sábado" />
             </div>
           </div>
-          <button type="submit" class="btn" id="submitBtn">Add Transaction</button>
-          <button type="button" class="btn btn-secondary" id="cancelEdit" style="display:none;">Cancel Edit</button>
+          <button type="submit" class="btn" id="submitBtn">Agregar Movimiento</button>
+          <button type="button" class="btn btn-secondary" id="cancelEdit" style="display:none;">Cancelar Edición</button>
         </form>
       </div>
 
       <div class="panel">
-        <h2><span class="dot"></span>Monthly Budget Limits</h2>
+        <h2><span class="dot"></span>Límites Mensuales de Presupuesto</h2>
         <div id="limitsList"></div>
       </div>
 
@@ -274,32 +274,32 @@
     <div class="col-right">
 
       <div class="panel">
-        <h2><span class="dot"></span>Spending by Category</h2>
+        <h2><span class="dot"></span>Gastos por Categoría</h2>
         <div class="donut-wrap" id="donutWrap"></div>
       </div>
 
       <div class="panel">
-        <h2><span class="dot"></span>Transactions</h2>
+        <h2><span class="dot"></span>Movimientos</h2>
         <div class="table-toolbar">
-          <input type="text" id="searchBox" placeholder="Search notes..." />
+          <input type="text" id="searchBox" placeholder="Buscar en notas..." />
           <select id="filterType">
-            <option value="all">All types</option>
-            <option value="income">Income</option>
-            <option value="expense">Expense</option>
+            <option value="all">Todos los tipos</option>
+            <option value="income">Ingreso</option>
+            <option value="expense">Gasto</option>
           </select>
           <select id="filterCategory">
-            <option value="all">All categories</option>
+            <option value="all">Todas las categorías</option>
           </select>
         </div>
         <table>
           <thead>
-            <tr><th>Date</th><th>Category</th><th>Note</th><th>Amount</th><th></th></tr>
+            <tr><th>Fecha</th><th>Categoría</th><th>Nota</th><th>Monto</th><th></th></tr>
           </thead>
           <tbody id="txTableBody"></tbody>
         </table>
         <div class="table-footer">
-          <span class="empty-state" id="tableEmpty" style="display:none;">No transactions found.</span>
-          <button class="export-btn" id="exportBtn">Export CSV</button>
+          <span class="empty-state" id="tableEmpty" style="display:none;">No se encontraron movimientos.</span>
+          <button class="export-btn" id="exportBtn">Exportar CSV</button>
         </div>
       </div>
 
@@ -311,11 +311,11 @@
 
 <script>
 (function () {
-  const STORAGE_TX = 'budgetPlatform_transactions_v1';
-  const STORAGE_LIMITS = 'budgetPlatform_limits_v1';
+  const STORAGE_TX = 'gastosCasa_transactions_v1';
+  const STORAGE_LIMITS = 'gastosCasa_limits_v1';
 
-  const EXPENSE_CATEGORIES = ['Housing','Food','Transport','Utilities','Health','Entertainment','Shopping','Debt Payment','Savings','Other'];
-  const INCOME_CATEGORIES = ['Salary','Freelance','Gifts','Investments','Other'];
+  const EXPENSE_CATEGORIES = ['Renta/Hipoteca','Comida','Transporte','Servicios','Salud','Entretenimiento','Compras','Deudas','Ahorros','Otros'];
+  const INCOME_CATEGORIES = ['Salario','Freelance','Regalos','Inversiones','Otros'];
 
   const PALETTE = ['#7c5cff','#22c98a','#ffb84d','#ff6b81','#4dd0e1','#a78bfa','#f472b6','#facc15','#38bdf8','#94a3b8'];
 
@@ -358,7 +358,7 @@
   function populateFilterCategory() {
     const sel = $('filterCategory');
     const current = sel.value;
-    sel.innerHTML = '<option value="all">All categories</option>';
+    sel.innerHTML = '<option value="all">Todas las categorías</option>';
     const all = [...new Set([...EXPENSE_CATEGORIES, ...INCOME_CATEGORIES])];
     all.forEach(c => {
       const opt = document.createElement('option');
@@ -382,7 +382,8 @@
 
   function monthLabelText() {
     const d = new Date(viewYear, viewMonth, 1);
-    return d.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+    const text = d.toLocaleString('es-ES', { month: 'long', year: 'numeric' });
+    return text.charAt(0).toUpperCase() + text.slice(1);
   }
 
   function transactionsForMonth() {
@@ -419,7 +420,7 @@
     wrap.innerHTML = '';
 
     if (entries.length === 0) {
-      wrap.innerHTML = '<div class="empty-state">No expenses recorded this month yet.</div>';
+      wrap.innerHTML = '<div class="empty-state">Todavía no hay gastos registrados este mes.</div>';
       return;
     }
 
@@ -441,7 +442,7 @@
       offset += dash;
     });
     svgParts.push(`<text x="${cx}" y="${cy - 4}" text-anchor="middle" fill="#e7ecf7" font-size="15" font-weight="800">${fmt(total)}</text>`);
-    svgParts.push(`<text x="${cx}" y="${cy + 16}" text-anchor="middle" fill="#8b95ac" font-size="10">total spent</text>`);
+    svgParts.push(`<text x="${cx}" y="${cy + 16}" text-anchor="middle" fill="#8b95ac" font-size="10">total gastado</text>`);
     svgParts.push('</svg>');
 
     const legend = document.createElement('div');
@@ -480,14 +481,14 @@
           <div class="limit-bar-track"><div class="limit-bar-fill" style="width:${pct}%;background:${color}"></div></div>
           <div class="limit-input-row" style="margin-top:8px;">
             <input type="number" min="0" step="1" value="${limit}" data-cat="${cat}" class="limit-edit-input" />
-            <button type="button" class="icon-btn limit-clear" data-cat="${cat}" title="Remove limit">&times;</button>
+            <button type="button" class="icon-btn limit-clear" data-cat="${cat}" title="Quitar límite">&times;</button>
           </div>`;
       } else {
         row.innerHTML = `
-          <div class="limit-head"><span class="cat">${cat}</span><span class="amt">no limit set</span></div>
+          <div class="limit-head"><span class="cat">${cat}</span><span class="amt">sin límite</span></div>
           <div class="limit-input-row">
-            <input type="number" min="0" step="1" placeholder="Set limit" data-cat="${cat}" class="limit-set-input" />
-            <button type="button" class="icon-btn limit-save" data-cat="${cat}" title="Save limit">&check;</button>
+            <input type="number" min="0" step="1" placeholder="Definir límite" data-cat="${cat}" class="limit-set-input" />
+            <button type="button" class="icon-btn limit-save" data-cat="${cat}" title="Guardar límite">&check;</button>
           </div>`;
       }
       list.appendChild(row);
@@ -545,8 +546,8 @@
         <td class="amt-cell ${t.type}">${t.type === 'expense' ? '-' : '+'}${fmt(t.amount)}</td>
         <td>
           <div class="row-actions">
-            <button class="icon-btn edit-btn" data-id="${t.id}" title="Edit">&#9998;</button>
-            <button class="icon-btn del-btn" data-id="${t.id}" title="Delete">&#128465;</button>
+            <button class="icon-btn edit-btn" data-id="${t.id}" title="Editar">&#9998;</button>
+            <button class="icon-btn del-btn" data-id="${t.id}" title="Eliminar">&#128465;</button>
           </div>
         </td>`;
       tbody.appendChild(tr);
@@ -571,7 +572,7 @@
     $('txAmount').value = t.amount;
     $('txCategory').value = t.category;
     $('txNote').value = t.note || '';
-    $('submitBtn').textContent = 'Save Changes';
+    $('submitBtn').textContent = 'Guardar Cambios';
     $('cancelEdit').style.display = 'block';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
@@ -579,7 +580,7 @@
   function cancelEdit() {
     editingId = null;
     $('txForm').reset();
-    $('submitBtn').textContent = 'Add Transaction';
+    $('submitBtn').textContent = 'Agregar Movimiento';
     $('cancelEdit').style.display = 'none';
     setType('expense');
     $('txDate').value = todayIso();
@@ -589,7 +590,7 @@
     transactions = transactions.filter(t => t.id !== id);
     save();
     renderAll();
-    showToast('Transaction deleted');
+    showToast('Movimiento eliminado');
   }
 
   function todayIso() {
@@ -609,13 +610,13 @@
     if (editingId) {
       const t = transactions.find(t => t.id === editingId);
       Object.assign(t, { date, amount, category, note, type: currentType });
-      showToast('Transaction updated');
+      showToast('Movimiento actualizado');
     } else {
       transactions.push({
         id: Date.now().toString(36) + Math.random().toString(36).slice(2, 7),
         date, amount, category, note, type: currentType
       });
-      showToast('Transaction added');
+      showToast('Movimiento agregado');
     }
 
     save();
@@ -649,15 +650,15 @@
 
   $('exportBtn').addEventListener('click', () => {
     const monthTx = transactionsForMonth().slice().sort((a, b) => a.date.localeCompare(b.date));
-    if (monthTx.length === 0) { showToast('Nothing to export'); return; }
-    const header = ['Date', 'Type', 'Category', 'Note', 'Amount'];
-    const rows = monthTx.map(t => [t.date, t.type, t.category, (t.note || '').replace(/"/g, '""'), t.amount]);
+    if (monthTx.length === 0) { showToast('Nada para exportar'); return; }
+    const header = ['Fecha', 'Tipo', 'Categoría', 'Nota', 'Monto'];
+    const rows = monthTx.map(t => [t.date, t.type === 'income' ? 'Ingreso' : 'Gasto', t.category, (t.note || '').replace(/"/g, '""'), t.amount]);
     const csv = [header, ...rows].map(r => r.map(v => `"${v}"`).join(',')).join('\n');
     const blob = new Blob([csv], { type: 'text/csv' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `budget_${monthKey(viewYear, viewMonth)}.csv`;
+    a.download = `gastos_${monthKey(viewYear, viewMonth)}.csv`;
     a.click();
     URL.revokeObjectURL(url);
   });
